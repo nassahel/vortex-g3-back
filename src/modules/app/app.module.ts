@@ -4,6 +4,7 @@ import { AppService } from './app.service';
 import { ConfigModule } from '@nestjs/config';
 import { envVaidationSchema } from 'src/config/configuration';
 import { PrismaModule } from '../prisma/prisma.module';
+import { AuthModule } from '../auth/auth.module';
 
 @Module({
   imports: [
@@ -13,6 +14,8 @@ import { PrismaModule } from '../prisma/prisma.module';
       validationSchema: envVaidationSchema
     }),
     PrismaModule,
+    AuthModule,
+    
   ],
   controllers: [AppController],
   providers: [AppService],

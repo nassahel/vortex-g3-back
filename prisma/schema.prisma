@@ -1,12 +1,9 @@
 //El comando para migrar la base de datos es: npx prisma migrate dev --name init
 
-
 // datos basicos del archivo .env
 // #Servidor----------------------------
 // NODE_ENV=development
 // PORT=8000
-
-
 
 // #Base de datos--------------------------
 
@@ -22,44 +19,52 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-
-
 model Product {
-  id          String    @id @unique @default(cuid())
+  id          String      @id @unique @default(cuid())
   Name        String?
   Description String?
   Stock       Int?
   Price       Float?
-  Categories  Category @relation(fields: [CategoryId], references: [id])
+  Categories  Category    @relation(fields: [CategoryId], references: [id])
   CategoryId  String
-  isDeleted   Boolean?
+  isDeleted   Boolean?    @default(false)
   OrderItem   OrderItem[]
 }
 
 model Category {
-  id        String   @id @unique @default(cuid())
+  id        String    @id @unique @default(cuid())
   Name      String?
-  isDeleted Boolean?
+  isDeleted Boolean?  @default(false)
   Products  Product[]
+}
+
+model Profile {
+  id      String @id @unique @default(cuid())
+  image   String
+  address String
+  dni     String
+  user    User   @relation(fields: [userId], references: [id])
+  userId  String @unique
 }
 
 model User {
   id        String   @id @unique @default(cuid())
   Name      String?
-  email     String?
-  rol       Rol?    
+  email     String?  @unique
+  rol       Rol?     @default(USER)
   password  String?
-  isActive  Boolean?
-  isDeleted Boolean?
-  Orders  Order[]
+  isActive  Boolean? @default(true)
+  isDeleted Boolean? @default(false)
+  Orders    Order[]
+  profile   Profile?
 }
 
 model Order {
-  id          String     @id @unique @default(cuid())
-  Items       OrderItem[] 
+  id          String      @id @unique @default(cuid())
+  Items       OrderItem[]
   TotalAmount Float?
-  User User @relation(fields: [UserId], references: [id])
-  UserId String
+  User        User        @relation(fields: [UserId], references: [id])
+  UserId      String
 }
 
 model OrderItem {
@@ -76,4 +81,3 @@ enum Rol {
   ADMIN
   USER
 }
-
