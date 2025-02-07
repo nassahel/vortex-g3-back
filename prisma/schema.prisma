@@ -1,18 +1,5 @@
 //El comando para migrar la base de datos es: npx prisma migrate dev --name init
 
-
-// datos basicos del archivo .env
-// #Servidor----------------------------
-// NODE_ENV=development
-// PORT=8000
-
-
-
-// #Base de datos--------------------------
-
-// # Aqui donde dice "postgres" hay que poner el nombre de su base de datos y donde dice "root" su contraseña.
-// DATABASE_URL="postgresql://postgres:root@localhost:5432/vortex-g3-back"
-
 generator client {
   provider = "prisma-client-js"
 }
@@ -22,6 +9,10 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+enum Rol {
+  ADMIN
+  USER
+}
 
 
 model Product {
@@ -72,8 +63,4 @@ model OrderItem {
   orderId       String?
 }
 
-enum Rol {
-  ADMIN
-  USER
-}
 
