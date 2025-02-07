@@ -17,48 +17,48 @@ enum Rol {
 
 model Product {
   id          String    @id @unique @default(cuid())
-  Name        String?
-  Description String?
-  Stock       Int?
-  Price       Float?
-  Categories  Category @relation(fields: [CategoryId], references: [id])
-  CategoryId  String
+  name        String?
+  description String?
+  stock       Int?
+  price       Float?
+  categories  Category @relation(fields: [categoryId], references: [id])
+  categoryId  String
   isDeleted   Boolean?
-  OrderItem   OrderItem[]
+  orderItem   OrderItem[]
 }
 
 model Category {
   id        String   @id @unique @default(cuid())
-  Name      String?
+  name      String?
   isDeleted Boolean?
-  Products  Product[]
+  products  Product[]
 }
 
 model User {
   id        String   @id @unique @default(cuid())
-  Name      String?
+  name      String?
   email     String?
   rol       Rol?    
   password  String?
   isActive  Boolean?
   isDeleted Boolean?
-  Orders  Order[]
+  orders  Order[]
 }
 
 model Order {
   id          String     @id @unique @default(cuid())
-  Items       OrderItem[] 
-  TotalAmount Float?
-  User User @relation(fields: [UserId], references: [id])
-  UserId String
+  items       OrderItem[] 
+  totalAmount Float?
+  user User @relation(fields: [userId], references: [id])
+  userId String
 }
 
 model OrderItem {
   id            String   @id @unique @default(cuid())
-  Product       Product? @relation(fields: [productId], references: [id])
-  Quantity      Int?
-  PartialAmount Float?
-  Order         Order?   @relation(fields: [orderId], references: [id])
+  product       Product? @relation(fields: [productId], references: [id])
+  quantity      Int?
+  partialAmount Float?
+  order         Order?   @relation(fields: [orderId], references: [id])
   productId     String?
   orderId       String?
 }
