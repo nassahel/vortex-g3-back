@@ -42,7 +42,17 @@ model User {
   password  String?
   isActive  Boolean?
   isDeleted Boolean?
+  profileImage String? 
   orders  Order[]
+}
+
+model Image {
+  id        String    @id @unique @default(cuid())
+  url       String
+  userId    String    @unique
+ // user      User      @relation(fields: [userId], references: [id])
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
 }
 
 model Order {
