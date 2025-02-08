@@ -1,4 +1,4 @@
-import { Controller, Post, Body, Param, Delete, UploadedFile, UseInterceptors } from '@nestjs/common';
+import { Controller, Post, Body, Param, Delete, UploadedFile, UseInterceptors, BadRequestException } from '@nestjs/common';
 import { ApiOperation, ApiResponse, ApiTags, ApiConsumes } from '@nestjs/swagger';
 import { memoryStorage } from 'multer';
 import { FileInterceptor } from '@nestjs/platform-express';
@@ -18,6 +18,13 @@ export class ProfileController {
     @UseInterceptors(FileInterceptor('file', {      //Configuro como manejar la carga de archivos
         storage: memoryStorage(),                   //almaceno en la memoria
         limits: {fileSize: 5 * 1024 * 1024},        // Tamaño limite de 5MB
+        fileFilter: (req, file, callback) => {
+            if (file.mimetype === 'image.png' || file.mimetype === 'image.jpeg'){
+                callback(null, true);
+            } else {
+                callback(new BadRequestException('Only JPEG and PNG files are allowed'), false);
+            }
+        }
     }))
 
     async uploadProfileImage(

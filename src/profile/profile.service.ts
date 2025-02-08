@@ -16,6 +16,10 @@ export class ProfileService {
             throw new BadRequestException('No file provided');      //en el caso de q no se suba ningun archivo
         }
 
+        if (file.mimetype !== 'image.png' && file.mimetype !== 'image.jpeg'){
+          throw new BadRequestException('Only JPEG and PNG files are allowed');
+        }
+
         const imageUrl = await this.awsService.uploadImage(file, userId);       //se encarga de subir el archivo a s3
         if (!file){
             throw new Error('Error uploading image to AWS');
