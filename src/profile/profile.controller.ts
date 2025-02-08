@@ -1,8 +1,9 @@
-import { Controller, Post, Body, Param, Delete, UploadedFile, UseInterceptors, BadRequestException } from '@nestjs/common';
+import { Controller, Post, Body, Param, Delete, UploadedFile, UseInterceptors, BadRequestException, Put } from '@nestjs/common';
 import { ApiOperation, ApiResponse, ApiTags, ApiConsumes } from '@nestjs/swagger';
 import { memoryStorage } from 'multer';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { ProfileService } from './profile.service';
+import { UpdateProfileDto } from './dto/update.profile.dto';
 
 
 @ApiTags('Profile')
@@ -43,6 +44,18 @@ export class ProfileController {
     async deleteProfileImage(@Param('userId') userId: string){      //Recibe userId como parametro
         const result = await this.profileService.deleteImage(userId);   //Llama al servicio para eliminar la imagen
         return { message: 'Image successfully deleted', data: result};
+    }
+
+    //Actualizar la info del usuario
+    @Put('update/:userId')
+    @ApiOperation({ summary: 'Update user profile information' })
+    @ApiResponse({ status: 200, description: 'Profile updated successfully' })
+    async updateProfile(
+        @Param('userId') userId: string,
+        @Body() updateProfileDto: UpdateProfileDto
+    ) {
+        const updatedUser = await this.profileService.updateProfile(userId, updateProfileDto);
+        return { message: 'Profile updated successfully', data: updatedUser };
     }
 
 }

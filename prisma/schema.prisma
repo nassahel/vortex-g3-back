@@ -14,63 +14,81 @@ enum Rol {
   USER
 }
 
+enum OrderStatus {
+  PENDING
+  INPROCESS
+  COMPLETED
+  CANCELED
+}
+
+model User {
+  id        String    @id @unique @default(cuid())
+  name      String
+  email     String    @unique
+  rol       Rol       @default(USER)
+  password  String
+  isActive  Boolean   @default(true)
+  isDeleted Boolean   @default(false)
+  orders    Order[]
+  profile   Profile[]
+}
+
+model Profile {
+  id            String   @id @unique @default(cuid())
+  address       String?
+  dni           String?   @unique
+  birthday      DateTime?  
+  phone         String?
+  user          User     @relation(fields: [userId], references: [id])
+  userId        String   @unique
+  profileImage  String? 
+}
 
 model Product {
   id          String    @id @unique @default(cuid())
-  name        String?
-  description String?
-  stock       Int?
-  price       Float?
-  categories  Category @relation(fields: [categoryId], references: [id])
-  categoryId  String
-  isDeleted   Boolean?
+  name        String
+  description String
+  stock       Int
+  price       Decimal   @default(0.00)
+  categories  Category[]
+  images      Image[]
+  isDeleted   Boolean   @default(false)
   orderItem   OrderItem[]
+}
+
+model Image {
+  id        String   @id @unique @default(cuid())
+  url       String
+  altText   String?
+  product   Product  @relation(fields: [productId], references: [id])
+  productId String
 }
 
 model Category {
   id        String   @id @unique @default(cuid())
-  name      String?
-  isDeleted Boolean?
+  name      String
+  isDeleted Boolean  @default(false)
   products  Product[]
 }
 
-model User {
-  id        String   @id @unique @default(cuid())
-  name      String?
-  email     String?
-  rol       Rol?    
-  password  String?
-  isActive  Boolean?
-  isDeleted Boolean?
-  profileImage String? 
-  orders  Order[]
-}
-
-model Image {
-  id        String    @id @unique @default(cuid())
-  url       String
-  userId    String    @unique
- // user      User      @relation(fields: [userId], references: [id])
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @updatedAt
-}
-
 model Order {
-  id          String     @id @unique @default(cuid())
-  items       OrderItem[] 
-  totalAmount Float?
-  user User @relation(fields: [userId], references: [id])
-  userId String
+  id        String      @id @unique @default(cuid())
+  items     OrderItem[]
+  status    OrderStatus @default(PENDING)
+  price     Decimal     @default(0.00)
+  user      User        @relation(fields: [userId], references: [id])
+  userId    String
+  createdAt DateTime    @default(now())
 }
 
 model OrderItem {
-  id            String   @id @unique @default(cuid())
-  product       Product? @relation(fields: [productId], references: [id])
-  quantity      Int?
-  partialAmount Float?
-  order         Order?   @relation(fields: [orderId], references: [id])
-  productId     String?
-  orderId       String?
+  id        String   @id @unique @default(cuid())
+  product   Product? @relation(fields: [productId], references: [id])
+  quantity  Int      @default(0)
+  price     Decimal  @default(0.00)
+  order     Order?   @relation(fields: [orderId], references: [id])
+  productId String?
+  orderId   String
 }
 
 

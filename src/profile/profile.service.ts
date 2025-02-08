@@ -1,6 +1,7 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { PrismaService } from '../modules/prisma/prisma.service';
 import { AwsService } from '../aws/aws.service';
+import { UpdateProfileDto } from './dto/update.profile.dto';
 
 @Injectable()
 export class ProfileService {
@@ -61,5 +62,13 @@ export class ProfileService {
       });
 
       return { message: 'Image successfully deleted' };
+    }
+
+    async updateProfile(userId: string, updateData: UpdateProfileDto): Promise<any>{
+      const updateUser = await this.prisma.user.update({
+        where: { id: userId },
+        data: { ...updateData },
+      });
+      return updateUser;
     }
 }
