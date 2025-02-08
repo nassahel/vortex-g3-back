@@ -20,6 +20,14 @@ export class ProfileService {
           throw new BadRequestException('Only JPEG and PNG files are allowed');
         }
 
+        const user = await this.prisma.user.findUnique({ where: { id: userId } });  //busca para ver si el usuario ya tiene una imagen de perfil
+        if (user && user.profileImage) {
+          const imageUrl = user.profileImage;   //extrae la imagen de perfil
+          const url = new URL(imageUrl);        // crea una nueva instancia
+          const key = url.pathname.substring(1);  //toma el path y le resta uno para eliminarle el /
+          await this.awsService.deleteImage(key); //elimina la imagen antigua
+        }
+
         const imageUrl = await this.awsService.uploadImage(file, userId);       //se encarga de subir el archivo a s3
         if (!file){
             throw new Error('Error uploading image to AWS');
