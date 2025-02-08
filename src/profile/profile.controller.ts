@@ -4,6 +4,8 @@ import { memoryStorage } from 'multer';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { ProfileService } from './profile.service';
 import { UpdateProfileDto } from './dto/update.profile.dto';
+import { ChangePasswordRequestDto } from './dto/change.password.request.dto';
+import { ChangePasswordDto } from './dto/change.password.dto';
 
 
 @ApiTags('Profile')
@@ -58,4 +60,24 @@ export class ProfileController {
         return { message: 'Profile updated successfully', data: updatedUser };
     }
 
+    //Modulos de cambio de contraseña
+    @Post('change-password-request')
+    @ApiOperation({ summary: 'Request a password change email' })
+    @ApiResponse({ status: 200, description: 'Password change email sent successfully' })
+    async requestPasswordChange(
+        @Body() changePasswordRequestDto: ChangePasswordRequestDto,
+    ) {
+        await this.profileService.requestPasswordChange(changePasswordRequestDto.email);
+        return { message: 'Password change email sent successfully' };
+    }
+
+    @Put('change-password')
+    @ApiOperation({ summary: 'Change the user password' })
+    @ApiResponse({ status: 200, description: 'Password updated successfully' })
+    async changePassword(
+        @Body() changePasswordDto: ChangePasswordDto,
+    ) {
+        await this.profileService.changePassword(changePasswordDto.token, changePasswordDto.newPassword);
+        return { message: 'Password updated successfully' };
+    }
 }

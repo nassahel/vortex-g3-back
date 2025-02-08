@@ -11,12 +11,6 @@ export class UpdateProfileDto {
   @IsEmail({}, { message: 'Must be a valid email address' })
   email: string;
 
-  @ApiPropertyOptional({description: 'User password'})
-  @IsString()
-  @MinLength(8, { message: 'Password must not be empty' })
-  @MaxLength(20, { message: 'Password must not exceed 20 characters' })
-  password: string;
-
   @ApiPropertyOptional({description: 'User address'})
   @IsOptional()
   @IsString()
