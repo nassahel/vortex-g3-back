@@ -112,7 +112,6 @@ export class UserService {
 
       return {
         id: foundUser.id,
-        image: foundUser.image,
         name: foundUser.name,
         email: foundUser.email,
         rol: foundUser.rol,
