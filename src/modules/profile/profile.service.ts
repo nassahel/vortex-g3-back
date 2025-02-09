@@ -1,8 +1,8 @@
 import { BadRequestException, Inject, Injectable } from '@nestjs/common';
 import { CACHE_MANAGER } from '@nestjs/cache-manager';
 import { Cache } from 'cache-manager';
-import { PrismaService } from '../modules/prisma/prisma.service';
-import { AwsService } from '../aws/aws.service';
+import { PrismaService } from '../prisma/prisma.service';
+import { AwsService } from '../../aws/aws.service';
 import { UpdateProfileDto } from './dto/update.profile.dto';
 import * as bcrypt from 'bcrypt';
 import { JwtService } from '@nestjs/jwt';
