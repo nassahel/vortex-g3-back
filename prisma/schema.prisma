@@ -1,15 +1,5 @@
 //El comando para migrar la base de datos es: npx prisma migrate dev --name init
 
-// datos basicos del archivo .env
-// #Servidor----------------------------
-// NODE_ENV=development
-// PORT=8000
-
-// #Base de datos--------------------------
-
-// # Aqui donde dice "postgres" hay que poner el nombre de su base de datos y donde dice "root" su contraseña.
-// DATABASE_URL="postgresql://postgres:root@localhost:5432/vortex-g3-back"
-
 generator client {
   provider = "prisma-client-js"
 }
@@ -19,15 +9,50 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+enum Rol {
+  ADMIN
+  USER
+}
+
+enum OrderStatus {
+  PENDING
+  INPROCESS
+  COMPLETED
+  CANCELED
+}
+
+model User {
+  id        String    @id @unique @default(cuid())
+  name      String
+  email     String    @unique
+  rol       Rol       @default(USER)
+  password  String
+  isActive  Boolean   @default(true)
+  isDeleted Boolean   @default(false)
+  orders    Order[]
+  profile   Profile[]
+}
+
+model Profile {
+  id            String   @id @unique @default(cuid())
+  address       String?
+  dni           String?   @unique
+  birthday      DateTime?  
+  phone         String?
+  user          User     @relation(fields: [userId], references: [id])
+  userId        String   @unique
+  profileImage  String? 
+}
+
 model Product {
-  id          String   @id @unique @default(cuid())
+  id          String    @id @unique @default(cuid())
   name        String
   description String
   stock       Int
-  price       Decimal  @default(0.00)
+  price       Decimal   @default(0.00)
   categories  Category[]
   images      Image[]
-  isDeleted   Boolean  @default(false)
+  isDeleted   Boolean   @default(false)
   orderItem   OrderItem[]
 }
 
@@ -40,32 +65,10 @@ model Image {
 }
 
 model Category {
-  id        String    @id @unique @default(cuid())
+  id        String   @id @unique @default(cuid())
   name      String
-  isDeleted Boolean   @default(false)
+  isDeleted Boolean  @default(false)
   products  Product[]
-}
-
-model Profile {
-  id       String   @id @unique @default(cuid())
-  address  String
-  dni      String   @unique
-  birthday DateTime
-  user     User     @relation(fields: [userId], references: [id])
-  userId   String   @unique
-}
-
-model User {
-  id           String   @id @unique @default(cuid())
-  image String?
-  name         String
-  email        String   @unique
-  rol          Rol      @default(USER)
-  password     String
-  isActive     Boolean  @default(true)
-  isDeleted    Boolean  @default(false)
-  orders       Order[]
-  profile      Profile?
 }
 
 model Order {
@@ -88,15 +91,4 @@ model OrderItem {
   orderId   String
 }
 
-enum Rol {
-  ADMIN
-  USER
-}
-
-enum OrderStatus {
-  PENDING
-  INPROCESS
-  COMPLETED
-  CANCELED
-}
 
