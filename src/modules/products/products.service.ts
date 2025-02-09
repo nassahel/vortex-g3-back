@@ -23,13 +23,15 @@ export class ProductsService {
         });
         return products;
       }
-
+      //filtro por nombre
       if (name) where.name = { contains: name, mode: 'insensitive' };
+      //filtro por precio
       if (minPrice || maxPrice) {
         where.price = {};
         if (minPrice) where.price.gte = minPrice;
         if (maxPrice) where.price.lte = maxPrice;
       }
+      //filtro por categoria
       if (categoryId) where.categoryId = categoryId;
       return this.prisma.product.findMany({ where });
     } catch (error) {
@@ -106,6 +108,12 @@ export class ProductsService {
         error.response.message,
       );
     }
+  }
+
+  async upload(file: Express.Multer.File) {
+    //logica para procesar datos
+    console.log(file);
+    return 'upload';
   }
 
   async update(id: string, updateProductDto: UpdateProductDto) {
