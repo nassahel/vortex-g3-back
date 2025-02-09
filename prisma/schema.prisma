@@ -26,21 +26,21 @@ datasource db {
 
 model Product {
   id          String    @id @unique @default(cuid())
-  Name        String?
-  Description String?
-  Stock       Int?
-  Price       Float?
-  Categories  Category @relation(fields: [CategoryId], references: [id])
-  CategoryId  String
-  isDeleted   Boolean?
-  OrderItem   OrderItem[]
+  name        String
+  description String?
+  stock       Int
+  price       Float
+  category  Category @relation(fields: [categoryId], references: [id])
+  categoryId String
+  isDeleted   Boolean  @default(false)
+  orderItems   OrderItem[]
 }
 
 model Category {
   id        String   @id @unique @default(cuid())
-  Name      String?
-  isDeleted Boolean?
-  Products  Product[]
+  name      String
+  isDeleted Boolean  @default(false)
+  products  Product[]
 }
 
 model User {
@@ -56,21 +56,23 @@ model User {
 
 model Order {
   id          String     @id @unique @default(cuid())
-  Items       OrderItem[] 
-  TotalAmount Float?
-  User User @relation(fields: [UserId], references: [id])
-  UserId String
+  items       OrderItem[] 
+  totalAmount Float
+  user User? @relation(fields: [userId], references: [id]) //opcional, de esa manera un usuario no logueado puede hacer una compra
+  userId String
+
 }
 
 model OrderItem {
   id            String   @id @unique @default(cuid())
-  Product       Product? @relation(fields: [productId], references: [id])
-  Quantity      Int?
-  PartialAmount Float?
-  Order         Order?   @relation(fields: [orderId], references: [id])
-  productId     String?
-  orderId       String?
+  product       Product @relation(fields: [productId], references: [id])
+  quantity      Int
+  partialAmount Float
+  order         Order   @relation(fields: [orderId], references: [id])
+  productId     String
+  orderId       String
 }
+
 
 enum Rol {
   ADMIN
