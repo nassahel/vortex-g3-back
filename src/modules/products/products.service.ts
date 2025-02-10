@@ -7,10 +7,14 @@ import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
 import { PrismaService } from '../prisma/prisma.service';
 import { FilterProductDto } from './dto/filters-product.dto';
+import { ExcelService } from '../excel/excel.service';
 
 @Injectable()
 export class ProductsService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly excel: ExcelService,
+  ) {}
 
   async findAll(filters: FilterProductDto) {
     try {
@@ -111,9 +115,55 @@ export class ProductsService {
   }
 
   async upload(file: Express.Multer.File) {
-    //logica para procesar datos
-    console.log(file);
-    return 'upload';
+    try {
+      const columnasRequeridas = [
+        'Nombre',
+        'Precio',
+        'Stock',
+        'Descripcion',
+        'Categoria',
+      ];
+
+      // Se lee el contenido del Excel utilizando el servicio ExcelService
+      const datos = await this.excel.readExcel(file.buffer, columnasRequeridas);
+
+      //se convierte el array de datos a un array de productos
+      const products = datos
+        .map((row: any) => {
+          const name = row['Nombre'];
+          const price = parseFloat(row['Precio']);
+          const stock = parseInt(row['Stock'], 10);
+          const description = row['Descripcion'];
+          const categoryId = row['Categoria'];
+          //se valida que los datos sean correctos
+          if (!name || isNaN(price) || !categoryId || isNaN(stock)) {
+            return null;
+          }
+
+          return { name, price, stock, description, categoryId };
+        })
+        .filter((product) => product !== null); //se filtra los productos que no son correctos
+
+      if (!products.length) {
+        throw new BadRequestException('No hay productos válidos para importar');
+      }
+
+      //se almacenan los productos
+
+      await this.prisma.product.createMany({
+        data: products,
+      });
+
+      return {
+        message: 'Productos importados correctamente',
+        cantidad: products.length,
+      };
+    } catch (error) {
+      console.log(error);
+      throw new BadRequestException(
+        'Error al importar los productos: ' + error.message,
+      );
+    }
   }
 
   async update(id: string, updateProductDto: UpdateProductDto) {

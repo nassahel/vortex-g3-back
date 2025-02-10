@@ -39,7 +39,7 @@ export class ProductsController {
     return this.productsService.create(createProductDto);
   }
 
-  @Post('/upload')
+  @Post('/upload-products')
   @UseInterceptors(FileInterceptor('file'))
   upload(@UploadedFile() file: Express.Multer.File) {
     return this.productsService.upload(file);
