@@ -49,17 +49,19 @@ export class CategoriesService {
 
   async create(createCategoryDto: CreateCategoryDto) {
     try {
-      const { name } = createCategoryDto;
-      const categoryExists = await this.prisma.category.findFirst({
-        where: { name },
+      const newCategory = await this.prisma.$transaction(async (tx) => {
+        const { name } = createCategoryDto;
+        const categoryExists = await tx.category.findFirst({
+          where: { name },
+        });
+        if (categoryExists) {
+          throw new BadRequestException('La categoría ya existe.');
+        }
+        return tx.category.create({
+          data: { name },
+        });
       });
-      if (categoryExists) {
-        throw new BadRequestException('La categoría ya existe.');
-      }
-      const newCategory = await this.prisma.category.create({
-        data: { name },
-      });
-      return newCategory;
+      return { message: 'Categoría creada correctamente', newCategory };
     } catch (error) {
       console.error(error);
       throw new BadRequestException(
@@ -82,8 +84,10 @@ export class CategoriesService {
       }));
 
       //se almacenan las categorías
-      await this.prisma.category.createMany({
-        data: categories,
+      await this.prisma.$transaction(async (tx) => {
+        await tx.category.createMany({
+          data: categories,
+        });
       });
       console.log(categories);
       return {
@@ -100,12 +104,21 @@ export class CategoriesService {
 
   async update(id: string, updateCategoryDto: UpdateCategoryDto) {
     try {
+      //verifica que la categoria exista
       const categoryExists = await this.prisma.category.findUnique({
         where: { id, isDeleted: false },
       });
       if (!categoryExists) {
         throw new NotFoundException(`Categoría con id ${id} no encontrada.`);
       }
+      //verifica que el nombre de la categoria no exista
+      const categoryNameExist = await this.prisma.category.findFirst({
+        where: { name: updateCategoryDto.name, isDeleted: false },
+      });
+      if (categoryNameExist) {
+        throw new BadRequestException('El nombre de la categoría ya existe.');
+      }
+      //actualiza la categoria
       const updatedCategory = await this.prisma.category.update({
         where: { id },
         data: {
@@ -118,7 +131,10 @@ export class CategoriesService {
       };
     } catch (error) {
       console.error(error);
-      throw new BadRequestException('Error al actualizar la categoría.');
+      throw new BadRequestException(
+        'Error al actualizar la categoría: ',
+        error.response.message,
+      );
     }
   }
 

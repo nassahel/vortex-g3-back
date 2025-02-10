@@ -80,36 +80,44 @@ export class ProductsService {
 
   async create(product: CreateProductDto) {
     try {
-      const { name, description, price, stock, categoryId } = product;
-      const productExists = await this.prisma.product.findFirst({
-        where: { name },
+      const newProduct = await this.prisma.$transaction(async (tx) => {
+        const { name, description, price, stock, categoryId } = product;
+
+        // Verificar si el producto ya existe.
+        const productExists = await tx.product.findFirst({
+          where: { name },
+        });
+        if (productExists) {
+          throw new BadRequestException('El producto ya existe.');
+        }
+
+        // Verificar si la categoría existe y no está eliminada.
+        const categoryExists = await tx.category.findUnique({
+          where: { id: categoryId, isDeleted: false },
+        });
+        if (!categoryExists) {
+          throw new NotFoundException(
+            `Categoria con id ${categoryId} no encontrada.`,
+          );
+        }
+
+        // Insertar el nuevo producto dentro de la transacción.
+        return tx.product.create({
+          data: {
+            name,
+            description: description || null,
+            price,
+            stock,
+            categoryId,
+          },
+        });
       });
-      if (productExists) {
-        throw new BadRequestException('El producto ya existe.');
-      }
-      const categoryExists = await this.prisma.category.findUnique({
-        where: { id: categoryId, isDeleted: false },
-      });
-      if (!categoryExists) {
-        throw new NotFoundException(
-          `Categoria con id ${categoryId} no encontrada.`,
-        );
-      }
-      const newProduct = await this.prisma.product.create({
-        data: {
-          name,
-          description: description || null,
-          price,
-          stock,
-          categoryId,
-        },
-      });
-      return newProduct;
+      return { message: 'Producto creado correctamente', newProduct };
     } catch (error) {
       console.log(error);
       throw new BadRequestException(
         'Error al crear el producto:',
-        error.response.message,
+        error.response?.message,
       );
     }
   }
@@ -127,7 +135,7 @@ export class ProductsService {
       // Se lee el contenido del Excel utilizando el servicio ExcelService
       const datos = await this.excel.readExcel(file.buffer, columnasRequeridas);
 
-      //se convierte el array de datos a un array de productos
+      //se parsean los datos
       const products = datos
         .map((row: any) => {
           const name = row['Nombre'];
@@ -147,16 +155,53 @@ export class ProductsService {
       if (!products.length) {
         throw new BadRequestException('No hay productos válidos para importar');
       }
+      //se eliminan los productos importados duplicados
+      const productosACrear = products.filter(
+        (producto, index, self) =>
+          index ===
+          self.findIndex(
+            (p) => p.name.toLowerCase() === producto.name.toLowerCase(),
+          ),
+      );
+
+      //VALIDAR NOMBRES
+      const nombresProductos = productosACrear.map((producto) => producto.name); //arreglo con los nombre de los productos
+      //verifica si los nombres de los productos existen en la base de datos
+      const productosExistentes = await this.prisma.product.findMany({
+        where: {
+          isDeleted: false,
+          name: { in: nombresProductos },
+        },
+      });
+
+      //se filtran los productos existentes en la bd
+      const productosFiltrados = productosACrear.filter(
+        (producto) =>
+          !productosExistentes.some((p) => p.name === producto.name),
+      );
+
+      //VALIDAR CATEGORIAS
+      const idCategoriaProductos = productosFiltrados.map(
+        (prod) => prod.categoryId,
+      );
+      const categoriasValidas = await this.prisma.category.findMany({
+        where: { isDeleted: false, id: { in: idCategoriaProductos } },
+      });
+      //se filtran los productos con categorias no existentes
+      const productosValidos = productosFiltrados.filter((prod) =>
+        categoriasValidas.some((c) => c.id === prod.categoryId),
+      );
 
       //se almacenan los productos
-
-      await this.prisma.product.createMany({
-        data: products,
+      await this.prisma.$transaction(async (tx) => {
+        await tx.product.createMany({
+          data: productosValidos,
+        });
       });
 
       return {
         message: 'Productos importados correctamente',
-        cantidad: products.length,
+        cantidad: productosValidos.length,
       };
     } catch (error) {
       console.log(error);
@@ -168,22 +213,27 @@ export class ProductsService {
 
   async update(id: string, updateProductDto: UpdateProductDto) {
     try {
-      const { name, description, price, stock, categoryId } = updateProductDto;
-      const productExists = await this.prisma.product.findUnique({
-        where: { id, isDeleted: false },
-      });
-      if (!productExists) {
-        throw new NotFoundException(`Producto con id ${id} no encontrado.`);
-      }
-      const updatedProduct = await this.prisma.product.update({
-        where: { id },
-        data: {
-          name: name ?? productExists.name,
-          description: description ?? productExists.description,
-          price: price ?? productExists.price,
-          stock: stock ?? productExists.stock,
-          categoryId: categoryId ?? productExists.categoryId,
-        },
+      const updatedProduct = await this.prisma.$transaction(async (tx) => {
+        // Buscar el producto a actualizar que no esté eliminado.
+        const productExists = await tx.product.findUnique({
+          where: { id, isDeleted: false },
+        });
+        if (!productExists) {
+          throw new NotFoundException(`Producto con id ${id} no encontrado.`);
+        }
+
+        // Actualizar el producto usando los nuevos valores o, en su defecto, los actuales.
+        return tx.product.update({
+          where: { id },
+          data: {
+            name: updateProductDto.name ?? productExists.name,
+            description:
+              updateProductDto.description ?? productExists.description,
+            price: updateProductDto.price ?? productExists.price,
+            stock: updateProductDto.stock ?? productExists.stock,
+            categoryId: updateProductDto.categoryId ?? productExists.categoryId,
+          },
+        });
       });
       return {
         message: 'Producto actualizado correctamente.',
