@@ -1,5 +1,7 @@
-import { BadRequestException, ConflictException, Injectable, InternalServerErrorException, NotFoundException } from '@nestjs/common';
+import { BadRequestException, ConflictException, Inject, Injectable, InternalServerErrorException, NotFoundException } from '@nestjs/common';
 import { CreateLoginDto, CreateRegisterDto } from './dto/create-auth.dto';
+import { CACHE_MANAGER } from '@nestjs/cache-manager';
+import { Cache } from 'cache-manager';
 import { PrismaService } from '../prisma/prisma.service';
 import * as bcrypt from 'bcrypt';
 import { JwtService } from '@nestjs/jwt';
@@ -8,7 +10,8 @@ import { JwtService } from '@nestjs/jwt';
 export class AuthService {
   constructor(
     private readonly prisma: PrismaService,
-    private readonly jwt: JwtService
+    private readonly jwt: JwtService,
+    @Inject(CACHE_MANAGER) private cacheManager: Cache,
   ) { }
   async register(createRegisterDto: CreateRegisterDto) {
     const { email, name, password, repeatPassword } = createRegisterDto;
@@ -49,7 +52,7 @@ export class AuthService {
     }
   }
 
-  async login(createLoginDto: CreateLoginDto) {
+  async login(createLoginDto: CreateLoginDto): Promise<{message: string; token: string}> {
 
     const { password, email } = createLoginDto;
     const userExist = await this.prisma.user.findUnique({
@@ -77,5 +80,55 @@ export class AuthService {
       message: 'Usuario logueado',
       token
     };
+  }
+
+  private async hashPassword(password: string): Promise<string> {
+    return await bcrypt.hash(password, 15); 
+  }
+
+  async requestPasswordChange(email: string): Promise<void>{
+    const user = await this.prisma.user.findFirst({ where: { email } });
+    if (!user){
+      throw new BadRequestException('User not found');
+    }
+
+    const payload = { sub: user.id, email: user.email };
+    const token = this.jwt.sign(payload);
+
+    await this.cacheManager.set(`passwordReset:${user.id}`, token, { ttl: 3600 } as any);
+
+    console.log('Generated token for password reset: ', token);
+  }
+
+  //AQUI DEBERIA IR LA LOGICA PARA MAILJET
+
+  async changePassword(token: string, newPassword: string): Promise<void>{
+    let payload: any;
+    try{
+      payload = this.jwt.verify(token);
+    } catch (error) {
+      throw new BadRequestException('Invalid or expirex token');
+    }
+
+    const userId = payload.sub;
+    if (!userId) {
+      throw new BadRequestException('Invalid token payload');
+    }
+
+    const cachedToken = await this.cacheManager.get(`passwordReset:${userId}`);   //logica para eliminar el tocken del cache
+    if (!cachedToken || cachedToken !== token) {
+      throw new BadRequestException('Invalid or expired token');
+    }
+
+    // Si el token es válido, eliminarlo del cache
+    await this.cacheManager.del(`passwordReset:${userId}`);
+
+    const hashedPassword = await this.hashPassword(newPassword);
+
+    await this.prisma.user.update({
+      where: {id: userId},
+      data: {password: hashedPassword},
+    });
+
   }
 }

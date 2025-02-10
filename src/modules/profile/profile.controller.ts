@@ -3,6 +3,7 @@ import { ApiOperation, ApiResponse, ApiTags, ApiConsumes } from '@nestjs/swagger
 import { memoryStorage } from 'multer';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { ProfileService } from './profile.service';
+import { AuthService } from '../auth/auth.service';
 import { UpdateProfileDto } from './dto/update.profile.dto';
 import { ChangePasswordRequestDto } from './dto/change.password.request.dto';
 import { ChangePasswordDto } from './dto/change.password.dto';
@@ -10,8 +11,8 @@ import { ChangePasswordDto } from './dto/change.password.dto';
 
 @ApiTags('Profile')
 @Controller('profile')
-export class ProfileController {
-    constructor(private readonly profileService:ProfileService){}
+    export class ProfileController {
+        constructor(private readonly profileService: ProfileService, private readonly authService: AuthService) {}
 
     //Ruta para subir la imagen
     @Post('upload')
@@ -67,7 +68,7 @@ export class ProfileController {
     async requestPasswordChange(
         @Body() changePasswordRequestDto: ChangePasswordRequestDto,
     ) {
-        await this.profileService.requestPasswordChange(changePasswordRequestDto.email);
+        await this.authService.requestPasswordChange(changePasswordRequestDto.email);
         return { message: 'Password change email sent successfully' };
     }
 
@@ -77,7 +78,7 @@ export class ProfileController {
     async changePassword(
         @Body() changePasswordDto: ChangePasswordDto,
     ) {
-        await this.profileService.changePassword(changePasswordDto.token, changePasswordDto.newPassword);
+        await this.authService.changePassword(changePasswordDto.token, changePasswordDto.newPassword);
         return { message: 'Password updated successfully' };
     }
 }
