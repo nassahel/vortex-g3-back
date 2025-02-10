@@ -19,6 +19,18 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+enum Rol {
+  ADMIN
+  USER
+}
+
+enum OrderStatus {
+  PENDING
+  INPROCESS
+  COMPLETED
+  CANCELED
+}
+
 model Product {
   id          String   @id @unique @default(cuid())
   name        String
@@ -88,15 +100,5 @@ model OrderItem {
   orderId   String
 }
 
-enum Rol {
-  ADMIN
-  USER
-}
 
-enum OrderStatus {
-  PENDING
-  INPROCESS
-  COMPLETED
-  CANCELED
-}
 
