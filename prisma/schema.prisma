@@ -45,15 +45,16 @@ model Profile {
 }
 
 model Product {
-  id          String    @id @unique @default(cuid())
-  name        String
-  description String
-  stock       Int
-  price       Decimal   @default(0.00)
-  categories  Category[]
-  images      Image[]
-  isDeleted   Boolean   @default(false)
-  orderItem   OrderItem[]
+  id              String    @id @unique @default(cuid())
+  name            String
+  description     String
+  stock           Int
+  price           Decimal   @default(0.00)
+  shippingAddress String?
+  categories      Category[]
+  images          Image[]
+  isDeleted       Boolean   @default(false)
+  orderItem       OrderItem[]
 }
 
 model Image {
