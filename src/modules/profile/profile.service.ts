@@ -1,6 +1,4 @@
 import { BadRequestException, Inject, Injectable } from '@nestjs/common';
-import { CACHE_MANAGER } from '@nestjs/cache-manager';
-import { Cache } from 'cache-manager';
 import { PrismaService } from '../prisma/prisma.service';
 import { AwsService } from '../../aws/aws.service';
 import { UpdateProfileDto } from './dto/update.profile.dto';
@@ -14,7 +12,6 @@ export class ProfileService {
         private prisma: PrismaService,
         private awsService: AwsService,
         private jwtService: JwtService,
-        @Inject(CACHE_MANAGER) private cacheManager: Cache,
     ) {}
   
     async uploadImage(file: Express.Multer.File, userId: string): Promise<string> {
@@ -77,56 +74,7 @@ export class ProfileService {
       });
       return updateUser;
     }
-
-    private async hashPassword(password: string): Promise<string> {
-      return await bcrypt.hash(password, 15); 
-    }
-
-    async requestPasswordChange(email: string): Promise<void>{
-      const user = await this.prisma.user.findFirst({ where: { email } });
-      if (!user){
-        throw new BadRequestException('User not found');
-      }
-
-      const payload = { sub: user.id, email: user.email };
-      const token = this.jwtService.sign(payload);
-
-      await this.cacheManager.set(`passwordReset:${user.id}`, token, { ttl: 3600 } as any);
-
-      console.log('Generated token for password reset: ', token);
-    }
-
-    //AQUI DEBERIA IR LA LOGICA PARA MAILJET
-
-    async changePassword(token: string, newPassword: string): Promise<void>{
-      let payload: any;
-      try{
-        payload = this.jwtService.verify(token);
-      } catch (error) {
-        throw new BadRequestException('Invalid or expirex token');
-      }
-
-      const userId = payload.sub;
-      if (!userId) {
-        throw new BadRequestException('Invalid token payload');
-      }
-
-      const cachedToken = await this.cacheManager.get(`passwordReset:${userId}`);   //logica para eliminar el tocken del cache
-      if (!cachedToken || cachedToken !== token) {
-        throw new BadRequestException('Invalid or expired token');
-      }
-
-      // Si el token es válido, eliminarlo del cache
-      await this.cacheManager.del(`passwordReset:${userId}`);
-
-      const hashedPassword = await this.hashPassword(newPassword);
-
-      await this.prisma.user.update({
-        where: {id: userId},
-        data: {password: hashedPassword},
-      });
-
-    }
+    
 
 
 }
