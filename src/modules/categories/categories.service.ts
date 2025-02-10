@@ -6,10 +6,14 @@ import {
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateCategoryDto } from './dto/create-category.dto';
 import { UpdateCategoryDto } from './dto/update-category.dto';
+import { ExcelService } from '../excel/excel.service';
 
 @Injectable()
 export class CategoriesService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly excel: ExcelService,
+  ) {}
 
   async findAll() {
     try {
@@ -61,6 +65,35 @@ export class CategoriesService {
       throw new BadRequestException(
         'Error al crear la categoría: ',
         error.response.message,
+      );
+    }
+  }
+
+  async upload(file: Express.Multer.File) {
+    try {
+      const columnasRequeridas = ['Nombre'];
+
+      // Se lee el contenido del Excel utilizando el servicio ExcelService
+      const datos = await this.excel.readExcel(file.buffer, columnasRequeridas);
+
+      //se convierte el array de datos a un array de categorías
+      const categories = datos.map((row: any) => ({
+        name: row['Nombre'],
+      }));
+
+      //se almacenan las categorías
+      await this.prisma.category.createMany({
+        data: categories,
+      });
+      console.log(categories);
+      return {
+        message: 'Categorías importadas correctamente',
+        cantidad: categories.length,
+      };
+    } catch (error) {
+      console.log(error);
+      throw new BadRequestException(
+        'Error al importar las categorías: ' + error.message,
       );
     }
   }
