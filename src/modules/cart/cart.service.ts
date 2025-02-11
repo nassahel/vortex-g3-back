@@ -13,7 +13,7 @@ export class CartService {
         //mail service una vez que se implemente
     ){}
 
-    async getActiveCart(userId: string): Promise<object>{        //Obtiene el carrito existente, usa los status pending del usuario. En el caso de que no exista, crea uno nuevo.
+    async getActiveCart(userId: string): Promise<{ id: string, items: any[] }>{        //Obtiene el carrito existente, usa los status pending del usuario. En el caso de que no exista, crea uno nuevo.
         let cart = await this.prisma.order.findFirst({      // Aqui lo busca y lo incluye
             where: { userId, status: 'PENDING'},
             include: { items: true },
@@ -129,7 +129,7 @@ export class CartService {
     
     async checkoutCart(userId: string, checkoutCartDto: CheckoutCartDto): Promise<{ message: string, cart: object }>{
         const cart = await this.getActiveCart(userId);
-        if(cart.items.lenght === 0){
+        if(cart.items.length === 0){
             throw new NotFoundException('Cart is empty');
         }
 
@@ -155,7 +155,7 @@ export class CartService {
 
         const cancelCart = await this.prisma.order.update({
             where: {id: cart.id},
-            data: {status: 'CANCELLED'},
+            data: {status: 'CANCELED'},
         });
 
         return { message: 'Cart cancelled' };
