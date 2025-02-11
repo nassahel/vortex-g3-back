@@ -146,4 +146,18 @@ export class CartService {
             cart: completedCart,
         }
     }
+
+    async cancelCart(userId: string): Promise<{ message: string }>{
+        const cart = await this.getActiveCart(userId)
+        if(!cart){
+            throw new NotFoundException('Cart not found');
+        }
+
+        const cancelCart = await this.prisma.order.update({
+            where: {id: cart.id},
+            data: {status: 'CANCELLED'},
+        });
+
+        return { message: 'Cart cancelled' };
+    }
 }
