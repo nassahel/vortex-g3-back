@@ -6,6 +6,7 @@ import { envVaidationSchema } from 'src/config/configuration';
 import { PrismaModule } from '../prisma/prisma.module';
 import { AuthModule } from '../auth/auth.module';
 import { UserModule } from '../user/user.module';
+import { ProfileModule } from '../profile/profile.module';
 
 @Module({
   imports: [
@@ -16,8 +17,9 @@ import { UserModule } from '../user/user.module';
     }),
     PrismaModule,
     AuthModule,
-    UserModule
-    
+    UserModule,
+    ProfileModule
+
   ],
   controllers: [AppController],
   providers: [AppService],
