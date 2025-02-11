@@ -68,6 +68,29 @@ export class CartService {
         return {message: "Item added to cart"};
     }
 
-    
+    async updateCartItem(userId: string, productId: string, updateCartItemDto: UpdateCartItemDto): Promise<{message: string}>{
+        const { quantity } = updateCartItemDto;
+
+        const cart = await this.getActiveCart(userId);      //Obtiene el carrito activo
+
+        const item = await this.prisma.orderItem.findFirst({        //Busca el producto
+            where: {orderId: cart.id, productId},
+        })
+
+        if(!item){
+            throw new NotFoundException('Item not found in cart');      //Si no lo encuentra tira un error
+        }
+
+        if (quantity === 0) {
+            await this.prisma.orderItem.delete({ where: {id: item.id}});      //Si la cantidad es 0, elimina el item
+        } else {
+            await this.prisma.orderItem.update({
+                where: { id: item.id },
+                data: { quantity },
+            });
+        }
+
+        return { message: 'Item updated' };
+    }
     
 }
