@@ -3,6 +3,7 @@ import { AddCartItemDto } from './dto/add.cart.item.dto';
 import { PrismaService } from '../prisma/prisma.service';
 import { Decimal } from '@prisma/client/runtime/library';
 import { UpdateCartItemDto } from './dto/update.cart.item.dto';
+import { CheckoutCartDto } from './dto/checkout.cart.dto';
 
 
 @Injectable()
@@ -95,7 +96,7 @@ export class CartService {
         return { message: 'Item updated' };
     }
     
-    async removeItemFromCart(userId: string, productId: string){
+    async removeItemFromCart(userId: string, productId: string): Promise<{ message: string }>{
         const cart = await this.getActiveCart(userId);
 
         const item = await this.prisma.orderItem.findFirst({
@@ -112,7 +113,7 @@ export class CartService {
         return { message: 'Item removed from cart' };
     }
 
-    async recalculateCartTotal(orderId: string){
+    private async recalculateCartTotal(orderId: string){
         const items = await this.prisma.orderItem.findMany({
             where: { orderId },
         });
@@ -124,5 +125,25 @@ export class CartService {
             where: { id: orderId },
             data: { price: total },
         });
-    }   
+    }
+    
+    async checkoutCart(userId: string, checkoutCartDto: CheckoutCartDto): Promise<{ message: string, cart: object }>{
+        const cart = await this.getActiveCart(userId);
+        if(cart.items.lenght === 0){
+            throw new NotFoundException('Cart is empty');
+        }
+
+        const completedCart = await this.prisma.order.update({
+            where: {id: cart.id},
+            data: {status: 'COMPLETED'},
+            include: {items: true},
+        })
+
+        //incluir el servicio de mail una vez que se implemente
+
+        return {
+            message: 'Cart checked out',
+            cart: completedCart,
+        }
+    }
 }
