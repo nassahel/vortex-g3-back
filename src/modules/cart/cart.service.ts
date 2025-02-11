@@ -65,6 +65,7 @@ export class CartService {
             })
         }
 
+        await this.recalculateCartTotal(cart.id);       //Recalcula el total del carrito
         return {message: "Item added to cart"};
     }
 
@@ -90,6 +91,7 @@ export class CartService {
             });
         }
 
+        await this.recalculateCartTotal(cart.id);       //Recalcula el total del carrito
         return { message: 'Item updated' };
     }
     
@@ -106,7 +108,21 @@ export class CartService {
 
         await this.prisma.orderItem.delete({ where: { id: item.id } });
 
-
+        await this.recalculateCartTotal(cart.id);       //Recalcula el total del carrito
         return { message: 'Item removed from cart' };
     }
+
+    async recalculateCartTotal(orderId: string){
+        const items = await this.prisma.orderItem.findMany({
+            where: { orderId },
+        });
+        const total = items.reduce((acc, item) => {
+            return acc.add(item.price.mul(item.quantity));
+        }, new Decimal(0));
+
+        await this.prisma.order.update({
+            where: { id: orderId },
+            data: { price: total },
+        });
+    }   
 }
