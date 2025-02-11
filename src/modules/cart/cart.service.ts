@@ -93,4 +93,20 @@ export class CartService {
         return { message: 'Item updated' };
     }
     
+    async removeItemFromCart(userId: string, productId: string){
+        const cart = await this.getActiveCart(userId);
+
+        const item = await this.prisma.orderItem.findFirst({
+            where: { orderId: cart.id, productId },
+        });
+
+        if(!item){
+            throw new NotFoundException('Item not found in cart');
+        }
+
+        await this.prisma.orderItem.delete({ where: { id: item.id } });
+
+
+        return { message: 'Item removed from cart' };
+    }
 }
