@@ -30,6 +30,44 @@ export class CartService {
         }
         return cart;
     }
+    async addItemToCart(userId: string, addCartItemDto: AddCartItemDto): Promise <{ message: string }>{  //Agrega un producto al carrito o lo actualiza si ya existe.
+        const { productId, quantity } = addCartItemDto;
 
+        const product = await this.prisma.product.findUnique({      //Busca el producto
+            where: { id: productId },
+        });
+
+        if(!product){
+            throw new NotFoundException('Product not found');   // En el cas de q no exista tira un error
+        }
+
+        const cart = await this.getActiveCart(userId);      //Obtiene el carrito activo
+
+        const existingItem = await this.prisma.orderItem.findFirst({        //verifica si el producto ya esta en el carrito
+            where: { orderId: cart.id, productId },
+        });
+
+        if (existingItem){
+            const newQuantity = existingItem.quantity + quantity;       
+
+            await this.prisma.orderItem.update({    //Si ya esta, actualiza la cantidad
+                where: {id: existingItem.id},
+                data: { quantity: newQuantity },
+            })
+        } else {
+            await this.prisma.orderItem.create({        //agrega el nuevo item al carrito
+                data: {
+                    orderId: cart.id,
+                    productId,
+                    quantity,
+                    price: product.price,
+                }
+            })
+        }
+
+        return {message: "Item added to cart"};
+    }
+
+    
     
 }
