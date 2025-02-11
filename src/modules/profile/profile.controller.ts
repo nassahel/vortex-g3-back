@@ -3,7 +3,7 @@ import { ApiOperation, ApiResponse, ApiTags, ApiConsumes } from '@nestjs/swagger
 import { memoryStorage } from 'multer';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { ProfileService } from './profile.service';
-import { AuthService } from '../auth/auth.service';
+// import { AuthService } from '../auth/auth.service';
 import { UpdateProfileDto } from './dto/update.profile.dto';
 import { ChangePasswordRequestDto } from './dto/change.password.request.dto';
 import { ChangePasswordDto } from './dto/change.password.dto';
@@ -12,7 +12,8 @@ import { ChangePasswordDto } from './dto/change.password.dto';
 @ApiTags('Profile')
 @Controller('profile')
     export class ProfileController {
-        constructor(private readonly profileService: ProfileService, private readonly authService: AuthService) {}
+        constructor(private readonly profileService: ProfileService,
+            ) {}
 
     //Ruta para subir la imagen
     @Post('upload')
@@ -31,13 +32,13 @@ import { ChangePasswordDto } from './dto/change.password.dto';
         }
     }))
 
-    async uploadProfileImage(
-        @UploadedFile() file: Express.Multer.File,  //con @UploadedFile obtenemos el archivo que el usuario sube
-        @Body('userId') userId: string,
-        ){        
-        const imageUrl = await this.profileService.uploadImage(file, userId);         //Llama al servicio AwsService para manejar la carga de la imagen
-        return { message: 'Image successfully uploaded', data: imageUrl};
-    }
+    // async uploadProfileImage(
+    //     @UploadedFile() file: Express.Multer.File,  //con @UploadedFile obtenemos el archivo que el usuario sube
+    //     @Body('userId') userId: string,
+    //     ){        
+    //     const imageUrl = await this.profileService.uploadImage(file, userId);         //Llama al servicio AwsService para manejar la carga de la imagen
+    //     return { message: 'Image successfully uploaded', data: imageUrl};
+    // }
 
 
     //Ruta para eliminar la imagen
@@ -62,23 +63,23 @@ import { ChangePasswordDto } from './dto/change.password.dto';
     }
 
     //Modulos de cambio de contraseña
-    @Post('change-password-request')
-    @ApiOperation({ summary: 'Request a password change email' })
-    @ApiResponse({ status: 200, description: 'Password change email sent successfully' })
-    async requestPasswordChange(
-        @Body() changePasswordRequestDto: ChangePasswordRequestDto,
-    ) {
-        await this.authService.requestPasswordChange(changePasswordRequestDto.email);
-        return { message: 'Password change email sent successfully' };
-    }
+    // @Post('change-password-request')
+    // @ApiOperation({ summary: 'Request a password change email' })
+    // @ApiResponse({ status: 200, description: 'Password change email sent successfully' })
+    // async requestPasswordChange(
+    //     @Body() changePasswordRequestDto: ChangePasswordRequestDto,
+    // ) {
+    //     await this.authService.requestPasswordChange(changePasswordRequestDto.email);
+    //     return { message: 'Password change email sent successfully' };
+    // }
 
-    @Put('change-password')
-    @ApiOperation({ summary: 'Change the user password' })
-    @ApiResponse({ status: 200, description: 'Password updated successfully' })
-    async changePassword(
-        @Body() changePasswordDto: ChangePasswordDto,
-    ) {
-        await this.authService.changePassword(changePasswordDto.token, changePasswordDto.newPassword);
-        return { message: 'Password updated successfully' };
-    }
+    // @Put('change-password')
+    // @ApiOperation({ summary: 'Change the user password' })
+    // @ApiResponse({ status: 200, description: 'Password updated successfully' })
+    // async changePassword(
+    //     @Body() changePasswordDto: ChangePasswordDto,
+    // ) {
+    //     await this.authService.changePassword(changePasswordDto.token, changePasswordDto.newPassword);
+    //     return { message: 'Password updated successfully' };
+    // }
 }

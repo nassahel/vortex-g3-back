@@ -1,6 +1,6 @@
-import { Controller, Post, Body } from '@nestjs/common';
+import { Controller, Post, Body, Get } from '@nestjs/common';
 import { AuthService } from './auth.service';
-import { CreateLoginDto, CreateRegisterDto } from './dto/create-auth.dto';
+import { CreateLoginDto, CreateRegisterDto, RecoveryPasswordDto } from './dto/create-auth.dto';
 
 @Controller('auth')
 export class AuthController {
@@ -14,6 +14,17 @@ export class AuthController {
   @Post('login')
   login(@Body() createLoginDto: CreateLoginDto) {
     return this.authService.login(createLoginDto);
+  }
+
+
+  @Post('request-recovery-password')
+  RequestRecoveryPassword(@Body() body: {email: string}) {
+    return this.authService.RequestRecoveryPassword(body.email);
+  }
+
+  @Post('recovery-password')
+  RecoveryPassword(@Body() recoveryPassword: RecoveryPasswordDto) {
+    return this.authService.RecoveryPassword(recoveryPassword);
   }
 
 
