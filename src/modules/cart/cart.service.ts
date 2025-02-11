@@ -114,14 +114,16 @@ export class CartService {
     }
 
     private async recalculateCartTotal(orderId: string){
-        const items = await this.prisma.orderItem.findMany({
+        const items = await this.prisma.orderItem.findMany({        //busca los productos
             where: { orderId },
         });
-        const total = items.reduce((acc, item) => {
-            return acc.add(item.price.mul(item.quantity));
-        }, new Decimal(0));
 
-        await this.prisma.order.update({
+        const total = items.reduce(
+            (acc, {price, quantity}) => acc.add(price.mul(quantity)), //Itera sobre el arreglo 'items' y suma el costo de cada item multiplicado por la cantidad
+            new Decimal(0)      
+        )
+
+        await this.prisma.order.update({            //actualiza el carrito
             where: { id: orderId },
             data: { price: total },
         });
