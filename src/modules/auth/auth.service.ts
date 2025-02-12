@@ -88,11 +88,13 @@ export class AuthService {
 
   async requestPasswordChange(email: string): Promise<void>{
     const user = await this.prisma.user.findFirst({ where: { email } });
+
     if (!user){
       throw new BadRequestException('User not found');
     }
 
     const payload = { sub: user.id, email: user.email };
+
     const token = this.jwt.sign(payload);
 
     await this.cacheManager.set(`passwordReset:${user.id}`, token, { ttl: 3600 } as any);
@@ -104,6 +106,7 @@ export class AuthService {
 
   async changePassword(token: string, newPassword: string): Promise<void>{
     let payload: any;
+
     try{
       payload = this.jwt.verify(token);
     } catch (error) {
@@ -111,11 +114,13 @@ export class AuthService {
     }
 
     const userId = payload.sub;
+
     if (!userId) {
       throw new BadRequestException('Invalid token payload');
     }
 
     const cachedToken = await this.cacheManager.get(`passwordReset:${userId}`);   //logica para eliminar el tocken del cache
+   
     if (!cachedToken || cachedToken !== token) {
       throw new BadRequestException('Invalid or expired token');
     }
