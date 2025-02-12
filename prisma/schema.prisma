@@ -9,6 +9,7 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+
 enum Rol {
   ADMIN
   USER
@@ -44,17 +45,37 @@ model Profile {
   profileImage  String? 
 }
 
-model Product {
-  id          String    @id @unique @default(cuid())
-  name        String
-  description String
-  stock       Int
-  price       Decimal   @default(0.00)
-  categories  Category[]
-  images      Image[]
-  isDeleted   Boolean   @default(false)
-  orderItem   OrderItem[]
+
+model Category {
+  id        String   @id @unique @default(cuid())
+  name      String
+  isDeleted Boolean  @default(false)
+  products  ProductsOnCategories[]
 }
+
+model Product {
+  id          String   @id @unique @default(cuid())
+  name        String
+  description String?
+  stock       Int
+  price       Float
+  isDeleted   Boolean  @default(false)
+  orderItems  OrderItem[]
+  images      Image[]
+  categories  ProductsOnCategories[]
+}
+
+// Tabla intermedia para la relacion entre productos y categorias
+model ProductsOnCategories {
+  product   Product  @relation(fields: [productId], references: [id])
+  productId String
+
+  category   Category @relation(fields: [categoryId], references: [id])
+  categoryId String
+
+  @@id([productId, categoryId])
+}
+
 
 model Image {
   id        String   @id @unique @default(cuid())
@@ -64,12 +85,6 @@ model Image {
   productId String
 }
 
-model Category {
-  id        String   @id @unique @default(cuid())
-  name      String
-  isDeleted Boolean  @default(false)
-  products  Product[]
-}
 
 model Order {
   id        String      @id @unique @default(cuid())
