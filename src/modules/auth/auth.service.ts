@@ -3,12 +3,15 @@ import { CreateLoginDto, CreateRegisterDto, RecoveryPasswordDto } from './dto/cr
 import { PrismaService } from '../prisma/prisma.service';
 import * as bcrypt from 'bcrypt';
 import { JwtService } from '@nestjs/jwt';
+import { MessageService } from '../messages/messages.service';
+import { messagingConfig } from 'src/common/constants';
 
 @Injectable()
 export class AuthService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly jwt: JwtService,
+    private messageService: MessageService
   ) { }
   async register(createRegisterDto: CreateRegisterDto) {
     const { email, name, password, repeatPassword } = createRegisterDto;
@@ -89,18 +92,24 @@ export class AuthService {
 
     try {
       const payload = { id: foundUser.id, email: foundUser.email };
-
       const token = this.jwt.sign(payload, { expiresIn: '30m' });
 
+      await this.messageService.sendRegisterUserEmail({
+        from: messagingConfig.emailSender,
+        to: email,
+        link: `https://tu-dominio.com/reset-password?token=${token}`
+      });
+
       return {
-        message: 'Link de recuperación d contraseña generado',
-        link: `${token}`
-      }
+        message: 'Link de recuperación de contraseña generado',
+        token
+      };
 
     } catch (error) {
-      throw new InternalServerErrorException('No se pudo enviar recuperacion de contraseña')
+      throw new InternalServerErrorException('No se pudo enviar recuperación de contraseña');
     }
-  }
+}
+
 
   //AQUI DEBERIA IR LA LOGICA PARA MAILJET
 
