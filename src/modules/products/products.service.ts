@@ -9,6 +9,8 @@ import { PrismaService } from '../prisma/prisma.service';
 import { FilterProductDto } from './dto/filters-product.dto';
 import { ExcelService } from '../excel/excel.service';
 import { AwsService } from 'src/aws/aws.service';
+import { UpdateStockDto } from '../compra/dto/update-compra.dto';
+import { UpdatePriceDto } from './dto/update-price.dto';
 
 @Injectable()
 export class ProductsService {
@@ -504,4 +506,139 @@ export class ProductsService {
       );
     }
   }
+
+  async updateStock(id: string, body: UpdateStockDto) {
+    try {
+      const product = await this.prisma.product.findUnique({
+        where: { id },
+      });
+      if (!product) {
+        throw new NotFoundException(`Producto con id ${id} no encontrado.`);
+      }
+
+      const updatedProduct = await this.prisma.product.update({
+        where: { id: product.id },
+        data: { stock: body.stock },
+      });
+      return {
+        message: 'Stock actualizado correctamente.',
+        updatedProduct,
+      };
+    } catch (error) {
+      console.log(error);
+      throw new BadRequestException(
+        'Error al actualizar el stock del producto: ',
+        error.response.message,
+      );
+    }
+  }
+
+  async updateStockAll(body: UpdateStockDto) {
+    try {
+      const { ids, stock } = body;
+      const products = await this.prisma.product.findMany({
+        where: { id: { in: ids } },
+      });
+      if (products.length !== ids.length) {
+        throw new NotFoundException(
+          `Los siguientes productos no existen ${ids.join(', ')}`,
+        );
+      }
+      const updatedProducts = await this.prisma.product.updateMany({
+        where: { id: { in: ids } },
+        data: { stock },
+      });
+      return {
+        message: 'Stock actualizado correctamente.',
+        updatedProducts,
+      };
+    } catch (error) {
+      console.log(error);
+      throw new BadRequestException(
+        'Error al actualizar el stock de los productos: ',
+        error.response.message,
+      );
+    }
+  }
+  async incrementarStockAll(body: UpdateStockDto) {
+    try {
+      const { ids, stock } = body;
+      const products = await this.prisma.product.findMany({
+        where: { id: { in: ids } },
+      });
+      if (products.length !== ids.length) {
+        throw new NotFoundException(
+          `Los siguientes productos no existen ${ids.join(', ')}`,
+        );
+      }
+      const updatedProducts = await this.prisma.product.updateMany({
+        where: { id: { in: ids } },
+        data: { stock: { increment: stock } },
+      });
+      return {
+        message: 'Stock incrementado correctamente.',
+        updatedProducts,
+      };
+    } catch (error) {
+      console.log(error);
+      throw new BadRequestException(
+        'Error al incrementar el stock de los productos: ',
+        error.response.message,
+      );
+    }
+  }
+  async incrementarPrecioAll(body: UpdatePriceDto) {
+    try {
+      const { ids, price } = body;
+      const products = await this.prisma.product.findMany({
+        where: { id: { in: ids } },
+      });
+      if (products.length !== ids.length) {
+        throw new NotFoundException(
+          `Los siguientes productos no existen ${ids.join(', ')}`,
+        );
+      }
+      const updatedProducts = await this.prisma.product.updateMany({
+        where: { id: { in: ids } },
+        data: { price: { increment: price } },
+      });
+      return {
+        message: 'Precio incrementado correctamente.',
+        updatedProducts,
+      };
+    } catch (error) {
+      console.log(error);
+      throw new BadRequestException(
+        'Error al incrementar el precio de los productos: ',
+        error.response.message,
+      );
+    }
+  }
+  /* async decrementarPrecioAll(body: UpdatePriceDto) {
+    try {
+      const { ids, price } = body;
+      const products = await this.prisma.product.findMany({
+        where: { id: { in: ids } },
+      });
+      if (products.length !== ids.length) {
+        throw new NotFoundException(
+          `Los siguientes productos no existen ${ids.join(', ')}`,
+        );
+      }
+      const updatedProducts = await this.prisma.product.updateMany({
+        where: { id: { in: ids } },
+        data: { price: { decrement: price } },
+      });
+      return {
+        message: 'Precio decrementado correctamente.',
+        updatedProducts,
+      };
+    } catch (error) {
+      console.log(error);
+      throw new BadRequestException(
+        'Error al decrementar el precio de los productos: ',
+        error.response.message,
+      );
+    }
+  } */
 }

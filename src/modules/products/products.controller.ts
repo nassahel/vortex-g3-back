@@ -19,6 +19,7 @@ import { UpdateProductDto } from './dto/update-product.dto';
 import { FilterProductDto } from './dto/filters-product.dto';
 import { FileInterceptor, FilesInterceptor } from '@nestjs/platform-express';
 import { memoryStorage } from 'multer';
+import { UpdatePriceDto } from './dto/update-price.dto';
 
 @Controller('producto')
 export class ProductsController {
@@ -116,4 +117,14 @@ export class ProductsController {
   restore(@Param('id') id: string) {
     return this.productsService.restore(id);
   }
+
+  @Patch('/incrementar-precio-productos')
+  incrementarPrecioAll(@Body() body: UpdatePriceDto) {
+    return this.productsService.incrementarPrecioAll(body);
+  }
+
+  /* @Patch('/decrementar-precio-productos')
+  decrementarPrecioAll(@Body() body: UpdateStockDto) {
+    return this.productsService.decrementarPrecioAll(body);
+  } */
 }
