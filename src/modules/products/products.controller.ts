@@ -11,6 +11,7 @@ import {
   Patch,
   UploadedFiles,
   Put,
+  Delete,
 } from '@nestjs/common';
 import { ProductsService } from './products.service';
 import { CreateProductDto } from './dto/create-product.dto';
@@ -40,12 +41,11 @@ export class ProductsController {
 
   @Post('/new')
   @UseInterceptors(
-    FilesInterceptor('images', 4, {
+    FilesInterceptor('files', 4, {
       //Configuro como manejar la carga de archivos
       storage: memoryStorage(), //almaceno en la memoria
       limits: { fileSize: 10 * 1024 * 1024 }, // Tamaño limite de 5MB
       fileFilter: (req, file, callback) => {
-        console.log(file);
         if (file.mimetype === 'image/png' || file.mimetype === 'image/jpeg') {
           callback(null, true);
         } else {
@@ -75,12 +75,12 @@ export class ProductsController {
     return this.productsService.update(id, updateProductDto);
   }
 
-  @Patch('/update-images/:id')
+  @Post('/upload-image/:id')
   @UseInterceptors(
-    FilesInterceptor('images', 4, {
+    FileInterceptor('file', {
       //Configuro como manejar la carga de archivos
       storage: memoryStorage(), //almaceno en la memoria
-      limits: { fileSize: 10 * 1024 * 1024 }, // Tamaño limite de 5MB
+      limits: { fileSize: 5 * 1024 * 1024 }, // Tamaño limite de 5MB
       fileFilter: (req, file, callback) => {
         if (file.mimetype === 'image/png' || file.mimetype === 'image/jpeg') {
           callback(null, true);
@@ -93,11 +93,17 @@ export class ProductsController {
       },
     }),
   )
-  updateImages(
+  uploadImage(
     @Param('id') id: string,
-    @UploadedFiles() images: Express.Multer.File[],
+    @UploadedFile() image: Express.Multer.File,
+    @Body() altText: string,
   ) {
-    return this.productsService.updateImages(id, images);
+    return this.productsService.uploadImage(id, image, altText);
+  }
+
+  @Delete('/delete-image/:id')
+  deleteImage(@Param('id') id: string) {
+    return this.productsService.deleteImage(id);
   }
 
   //Eliminado logico del producto

@@ -331,9 +331,11 @@ export class ProductsService {
         // Si hay categorías, validarlas y agregarlas a los datos de actualización
         if (categories?.length) {
           await this.validateCategories(categories);
-
+          //eliminar las categorías actuales
+          await tx.productsOnCategories.deleteMany({
+            where: { productId: id },
+          });
           updateData.categories = {
-            deleteMany: {},
             create: categories.map((categoryId) => ({
               category: {
                 connect: { id: categoryId },
@@ -361,7 +363,36 @@ export class ProductsService {
     }
   }
 
-  async updateImages(id: string, images: Express.Multer.File[]) {
+  async deleteImage(id: string) {
+    try {
+      const imageExists = await this.prisma.image.findUnique({
+        where: { id },
+      });
+      if (!imageExists) {
+        throw new NotFoundException(`Imagen con id ${id} no encontrada.`);
+      }
+      const imageUrl = imageExists.url;
+      const url = new URL(imageUrl); // crea una nueva instancia de URL utilizando imageUrl
+      const key = url.pathname.substring(1); //toma la ruta (path) del objeto url (ej: /path/to/image.jpg) y usa substring(1) para eliminar el primer caracter
+
+      await this.aws.deleteImage(key); //elimina la imagen de s3
+      //eliminar la imagen de la bd
+      await this.prisma.image.delete({
+        where: { id },
+      });
+      return {
+        message: 'Imagen eliminada correctamente.',
+      };
+    } catch (error) {
+      console.log(error);
+      throw new BadRequestException(
+        'Error al eliminar la imagen del producto:',
+        error.response,
+      );
+    }
+  }
+
+  async uploadImage(id: string, image: Express.Multer.File, altText: string) {
     try {
       const productExists = await this.prisma.product.findUnique({
         where: { id, isDeleted: false },
@@ -369,28 +400,23 @@ export class ProductsService {
       if (!productExists) {
         throw new NotFoundException(`Producto con id ${id} no encontrado.`);
       }
-      //eliminar las imagenes actuales
-      await this.prisma.image.deleteMany({
-        where: { productId: id },
+      //subir la nueva imagen
+      const imageUrl = await this.aws.uploadImage(image, id);
+      //crear la nueva imagen
+      await this.prisma.image.create({
+        data: {
+          url: imageUrl,
+          productId: id,
+          altText: altText,
+        },
       });
-      //subir las nuevas imagenes
-      const imagePromises = images.map(async (image) => {
-        const imageUrl = await this.aws.uploadImage(image, id);
-        return this.prisma.image.create({
-          data: {
-            url: imageUrl,
-            productId: id,
-          },
-        });
-      });
-      await Promise.all(imagePromises);
       return {
-        message: 'Imágenes actualizadas correctamente.',
+        message: 'Imagen actualizada correctamente.',
       };
     } catch (error) {
       console.log(error);
       throw new BadRequestException(
-        'Error al actualizar las imágenes del producto:',
+        'Error al actualizar la imagen del producto:',
         error.response,
       );
     }
