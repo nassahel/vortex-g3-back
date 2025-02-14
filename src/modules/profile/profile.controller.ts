@@ -1,4 +1,4 @@
-import { Controller, Post, Body, Param, Delete, UploadedFile, UseInterceptors, BadRequestException, Put } from '@nestjs/common';
+import { Controller, Post, Body, Param, Delete, UploadedFile, UseInterceptors, BadRequestException, Put, Get, ValidationPipe } from '@nestjs/common';
 import { ApiOperation, ApiResponse, ApiTags, ApiConsumes } from '@nestjs/swagger';
 import { memoryStorage } from 'multer';
 import { FileInterceptor } from '@nestjs/platform-express';
@@ -14,6 +14,28 @@ import { ChangePasswordDto } from './dto/change.password.dto';
     export class ProfileController {
         constructor(private readonly profileService: ProfileService, private readonly authService: AuthService) {}
 
+
+    @Post('create/:userId')
+    @ApiOperation({summary: 'Create a user profile'})
+    @ApiResponse({ status: 201, description: 'Profile successfully created'})
+    @ApiConsumes('multipart/form-data')
+    @UseInterceptors(FileInterceptor('file', { 
+        storage: memoryStorage(), 
+        limits: { fileSize: 5 * 1024 * 1024 }, // 5MB límite de archivo
+    }))
+    async createdProfile(
+        @Param('userId') userId: string,
+        @UploadedFile() file?: Express.Multer.File,
+        @Body() updateProfileDto?: UpdateProfileDto,
+    ) {
+        if (!userId) {
+            throw new BadRequestException('User ID is required');
+        }
+
+        const createdProfile = await this.profileService.createProfile(userId, updateProfileDto, file);
+        return createdProfile;
+    }
+
     //Ruta para subir la imagen
     @Post('upload')
     @ApiOperation({summary: 'Upload profile image'})        //Para documentacion de Swagger
@@ -21,14 +43,7 @@ import { ChangePasswordDto } from './dto/change.password.dto';
     @ApiConsumes('multipart/form-data')     //La ruta consume datos en ese formato, que es el que se usa para cargar archivos
     @UseInterceptors(FileInterceptor('file', {      //Configuro como manejar la carga de archivos
         storage: memoryStorage(),                   //almaceno en la memoria
-        limits: {fileSize: 5 * 1024 * 1024},        // Tamaño limite de 5MB
-        fileFilter: (req, file, callback) => {
-            if (file.mimetype === 'image.png' || file.mimetype === 'image.jpeg'){
-                callback(null, true);
-            } else {
-                callback(new BadRequestException('Only JPEG and PNG files are allowed'), false);
-            }
-        }
+        limits: {fileSize: 5 * 1024 * 1024}        // Tamaño limite de 5MB
     }))
 
     async uploadProfileImage(
@@ -55,8 +70,9 @@ import { ChangePasswordDto } from './dto/change.password.dto';
     @ApiResponse({ status: 200, description: 'Profile updated successfully' })
     async updateProfile(
         @Param('userId') userId: string,
-        @Body() updateProfileDto: UpdateProfileDto
+        @Body(new ValidationPipe({ transform: true })) updateProfileDto: UpdateProfileDto
     ) {
+        console.log("Datos recibidos en updateProfile:", updateProfileDto);
         const updatedUser = await this.profileService.updateProfile(userId, updateProfileDto);
         return { message: 'Profile updated successfully', data: updatedUser };
     }
