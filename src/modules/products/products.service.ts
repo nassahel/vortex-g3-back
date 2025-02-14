@@ -53,16 +53,12 @@ export class ProductsService {
         where,
         include: {
           images: {
-            select: {
-              url: true,
-            },
+            select: { url: true },
           },
           categories: {
             select: {
               category: {
-                select: {
-                  name: true,
-                },
+                select: { name: true },
               },
             },
           },
@@ -75,7 +71,7 @@ export class ProductsService {
         price: product.price,
         stock: product.stock,
         images: product.images,
-        categories: product.categories.map((pc) => pc.category),
+        categories: product.categories.map((pc) => pc.category.name),
       }));
       return formattedProducts;
     } catch (error) {
@@ -101,7 +97,7 @@ export class ProductsService {
 
   async findOne(id: string) {
     try {
-      const product = await this.prisma.product.findUnique({
+      const product = await this.prisma.product.findFirst({
         where: { id, isDeleted: false },
         include: {
           images: {
@@ -113,7 +109,7 @@ export class ProductsService {
           },
           categories: {
             select: {
-              category: {
+              category: { 
                 select: {
                   id: true,
                   name: true,
@@ -123,6 +119,7 @@ export class ProductsService {
           },
         },
       });
+      
       if (!product) {
         throw new NotFoundException(`Producto con id ${id} no encontrado.`);
       }
@@ -136,7 +133,7 @@ export class ProductsService {
     }
   }
 
-  async create(product: CreateProductDto, images: Express.Multer.File[]) {
+  async createProduct(product: CreateProductDto, images: Express.Multer.File[]) {
     try {
       const newProduct = await this.prisma.$transaction(async (tx) => {
         const { name, description, price, stock, categories } = product;
@@ -160,9 +157,7 @@ export class ProductsService {
             // Crear las relaciones con las categorías directamente
             categories: {
               create: categories.map((categoryId) => ({
-                category: {
-                  connect: { id: categoryId },
-                },
+                categoryId: categoryId,
               })),
             },
           },
@@ -198,7 +193,7 @@ export class ProductsService {
     }
   }
 
-  async upload(file: Express.Multer.File) {
+  async uploadProduct(file: Express.Multer.File) {
     try {
       const columnasRequeridas = [
         'Nombre',
@@ -284,7 +279,7 @@ export class ProductsService {
             .split(',')
             .map((c) => c.trim());
           //asignar categorías al producto
-          await tx.productsOnCategories.createMany({
+          await tx.productCategory.createMany({
             data: categories.map((categoryId) => ({
               productId: createdProduct.id,
               categoryId,
@@ -309,7 +304,7 @@ export class ProductsService {
     }
   }
 
-  async update(id: string, updateProductDto: UpdateProductDto) {
+  async updateProduct(id: string, updateProductDto: UpdateProductDto) {
     try {
       const updatedProduct = await this.prisma.$transaction(async (tx) => {
         const { name, description, price, stock, categories } =
@@ -334,7 +329,7 @@ export class ProductsService {
         if (categories?.length) {
           await this.validateCategories(categories);
           //eliminar las categorías actuales
-          await tx.productsOnCategories.deleteMany({
+          await tx.productCategory.deleteMany({
             where: { productId: id },
           });
           updateData.categories = {
@@ -424,7 +419,7 @@ export class ProductsService {
     }
   }
 
-  async remove(id: string) {
+  async removeProduct(id: string) {
     try {
       const productExists = await this.prisma.product.findUnique({
         where: { id, isDeleted: false },
@@ -449,7 +444,7 @@ export class ProductsService {
     }
   }
 
-  async restore(id: string) {
+  async restoreProduct(id: string) {
     try {
       const productExists = await this.prisma.product.findUnique({
         where: { id, isDeleted: true },
@@ -492,7 +487,7 @@ export class ProductsService {
     console.log(productId, categoryIds);
     try {
       //genera nuevas relaciones
-      await this.prisma.productsOnCategories.createMany({
+      await this.prisma.productCategory.createMany({
         data: categoryIds.map((categoryId) => ({
           productId,
           categoryId,
@@ -533,7 +528,7 @@ export class ProductsService {
     }
   }
 
-  async updateStockAll(body: UpdateStockDto) {
+  async updateAllStock(body: UpdateStockDto) {
     try {
       const { ids, stock } = body;
       const products = await this.prisma.product.findMany({
@@ -560,7 +555,7 @@ export class ProductsService {
       );
     }
   }
-  async incrementarStockAll(body: UpdateStockDto) {
+  async incrementAllStock(body: UpdateStockDto) {
     try {
       const { ids, stock } = body;
       const products = await this.prisma.product.findMany({
@@ -587,7 +582,7 @@ export class ProductsService {
       );
     }
   }
-  async incrementarPrecioAll(body: UpdatePriceDto) {
+  async incrementAllPrice(body: UpdatePriceDto) {
     try {
       const { ids, price } = body;
       const products = await this.prisma.product.findMany({

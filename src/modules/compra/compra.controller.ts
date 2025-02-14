@@ -12,10 +12,10 @@ export class CompraController {
   }
   @Patch('/actualizar-stock-productos')
   updateStockAll(@Body() body: UpdateStockDto) {
-    return this.productsService.updateStockAll(body);
+    return this.productsService.updateAllStock(body);
   }
   @Patch('/incrementar-stock-productos')
   incrementarStockAll(@Body() body: UpdateStockDto) {
-    return this.productsService.incrementarStockAll(body);
+    return this.productsService.incrementAllStock(body);
   }
 }

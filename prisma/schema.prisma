@@ -50,7 +50,7 @@ model Category {
   id        String   @id @unique @default(cuid())
   name      String
   isDeleted Boolean  @default(false)
-  products  ProductsOnCategories[]
+  products  ProductCategory[]
 }
 
 model Product {
@@ -62,11 +62,11 @@ model Product {
   isDeleted   Boolean  @default(false)
   orderItems  OrderItem[]
   images      Image[]
-  categories  ProductsOnCategories[]
+  categories  ProductCategory[]
 }
 
 // Tabla intermedia para la relacion entre productos y categorias
-model ProductsOnCategories {
+model ProductCategory {
   product   Product  @relation(fields: [productId], references: [id])
   productId String
 

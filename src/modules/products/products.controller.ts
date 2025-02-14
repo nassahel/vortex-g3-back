@@ -40,12 +40,12 @@ export class ProductsController {
     return this.productsService.findOne(id);
   }
 
-  @Post('/new')
+  @Post('/new-product')
   @UseInterceptors(
     FilesInterceptor('files', 4, {
       //Configuro como manejar la carga de archivos
       storage: memoryStorage(), //almaceno en la memoria
-      limits: { fileSize: 10 * 1024 * 1024 }, // Tamaño limite de 5MB
+      limits: { fileSize: 5 * 1024 * 1024 }, // Tamaño limite de 5MB
       fileFilter: (req, file, callback) => {
         if (file.mimetype === 'image/png' || file.mimetype === 'image/jpeg') {
           callback(null, true);
@@ -62,18 +62,18 @@ export class ProductsController {
     @Body() createProductDto: CreateProductDto,
     @UploadedFiles() images: Express.Multer.File[],
   ) {
-    return this.productsService.create(createProductDto, images);
+    return this.productsService.createProduct(createProductDto, images);
   }
 
   @Post('/upload-products')
   @UseInterceptors(FileInterceptor('file'))
   upload(@UploadedFile() file: Express.Multer.File) {
-    return this.productsService.upload(file);
+    return this.productsService.uploadProduct(file);
   }
 
   @Put('/update/:id')
   update(@Param('id') id: string, @Body() updateProductDto: UpdateProductDto) {
-    return this.productsService.update(id, updateProductDto);
+    return this.productsService.updateProduct(id, updateProductDto);
   }
 
   @Post('/upload-image/:id')
@@ -110,17 +110,17 @@ export class ProductsController {
   //Eliminado logico del producto
   @Patch('/delete/:id')
   remove(@Param('id') id: string) {
-    return this.productsService.remove(id);
+    return this.productsService.removeProduct(id);
   }
   //Restaurado logico del producto
   @Patch('/restore/:id')
   restore(@Param('id') id: string) {
-    return this.productsService.restore(id);
+    return this.productsService.restoreProduct(id);
   }
 
   @Patch('/incrementar-precio-productos')
   incrementarPrecioAll(@Body() body: UpdatePriceDto) {
-    return this.productsService.incrementarPrecioAll(body);
+    return this.productsService.incrementAllPrice(body);
   }
 
   /* @Patch('/decrementar-precio-productos')
