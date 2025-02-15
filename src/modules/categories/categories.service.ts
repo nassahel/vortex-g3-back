@@ -78,7 +78,7 @@ export class CategoriesService {
     }
   }
 
-  async create(createCategoryDto: CreateCategoryDto) {
+  async createCategory(createCategoryDto: CreateCategoryDto) {
     try {
       const newCategory = await this.prisma.$transaction(async (tx) => {
         const { name } = createCategoryDto;
@@ -102,7 +102,7 @@ export class CategoriesService {
     }
   }
 
-  async upload(file: Express.Multer.File) {
+  async uploadCategory(file: Express.Multer.File) {
     try {
       const columnasRequeridas = ['Nombre'];
 
@@ -120,20 +120,20 @@ export class CategoriesService {
           data: categories,
         });
       });
-      console.log(categories);
+
       return {
         message: 'Categorías importadas correctamente',
         cantidad: categories.length,
       };
     } catch (error) {
-      console.log(error);
+
       throw new BadRequestException(
         'Error al importar las categorías: ' + error.message,
       );
     }
   }
 
-  async update(id: string, updateCategoryDto: UpdateCategoryDto) {
+  async updateCategory(id: string, updateCategoryDto: UpdateCategoryDto) {
     try {
       //verifica que la categoria exista
       const categoryExists = await this.prisma.category.findUnique({
@@ -169,7 +169,7 @@ export class CategoriesService {
     }
   }
 
-  async remove(id: string) {
+  async removeCategory(id: string) {
     try {
       const categoryExists = await this.prisma.category.findUnique({
         where: { id, isDeleted: false },
@@ -194,7 +194,7 @@ export class CategoriesService {
     }
   }
 
-  async restore(id: string) {
+  async restoreCategory(id: string) {
     try {
       const categoryExists = await this.prisma.category.findUnique({
         where: { id, isDeleted: true },

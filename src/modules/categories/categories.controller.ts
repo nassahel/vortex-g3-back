@@ -8,25 +8,26 @@ import {
   UseInterceptors,
   UploadedFile,
   Patch,
+  Delete,
 } from '@nestjs/common';
 import { CategoriesService } from './categories.service';
 import { CreateCategoryDto } from './dto/create-category.dto';
 import { UpdateCategoryDto } from './dto/update-category.dto';
 import { FileInterceptor } from '@nestjs/platform-express';
 
-@Controller('categoria')
+@Controller('category')
 export class CategoriesController {
   constructor(private readonly categoriesService: CategoriesService) {}
 
   @Post('/new')
   create(@Body() createCategoryDto: CreateCategoryDto) {
-    return this.categoriesService.create(createCategoryDto);
+    return this.categoriesService.createCategory(createCategoryDto);
   }
 
   @Post('/upload-categories')
   @UseInterceptors(FileInterceptor('file'))
   upload(@UploadedFile() file: Express.Multer.File) {
-    return this.categoriesService.upload(file);
+    return this.categoriesService.uploadCategory(file);
   }
 
   @Get('/all')
@@ -44,16 +45,16 @@ export class CategoriesController {
     @Param('id') id: string,
     @Body() updateCategoryDto: UpdateCategoryDto,
   ) {
-    return this.categoriesService.update(id, updateCategoryDto);
+    return this.categoriesService.updateCategory(id, updateCategoryDto);
   }
 
-  @Patch('/delete/:id')
+  @Delete('/delete/:id')
   remove(@Param('id') id: string) {
-    return this.categoriesService.remove(id);
+    return this.categoriesService.removeCategory(id);
   }
 
   @Patch('/restore/:id')
   restore(@Param('id') id: string) {
-    return this.categoriesService.restore(id);
+    return this.categoriesService.restoreCategory(id);
   }
 }

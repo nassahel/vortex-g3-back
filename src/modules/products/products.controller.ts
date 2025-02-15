@@ -20,6 +20,7 @@ import { FilterProductDto } from './dto/filters-product.dto';
 import { FileInterceptor, FilesInterceptor } from '@nestjs/platform-express';
 import { memoryStorage } from 'multer';
 import { UpdatePriceDto } from './dto/update-price.dto';
+import { ApiConsumes, ApiOperation, ApiResponse } from '@nestjs/swagger';
 
 @Controller('producto')
 export class ProductsController {
@@ -38,6 +39,37 @@ export class ProductsController {
   @Get('/:id')
   findOne(@Param('id') id: string) {
     return this.productsService.findOne(id);
+  }
+
+  @Post('create-product')
+  @ApiOperation({ summary: 'Crear un producto' })
+  @ApiResponse({ status: 201, description: 'Producto creado correctamente' })
+  @ApiConsumes('multipart/form-data')
+  @UseInterceptors(
+    FilesInterceptor('images', 5, {
+      storage: memoryStorage(),
+      limits: { fileSize: 5 * 1024 * 1024 }, // Límite de 5MB por imagen
+    }),
+  )
+  async createdProduct(
+    @Body() createProductDto: CreateProductDto,
+    @UploadedFiles() images?: Express.Multer.File[],
+  ) {
+    try {
+      if (!createProductDto) {
+        throw new BadRequestException('Los datos del producto son requeridos.');
+      }
+
+      const createdProduct = await this.productsService.createProduct(
+        createProductDto,
+        images || [],
+      );
+
+      return createdProduct;
+    } catch (error) {
+      console.error('Error en la creación del producto:', error);
+      throw new BadRequestException('Error al crear el producto.');
+    }
   }
 
   @Post('/new-product')
