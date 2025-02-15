@@ -22,10 +22,10 @@ import { memoryStorage } from 'multer';
 import { UpdatePriceDto } from './dto/update-price.dto';
 import { ApiConsumes, ApiOperation, ApiResponse } from '@nestjs/swagger';
 
-@Controller('producto')
+@Controller('product')
 export class ProductsController {
   constructor(private readonly productsService: ProductsService) {}
-
+  
   @Get('/all')
   findAll(@Query() filters: FilterProductDto) {
     return this.productsService.findAll(filters);
@@ -59,7 +59,6 @@ export class ProductsController {
       if (!createProductDto) {
         throw new BadRequestException('Los datos del producto son requeridos.');
       }
-
       const createdProduct = await this.productsService.createProduct(
         createProductDto,
         images || [],
@@ -70,31 +69,6 @@ export class ProductsController {
       console.error('Error en la creación del producto:', error);
       throw new BadRequestException('Error al crear el producto.');
     }
-  }
-
-  @Post('/new-product')
-  @UseInterceptors(
-    FilesInterceptor('files', 4, {
-      //Configuro como manejar la carga de archivos
-      storage: memoryStorage(), //almaceno en la memoria
-      limits: { fileSize: 5 * 1024 * 1024 }, // Tamaño limite de 5MB
-      fileFilter: (req, file, callback) => {
-        if (file.mimetype === 'image/png' || file.mimetype === 'image/jpeg') {
-          callback(null, true);
-        } else {
-          callback(
-            new BadRequestException('Only JPEG and PNG files are allowed'),
-            false,
-          );
-        }
-      },
-    }),
-  )
-  create(
-    @Body() createProductDto: CreateProductDto,
-    @UploadedFiles() images: Express.Multer.File[],
-  ) {
-    return this.productsService.createProduct(createProductDto, images);
   }
 
   @Post('/upload-products')
@@ -129,7 +103,7 @@ export class ProductsController {
   uploadImage(
     @Param('id') id: string,
     @UploadedFile() image: Express.Multer.File,
-    @Body() altText: string,
+    @Body('altText') altText: string,
   ) {
     return this.productsService.uploadImage(id, image, altText);
   }
@@ -140,7 +114,7 @@ export class ProductsController {
   }
 
   //Eliminado logico del producto
-  @Patch('/delete/:id')
+  @Delete('/delete/:id')
   remove(@Param('id') id: string) {
     return this.productsService.removeProduct(id);
   }

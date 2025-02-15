@@ -275,12 +275,12 @@ export class ProductsService {
               description: producto.description,
             },
           });
-          const categories = producto.categories
-            .split(',')
-            .map((c) => c.trim());
+          const categoryIds = await this.validateCategories(
+            producto.categories.split(',').map((c) => c.trim())
+          );
           //asignar categorías al producto
           await tx.productCategory.createMany({
-            data: categories.map((categoryId) => ({
+            data: categoryIds.map((categoryId) => ({
               productId: createdProduct.id,
               categoryId,
             })),
@@ -307,16 +307,17 @@ export class ProductsService {
   async updateProduct(id: string, updateProductDto: UpdateProductDto) {
     try {
       const updatedProduct = await this.prisma.$transaction(async (tx) => {
-        const { name, description, price, stock, categories } =
-          updateProductDto;
+        const { name, description, price, stock, categories } = updateProductDto;
+  
         // Buscar el producto a actualizar que no esté eliminado.
         const productExists = await tx.product.findUnique({
           where: { id, isDeleted: false },
         });
+  
         if (!productExists) {
           throw new NotFoundException(`Producto con id ${id} no encontrado.`);
         }
-
+  
         // Preparar los datos de actualización
         const updateData: any = {
           name: name ?? productExists.name,
@@ -324,29 +325,41 @@ export class ProductsService {
           price: price ?? productExists.price,
           stock: stock ?? productExists.stock,
         };
-
-        // Si hay categorías, validarlas y agregarlas a los datos de actualización
+  
+        // Si hay categorías, validarlas y reemplazarlas correctamente
         if (categories?.length) {
-          await this.validateCategories(categories);
-          //eliminar las categorías actuales
+          const categoryIds = await this.validateCategories(categories);
+  
+          // Eliminar las categorías actuales
           await tx.productCategory.deleteMany({
             where: { productId: id },
           });
-          updateData.categories = {
-            create: categories.map((categoryId) => ({
-              category: {
-                connect: { id: categoryId },
-              },
+  
+          // Asociar nuevas categorías usando `createMany()`
+          await tx.productCategory.createMany({
+            data: categoryIds.map((categoryId) => ({
+              productId: id,
+              categoryId: categoryId,
             })),
-          };
+          });
         }
-
-        // Actualizar el producto usando los nuevos valores o, en su defecto, los actuales.
+  
+        // Actualizar el producto
         return tx.product.update({
           where: { id },
           data: updateData,
+          include: {
+            categories: {
+              select: {
+                category: {
+                  select: { id: true, name: true },
+                },
+              },
+            },
+          },
         });
       });
+  
       return {
         message: 'Producto actualizado correctamente.',
         updatedProduct,
@@ -360,32 +373,35 @@ export class ProductsService {
     }
   }
 
-  async deleteImage(id: string) {
+  async deleteImage(id: string): Promise<{ message: string }> {
     try {
+  
       const imageExists = await this.prisma.image.findUnique({
         where: { id },
       });
+  
       if (!imageExists) {
         throw new NotFoundException(`Imagen con id ${id} no encontrada.`);
       }
+  
+  
       const imageUrl = imageExists.url;
-      const url = new URL(imageUrl); // crea una nueva instancia de URL utilizando imageUrl
-      const key = url.pathname.substring(1); //toma la ruta (path) del objeto url (ej: /path/to/image.jpg) y usa substring(1) para eliminar el primer caracter
+      if (imageUrl) {
+        try {
+          const url = new URL(imageUrl);
+          const key = url.pathname.substring(1);
+  
+          await this.aws.deleteImage(key);
+        } catch (error) {
+          throw new BadRequestException("URL de imagen inválida.");
+        }
+      }
 
-      await this.aws.deleteImage(key); //elimina la imagen de s3
-      //eliminar la imagen de la bd
-      await this.prisma.image.delete({
-        where: { id },
-      });
-      return {
-        message: 'Imagen eliminada correctamente.',
-      };
+      await this.prisma.image.delete({ where: { id } });
+  
+      return { message: "Imagen eliminada correctamente." };
     } catch (error) {
-      console.log(error);
-      throw new BadRequestException(
-        'Error al eliminar la imagen del producto:',
-        error.response,
-      );
+      throw new BadRequestException("Error al eliminar la imagen del producto.");
     }
   }
 
@@ -404,7 +420,7 @@ export class ProductsService {
         data: {
           url: imageUrl,
           productId: id,
-          altText: altText,
+          altText: altText, 
         },
       });
       return {
@@ -470,18 +486,22 @@ export class ProductsService {
   }
 
   //verifica que todas las categorías existan
-  async validateCategories(categoryIds: string[]) {
-    console.log(categoryIds);
+  async validateCategories(categoryId: string[]) {
     const existingCategories = await this.prisma.category.findMany({
-      where: { id: { in: categoryIds }, isDeleted: false },
+      where: { id: { in: categoryId } },
+      select: { id: true }
     });
-    if (existingCategories.length !== categoryIds.length) {
-      throw new BadRequestException(
-        'Una o más categorías no existen o están eliminadas.',
-      );
+  
+    const foundCategoryNames = existingCategories.map(c => c.id);
+    const missingCategories = categoryId.filter(id => !foundCategoryNames.includes(id));
+    
+    if (missingCategories.length > 0) {
+      throw new BadRequestException(`Las siguientes categorías no existen: ${missingCategories.join(', ')}`);
     }
-    return true;
+  
+    return existingCategories.map(c => c.id);
   }
+
   //asociar categorías a un producto
   async associateCategories(productId: string, categoryIds: string[]) {
     console.log(productId, categoryIds);
