@@ -77,7 +77,7 @@ export class ProductsController {
     return this.productsService.uploadProduct(file);
   }
 
-  @Put('/update/:id')
+  @Patch('/update/:id')
   update(@Param('id') id: string, @Body() updateProductDto: UpdateProductDto) {
     return this.productsService.updateProduct(id, updateProductDto);
   }
@@ -114,23 +114,15 @@ export class ProductsController {
   }
 
   //Eliminado logico del producto
-  @Delete('/delete/:id')
+  @Patch('/delete/:id')
   remove(@Param('id') id: string) {
     return this.productsService.removeProduct(id);
   }
+
   //Restaurado logico del producto
   @Patch('/restore/:id')
   restore(@Param('id') id: string) {
     return this.productsService.restoreProduct(id);
   }
 
-  @Patch('/incrementar-precio-productos')
-  incrementarPrecioAll(@Body() body: UpdatePriceDto) {
-    return this.productsService.incrementAllPrice(body);
-  }
-
-  /* @Patch('/decrementar-precio-productos')
-  decrementarPrecioAll(@Body() body: UpdateStockDto) {
-    return this.productsService.decrementarPrecioAll(body);
-  } */
 }

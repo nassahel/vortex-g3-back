@@ -522,7 +522,7 @@ export class ProductsService {
     }
   }
 
-  async updateStock(id: string, body: UpdateStockDto) {
+  async updateStock(id: string, body: UpdateStockDto) { //Missing en el controller
     try {
       const product = await this.prisma.product.findUnique({
         where: { id },
@@ -548,7 +548,7 @@ export class ProductsService {
     }
   }
 
-  async updateAllStock(body: UpdateStockDto) {
+  async updateAllStock(body: UpdateStockDto) {    //No le veo el sentido
     try {
       const { ids, stock } = body;
       const products = await this.prisma.product.findMany({
@@ -575,60 +575,61 @@ export class ProductsService {
       );
     }
   }
-  async incrementAllStock(body: UpdateStockDto) {
-    try {
-      const { ids, stock } = body;
-      const products = await this.prisma.product.findMany({
-        where: { id: { in: ids } },
-      });
-      if (products.length !== ids.length) {
-        throw new NotFoundException(
-          `Los siguientes productos no existen ${ids.join(', ')}`,
-        );
-      }
-      const updatedProducts = await this.prisma.product.updateMany({
-        where: { id: { in: ids } },
-        data: { stock: { increment: stock } },
-      });
-      return {
-        message: 'Stock incrementado correctamente.',
-        updatedProducts,
-      };
-    } catch (error) {
-      console.log(error);
-      throw new BadRequestException(
-        'Error al incrementar el stock de los productos: ',
-        error.response.message,
-      );
-    }
-  }
-  async incrementAllPrice(body: UpdatePriceDto) {
-    try {
-      const { ids, price } = body;
-      const products = await this.prisma.product.findMany({
-        where: { id: { in: ids } },
-      });
-      if (products.length !== ids.length) {
-        throw new NotFoundException(
-          `Los siguientes productos no existen ${ids.join(', ')}`,
-        );
-      }
-      const updatedProducts = await this.prisma.product.updateMany({
-        where: { id: { in: ids } },
-        data: { price: { increment: price } },
-      });
-      return {
-        message: 'Precio incrementado correctamente.',
-        updatedProducts,
-      };
-    } catch (error) {
-      console.log(error);
-      throw new BadRequestException(
-        'Error al incrementar el precio de los productos: ',
-        error.response.message,
-      );
-    }
-  }
+
+  // async incrementAllStock(body: UpdateStockDto) {    //No tiene sentido si ya hay un update all stock
+  //   try {
+  //     const { ids, stock } = body;
+  //     const products = await this.prisma.product.findMany({
+  //       where: { id: { in: ids } },
+  //     });
+  //     if (products.length !== ids.length) {
+  //       throw new NotFoundException(
+  //         `Los siguientes productos no existen ${ids.join(', ')}`,
+  //       );
+  //     }
+  //     const updatedProducts = await this.prisma.product.updateMany({
+  //       where: { id: { in: ids } },
+  //       data: { stock: { increment: stock } },
+  //     });
+  //     return {
+  //       message: 'Stock incrementado correctamente.',
+  //       updatedProducts,
+  //     };
+  //   } catch (error) {
+  //     console.log(error);
+  //     throw new BadRequestException(
+  //       'Error al incrementar el stock de los productos: ',
+  //       error.response.message,
+  //     );
+  //   }
+  // }
+  // async incrementAllPrice(body: UpdatePriceDto) {
+  //   try {
+  //     const { ids, price } = body;
+  //     const products = await this.prisma.product.findMany({
+  //       where: { id: { in: ids } },
+  //     });
+  //     if (products.length !== ids.length) {
+  //       throw new NotFoundException(
+  //         `Los siguientes productos no existen ${ids.join(', ')}`,
+  //       );
+  //     }
+  //     const updatedProducts = await this.prisma.product.updateMany({
+  //       where: { id: { in: ids } },
+  //       data: { price: { increment: price } },
+  //     });
+  //     return {
+  //       message: 'Precio incrementado correctamente.',
+  //       updatedProducts,
+  //     };
+  //   } catch (error) {
+  //     console.log(error);
+  //     throw new BadRequestException(
+  //       'Error al incrementar el precio de los productos: ',
+  //       error.response.message,
+  //     );
+  //   }
+  // }
   /* async decrementarPrecioAll(body: UpdatePriceDto) {
     try {
       const { ids, price } = body;
