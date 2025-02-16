@@ -4,6 +4,7 @@ import { memoryStorage } from 'multer';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { ProfileService } from './profile.service';
 import { UpdateProfileDto } from './dto/update.profile.dto';
+import { AuthService } from '../auth/auth.service';
 
 @ApiTags('Profile')
 @Controller('profile')
