@@ -33,6 +33,7 @@ export class MailjetService implements EmailService {
       })
       .catch((error) => {
         this.logger.error('Error sending email', error.stack);
+        console.error('Mailjet error:', error);
       });
   }
 }

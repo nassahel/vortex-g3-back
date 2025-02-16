@@ -3,18 +3,16 @@ import { EMAIL_PROVIDER, EmailService } from './messages.types';
 
 @Injectable()
 export class MessageService {
-  constructor(@Inject(EMAIL_PROVIDER) private emailService: EmailService) {}
+  constructor(@Inject(EMAIL_PROVIDER) private emailService: EmailService) { }
 
-  async sendRegisterUserEmail(input: { from: string; to: string, link: string }) {
-    const { from, to, link } = input;
-    const subject = 'Bienvenido a la plataforma';
-    const body = `Puedes recuperar la contraseña desde este link: ${link}`;
+  async sendRegisterUserEmail(input: { from: string; to: string; emailBody: string; subject: string }) {
+    const { from, to, emailBody, subject } = input;
 
     await this.emailService.send({
       from,
       to,
       subject,
-      body,
+      body: emailBody,
     });
   }
 }

@@ -1,3 +1,4 @@
+export let recoveryTemplate = `
 <!DOCTYPE html>
 <html lang="es">
 
@@ -24,19 +25,18 @@
                             </tr>
                             <tr>
                                 <td style="padding:20px 10px;color: #231331;">
-                                    <p style="max-width: 500px; margin-left: auto;margin-right: auto;"><b>Hola,</b></p>
+                                    <p style="max-width: 500px; margin-left: auto;margin-right: auto;"><b>Hola {{name}},</b></p>
                                     <p style="max-width: 500px; margin-left: auto;margin-right: auto;">Al parecer
                                         solicitaste un cambio de contraseña.</p>
                                     <p
-                                        style="margin-bottom: 30px;max-width: 500px; margin-left: auto;margin-right: auto;">
-                                        Por favor, para reestablecer tu contraseña puede hacer click en el boton de
+                                        style="margin-bottom: 10px;max-width: 500px; margin-left: auto;margin-right: auto;">
+                                        Para reestablecer tu contraseña puedes hacer click en el boton de
                                         abajo.
                                     </p>
 
                                     <p style="max-width: 500px; margin-left: auto;margin-right: auto;"><button
                                             style="width: 191px;height: 35px;border-radius: 50rem;background-color: #231331; cursor: pointer;margin: 15px auto;"><a
-                                                href="https://tuculanding.vercel.app/" target="_blank"
-                                                rel="noopener noreferer"
+                                                href="{{link}}" target="_blank" rel="noopener noreferer"
                                                 style="text-decoration: none;color: white;border: none;">Ir a cambiar
                                                 contraseña</a>
                                         </button></p>
@@ -47,8 +47,7 @@
 
 
 
-                                    <p style="max-width: 500px; margin-left: auto;margin-right: auto;">
-                                        https:/luxshop/recoverypassword/asdjhc.kjsh.kjh3k.j4h5k5,jhfk3j</p>
+                                    <p style="max-width: 500px; margin-left: auto;margin-right: auto;">{{link}}</p>
 
                                     <p style="max-width: 500px; margin-left: auto;margin-right: auto;">Si no solicitaste
                                         un cambio de contraseña por favor descarta este mensaje!</p>
@@ -67,7 +66,8 @@
                                 </td>
                             </tr>
                             <tr>
-                                <td style="width: 100%; color: white; padding: 30px 0;background-color: #1f2937;" align="center">
+                                <td style="width: 100%; color: white; padding: 30px 0;background-color: #1f2937;"
+                                    align="center">
                                     <p>LuxShop - Tu tienda de confianza para mantenerte siempre en la moda.</p>
                                 </td>
                             </tr>
@@ -81,3 +81,5 @@
 </body>
 
 </html>
+
+`

@@ -5,6 +5,8 @@ import * as bcrypt from 'bcrypt';
 import { JwtService } from '@nestjs/jwt';
 import { MessageService } from '../messages/messages.service';
 import { messagingConfig } from 'src/common/constants';
+import { recoveryTemplate } from '../messages/templates/recovery-template';
+import { registrationTmplate } from '../messages/templates/registration-success';
 
 @Injectable()
 export class AuthService {
@@ -16,8 +18,11 @@ export class AuthService {
   async register(createRegisterDto: CreateRegisterDto) {
     const { email, name, password, repeatPassword } = createRegisterDto;
 
+
+    const formattedEmail = email.toLowerCase();
     const userExist = await this.prisma.user.findUnique({
-      where: { email }
+      where: { email: formattedEmail },
+
     })
 
     if (userExist) {
@@ -31,19 +36,37 @@ export class AuthService {
     try {
       const newUser = {
         name: name,
-        email,
+        email: formattedEmail,
         password: await bcrypt.hash(password, 15)
       }
 
-      await this.prisma.user.create({
+      const registeredUser = await this.prisma.user.create({
         data: newUser
       })
+
+      if (!registeredUser) {
+        throw new BadRequestException('No se pudo registrar al usuario')
+
+      }
+
+      const link = `https://luxshop.com/`
+      let emailBody = registrationTmplate;
+      emailBody = emailBody.replace(/{{name}}/g, name);
+      emailBody = emailBody.replace(/{{link}}/g, link);
+
+
+      await this.messageService.sendRegisterUserEmail({
+        from: messagingConfig.emailSender,
+        to: email,
+        subject: 'LuxShop - Registro exitoso!',
+        emailBody,
+      });
 
       return {
         message: 'Usuario registrado con éxito!',
         newUser: {
           name,
-          email
+          emailLower: formattedEmail
         }
       };
 
@@ -55,18 +78,19 @@ export class AuthService {
   async login(createLoginDto: CreateLoginDto): Promise<{ message: string; token: string }> {
 
     const { password, email } = createLoginDto;
+    const formattedEmail = email.toLowerCase()
     const userExist = await this.prisma.user.findUnique({
-      where: { email }
+      where: { email: formattedEmail }
     })
 
     if (!userExist) {
-      throw new NotFoundException('El usuario no existe.')
+      throw new NotFoundException('Credenciales invalidas.')
     }
 
     const passwordsMatch = await bcrypt.compare(password, userExist.password)
 
     if (!passwordsMatch) {
-      throw new BadRequestException('Contraseña incorrecta.')
+      throw new BadRequestException('Credenciales invalidas.')
     }
 
     const payload = {
@@ -83,8 +107,10 @@ export class AuthService {
   }
 
   async RequestRecoveryPassword(email: string) {
+
+    const formattedEmail = email.toLowerCase()
     const foundUser = await this.prisma.user.findUnique({
-      where: { email }
+      where: { email: formattedEmail }
     });
     if (!foundUser) {
       throw new BadRequestException('User not found');
@@ -94,10 +120,18 @@ export class AuthService {
       const payload = { id: foundUser.id, email: foundUser.email };
       const token = this.jwt.sign(payload, { expiresIn: '30m' });
 
+      const link = `https://tu-dominio.com/reset-password?token=${token}`
+
+      //Obtengo la plantilla y le reemplazo las variables
+      let emailBody = recoveryTemplate;
+      emailBody = emailBody.replace(/{{link}}/g, link);
+      emailBody = emailBody.replace(/{{name}}/g, foundUser.name);
+
       await this.messageService.sendRegisterUserEmail({
         from: messagingConfig.emailSender,
         to: email,
-        link: `https://tu-dominio.com/reset-password?token=${token}`
+        subject: 'LuxShop - Recuperacion de contraseña',
+        emailBody,
       });
 
       return {
@@ -108,7 +142,7 @@ export class AuthService {
     } catch (error) {
       throw new InternalServerErrorException('No se pudo enviar recuperación de contraseña');
     }
-}
+  }
 
 
   //AQUI DEBERIA IR LA LOGICA PARA MAILJET
