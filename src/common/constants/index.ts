@@ -8,20 +8,25 @@ export enum RoleEnum {
     USER = 'USER',
   }
   
-const env = process.env;
+import { ConfigService } from '@nestjs/config';
+
+const configService = new ConfigService();
 
 
 // CONSTANTES AWS
 export const awsConfig = {
-    client: {
-      accessKeyId: env.AWS_ACCESS_KEY_ID,
-      secretAccessKey: env.AWS_SECRET_ACCESS_KEY,
-      region: env.AWS_REGION,
+  client: {
+    region: configService.get('AWS_REGION'),
+    credentials: {
+      accessKeyId: configService.get('AWS_ACCESS_KEY_ID'),
+      secretAccessKey: configService.get('AWS_SECRET_ACCESS_KEY'),
     },
-    s3: {
-      bucket: env.AWS_BUCKET,
-    },
-  } as const;
+  },
+  s3: {
+    bucket: configService.get('AWS_BUCKET'),
+  },
+};
+
 
 
 // CONSTANTES MAILJET
