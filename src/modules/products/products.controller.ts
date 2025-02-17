@@ -29,17 +29,12 @@ export class ProductsController {
     return this.productsService.findAll(filters);
   }
 
-  @Get('/all-deleted')
-  findAllDeleted() {
-    return this.productsService.findAllDeleted();
-  }
-
   @Get('/:id')
   findOne(@Param('id') id: string) {
     return this.productsService.findOne(id);
   }
 
-  @Post('create-product')
+  @Post('/create-product')
   @ApiOperation({ summary: 'Crear un producto' })
   @ApiResponse({ status: 201, description: 'Producto creado correctamente' })
   @ApiConsumes('multipart/form-data')
@@ -81,7 +76,7 @@ export class ProductsController {
   }
 
   //Eliminado logico del producto
-  @Patch('/delete/:id')
+  @Delete('/delete/:id')
   remove(@Param('id') id: string) {
     return this.productsService.removeProduct(id);
   }
@@ -90,37 +85,5 @@ export class ProductsController {
   @Patch('/restore/:id')
   restore(@Param('id') id: string) {
     return this.productsService.restoreProduct(id);
-  }
-
-  ////////////////////////////////////////////////////////////
-  @Post('/upload-image/:id')
-  @UseInterceptors(
-    FileInterceptor('file', {
-      //Configuro como manejar la carga de archivos
-      storage: memoryStorage(), //almaceno en la memoria
-      limits: { fileSize: 5 * 1024 * 1024 }, // Tamaño limite de 5MB
-      fileFilter: (req, file, callback) => {
-        if (file.mimetype === 'image/png' || file.mimetype === 'image/jpeg') {
-          callback(null, true);
-        } else {
-          callback(
-            new BadRequestException('Only JPEG and PNG files are allowed'),
-            false,
-          );
-        }
-      },
-    }),
-  )
-  uploadImage(
-    @Param('id') id: string,
-    @UploadedFile() image: Express.Multer.File,
-    @Body('altText') altText: string,
-  ) {
-    return this.productsService.uploadImage(id, image, altText);
-  }
-
-  @Delete('/delete-image/:id')
-  deleteImage(@Param('id') id: string) {
-    return this.productsService.deleteImage(id);
   }
 }
