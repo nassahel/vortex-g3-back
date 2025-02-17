@@ -9,8 +9,6 @@ import { PrismaService } from '../prisma/prisma.service';
 import { FilterProductDto } from './dto/filters-product.dto';
 import { ExcelService } from '../excel/excel.service';
 import { AwsService } from 'src/aws/aws.service';
-import { UpdateStockDto } from '../compra/dto/update-compra.dto';
-import { UpdatePriceDto } from './dto/update-price.dto';
 
 @Injectable()
 export class ProductsService {
@@ -80,21 +78,6 @@ export class ProductsService {
     }
   }
 
-  async findAllDeleted() {
-    try {
-      const products = await this.prisma.product.findMany({
-        where: { isDeleted: true },
-      });
-      return products;
-    } catch (error) {
-      console.log(error);
-      throw new BadRequestException(
-        'Error al obtener los productos eliminados: ',
-        error,
-      );
-    }
-  }
-
   async findOne(id: string) {
     try {
       const product = await this.prisma.product.findFirst({
@@ -109,7 +92,7 @@ export class ProductsService {
           },
           categories: {
             select: {
-              category: { 
+              category: {
                 select: {
                   id: true,
                   name: true,
@@ -119,7 +102,7 @@ export class ProductsService {
           },
         },
       });
-      
+
       if (!product) {
         throw new NotFoundException(`Producto con id ${id} no encontrado.`);
       }
@@ -133,7 +116,10 @@ export class ProductsService {
     }
   }
 
-  async createProduct(product: CreateProductDto, images: Express.Multer.File[]) {
+  async createProduct(
+    product: CreateProductDto,
+    images: Express.Multer.File[],
+  ) {
     try {
       const newProduct = await this.prisma.$transaction(async (tx) => {
         const { name, description, price, stock, categories } = product;
@@ -276,7 +262,7 @@ export class ProductsService {
             },
           });
           const categoryIds = await this.validateCategories(
-            producto.categories.split(',').map((c) => c.trim())
+            producto.categories.split(',').map((c) => c.trim()),
           );
           //asignar categorías al producto
           await tx.productCategory.createMany({
@@ -307,17 +293,18 @@ export class ProductsService {
   async updateProduct(id: string, updateProductDto: UpdateProductDto) {
     try {
       const updatedProduct = await this.prisma.$transaction(async (tx) => {
-        const { name, description, price, stock, categories } = updateProductDto;
-  
+        const { name, description, price, stock, categories } =
+          updateProductDto;
+
         // Buscar el producto a actualizar que no esté eliminado.
         const productExists = await tx.product.findUnique({
           where: { id, isDeleted: false },
         });
-  
+
         if (!productExists) {
           throw new NotFoundException(`Producto con id ${id} no encontrado.`);
         }
-  
+
         // Preparar los datos de actualización
         const updateData: any = {
           name: name ?? productExists.name,
@@ -325,16 +312,16 @@ export class ProductsService {
           price: price ?? productExists.price,
           stock: stock ?? productExists.stock,
         };
-  
+
         // Si hay categorías, validarlas y reemplazarlas correctamente
         if (categories?.length) {
           const categoryIds = await this.validateCategories(categories);
-  
+
           // Eliminar las categorías actuales
           await tx.productCategory.deleteMany({
             where: { productId: id },
           });
-  
+
           // Asociar nuevas categorías usando `createMany()`
           await tx.productCategory.createMany({
             data: categoryIds.map((categoryId) => ({
@@ -343,7 +330,7 @@ export class ProductsService {
             })),
           });
         }
-  
+
         // Actualizar el producto
         return tx.product.update({
           where: { id },
@@ -359,7 +346,7 @@ export class ProductsService {
           },
         });
       });
-  
+
       return {
         message: 'Producto actualizado correctamente.',
         updatedProduct,
@@ -372,36 +359,36 @@ export class ProductsService {
       );
     }
   }
-
+  ///////////////////////////////////////////////////////////////
   async deleteImage(id: string): Promise<{ message: string }> {
     try {
-  
       const imageExists = await this.prisma.image.findUnique({
         where: { id },
       });
-  
+
       if (!imageExists) {
         throw new NotFoundException(`Imagen con id ${id} no encontrada.`);
       }
-  
-  
+
       const imageUrl = imageExists.url;
       if (imageUrl) {
         try {
           const url = new URL(imageUrl);
           const key = url.pathname.substring(1);
-  
+
           await this.aws.deleteImage(key);
         } catch (error) {
-          throw new BadRequestException("URL de imagen inválida.");
+          throw new BadRequestException('URL de imagen inválida.');
         }
       }
 
       await this.prisma.image.delete({ where: { id } });
-  
-      return { message: "Imagen eliminada correctamente." };
+
+      return { message: 'Imagen eliminada correctamente.' };
     } catch (error) {
-      throw new BadRequestException("Error al eliminar la imagen del producto.");
+      throw new BadRequestException(
+        'Error al eliminar la imagen del producto.',
+      );
     }
   }
 
@@ -420,7 +407,7 @@ export class ProductsService {
         data: {
           url: imageUrl,
           productId: id,
-          altText: altText, 
+          altText: altText,
         },
       });
       return {
@@ -434,7 +421,7 @@ export class ProductsService {
       );
     }
   }
-
+  ///////////////////////////////////////////////////////////////
   async removeProduct(id: string) {
     try {
       const productExists = await this.prisma.product.findUnique({
@@ -489,17 +476,21 @@ export class ProductsService {
   async validateCategories(categoryId: string[]) {
     const existingCategories = await this.prisma.category.findMany({
       where: { id: { in: categoryId } },
-      select: { id: true }
+      select: { id: true },
     });
-  
-    const foundCategoryNames = existingCategories.map(c => c.id);
-    const missingCategories = categoryId.filter(id => !foundCategoryNames.includes(id));
-    
+
+    const foundCategoryNames = existingCategories.map((c) => c.id);
+    const missingCategories = categoryId.filter(
+      (id) => !foundCategoryNames.includes(id),
+    );
+
     if (missingCategories.length > 0) {
-      throw new BadRequestException(`Las siguientes categorías no existen: ${missingCategories.join(', ')}`);
+      throw new BadRequestException(
+        `Las siguientes categorías no existen: ${missingCategories.join(', ')}`,
+      );
     }
-  
-    return existingCategories.map(c => c.id);
+
+    return existingCategories.map((c) => c.id);
   }
 
   //asociar categorías a un producto
@@ -521,140 +512,4 @@ export class ProductsService {
       );
     }
   }
-
-  async updateStock(id: string, body: UpdateStockDto) { //Missing en el controller
-    try {
-      const product = await this.prisma.product.findUnique({
-        where: { id },
-      });
-      if (!product) {
-        throw new NotFoundException(`Producto con id ${id} no encontrado.`);
-      }
-
-      const updatedProduct = await this.prisma.product.update({
-        where: { id: product.id },
-        data: { stock: body.stock },
-      });
-      return {
-        message: 'Stock actualizado correctamente.',
-        updatedProduct,
-      };
-    } catch (error) {
-      console.log(error);
-      throw new BadRequestException(
-        'Error al actualizar el stock del producto: ',
-        error.response.message,
-      );
-    }
-  }
-
-  async updateAllStock(body: UpdateStockDto) {    //No le veo el sentido
-    try {
-      const { ids, stock } = body;
-      const products = await this.prisma.product.findMany({
-        where: { id: { in: ids } },
-      });
-      if (products.length !== ids.length) {
-        throw new NotFoundException(
-          `Los siguientes productos no existen ${ids.join(', ')}`,
-        );
-      }
-      const updatedProducts = await this.prisma.product.updateMany({
-        where: { id: { in: ids } },
-        data: { stock },
-      });
-      return {
-        message: 'Stock actualizado correctamente.',
-        updatedProducts,
-      };
-    } catch (error) {
-      console.log(error);
-      throw new BadRequestException(
-        'Error al actualizar el stock de los productos: ',
-        error.response.message,
-      );
-    }
-  }
-
-  // async incrementAllStock(body: UpdateStockDto) {    //No tiene sentido si ya hay un update all stock
-  //   try {
-  //     const { ids, stock } = body;
-  //     const products = await this.prisma.product.findMany({
-  //       where: { id: { in: ids } },
-  //     });
-  //     if (products.length !== ids.length) {
-  //       throw new NotFoundException(
-  //         `Los siguientes productos no existen ${ids.join(', ')}`,
-  //       );
-  //     }
-  //     const updatedProducts = await this.prisma.product.updateMany({
-  //       where: { id: { in: ids } },
-  //       data: { stock: { increment: stock } },
-  //     });
-  //     return {
-  //       message: 'Stock incrementado correctamente.',
-  //       updatedProducts,
-  //     };
-  //   } catch (error) {
-  //     console.log(error);
-  //     throw new BadRequestException(
-  //       'Error al incrementar el stock de los productos: ',
-  //       error.response.message,
-  //     );
-  //   }
-  // }
-  // async incrementAllPrice(body: UpdatePriceDto) {
-  //   try {
-  //     const { ids, price } = body;
-  //     const products = await this.prisma.product.findMany({
-  //       where: { id: { in: ids } },
-  //     });
-  //     if (products.length !== ids.length) {
-  //       throw new NotFoundException(
-  //         `Los siguientes productos no existen ${ids.join(', ')}`,
-  //       );
-  //     }
-  //     const updatedProducts = await this.prisma.product.updateMany({
-  //       where: { id: { in: ids } },
-  //       data: { price: { increment: price } },
-  //     });
-  //     return {
-  //       message: 'Precio incrementado correctamente.',
-  //       updatedProducts,
-  //     };
-  //   } catch (error) {
-  //     console.log(error);
-  //     throw new BadRequestException(
-  //       'Error al incrementar el precio de los productos: ',
-  //       error.response.message,
-  //     );
-  //   }
-  // }
-  /* async decrementarPrecioAll(body: UpdatePriceDto) {
-    try {
-      const { ids, price } = body;
-      const products = await this.prisma.product.findMany({
-        where: { id: { in: ids } },
-      });
-      if (products.length !== ids.length) {
-        throw new NotFoundException(
-          `Los siguientes productos no existen ${ids.join(', ')}`,
-        );
-      }
-      const updatedProducts = await this.prisma.product.updateMany({
-        where: { id: { in: ids } },
-        data: { price: { decrement: price } },
-      });
-      return {
-        message: 'Precio decrementado correctamente.',
-        updatedProducts,
-      };
-    } catch (error) {
-      console.log(error);
-      throw new BadRequestException(
-        'Error al decrementar el precio de los productos: ',
-        error.response.message,
-      );
-    }
-  } */
 }

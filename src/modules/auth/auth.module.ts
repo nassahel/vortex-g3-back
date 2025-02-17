@@ -5,10 +5,7 @@ import { AuthController } from './auth.controller';
 import JwtModuleConfig from 'src/config/jwt.config';
 
 @Module({
-  imports: [
-    JwtModuleConfig(),
-    CacheModule.register(),
-  ],
+  imports: [JwtModuleConfig(), CacheModule.register()],
   controllers: [AuthController],
   providers: [AuthService],
   exports: [AuthService],

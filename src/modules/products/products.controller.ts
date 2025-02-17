@@ -10,7 +10,6 @@ import {
   BadRequestException,
   Patch,
   UploadedFiles,
-  Put,
   Delete,
 } from '@nestjs/common';
 import { ProductsService } from './products.service';
@@ -19,13 +18,12 @@ import { UpdateProductDto } from './dto/update-product.dto';
 import { FilterProductDto } from './dto/filters-product.dto';
 import { FileInterceptor, FilesInterceptor } from '@nestjs/platform-express';
 import { memoryStorage } from 'multer';
-import { UpdatePriceDto } from './dto/update-price.dto';
 import { ApiConsumes, ApiOperation, ApiResponse } from '@nestjs/swagger';
 
 @Controller('product')
 export class ProductsController {
   constructor(private readonly productsService: ProductsService) {}
-  
+
   @Get('/all')
   findAll(@Query() filters: FilterProductDto) {
     return this.productsService.findAll(filters);
@@ -82,6 +80,19 @@ export class ProductsController {
     return this.productsService.updateProduct(id, updateProductDto);
   }
 
+  //Eliminado logico del producto
+  @Patch('/delete/:id')
+  remove(@Param('id') id: string) {
+    return this.productsService.removeProduct(id);
+  }
+
+  //Restaurado logico del producto
+  @Patch('/restore/:id')
+  restore(@Param('id') id: string) {
+    return this.productsService.restoreProduct(id);
+  }
+
+  ////////////////////////////////////////////////////////////
   @Post('/upload-image/:id')
   @UseInterceptors(
     FileInterceptor('file', {
@@ -112,17 +123,4 @@ export class ProductsController {
   deleteImage(@Param('id') id: string) {
     return this.productsService.deleteImage(id);
   }
-
-  //Eliminado logico del producto
-  @Patch('/delete/:id')
-  remove(@Param('id') id: string) {
-    return this.productsService.removeProduct(id);
-  }
-
-  //Restaurado logico del producto
-  @Patch('/restore/:id')
-  restore(@Param('id') id: string) {
-    return this.productsService.restoreProduct(id);
-  }
-
 }

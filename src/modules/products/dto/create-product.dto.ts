@@ -35,7 +35,7 @@ export class CreateProductDto {
       try {
         return JSON.parse(value); // Convierte el string en array
       } catch {
-        throw new Error("categories must be a valid JSON array");
+        throw new Error('categories must be a valid JSON array');
       }
     }
     return value;

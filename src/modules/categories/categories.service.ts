@@ -126,7 +126,6 @@ export class CategoriesService {
         cantidad: categories.length,
       };
     } catch (error) {
-
       throw new BadRequestException(
         'Error al importar las categorías: ' + error.message,
       );
