@@ -1,6 +1,7 @@
 // import * as dotenv from 'dotenv';
 // dotenv.config();
 
+const env = process.env;
 
 
 export enum RoleEnum {
@@ -8,7 +9,6 @@ export enum RoleEnum {
     USER = 'USER',
   }
   
-const env = process.env;
 
 
 // CONSTANTES AWS
