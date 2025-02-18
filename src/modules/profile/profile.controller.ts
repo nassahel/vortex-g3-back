@@ -1,16 +1,37 @@
-import { Controller, Post, Body, Param, Delete, UploadedFile, UseInterceptors, BadRequestException, Put } from '@nestjs/common';
+import { Controller, Post, Body, Param, Delete, UploadedFile, UseInterceptors, BadRequestException, Put, Get, ValidationPipe } from '@nestjs/common';
 import { ApiOperation, ApiResponse, ApiTags, ApiConsumes } from '@nestjs/swagger';
 import { memoryStorage } from 'multer';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { ProfileService } from './profile.service';
 import { UpdateProfileDto } from './dto/update.profile.dto';
-
+import { AuthService } from '../auth/auth.service';
 
 @ApiTags('Profile')
 @Controller('profile')
-export class ProfileController {
-    constructor(private readonly profileService: ProfileService,
-    ) { }
+    export class ProfileController {
+        constructor(private readonly profileService: ProfileService, private readonly authService: AuthService) {}
+
+
+    @Post('create/:userId')
+    @ApiOperation({summary: 'Create a user profile'})
+    @ApiResponse({ status: 201, description: 'Profile successfully created'})
+    @ApiConsumes('multipart/form-data')
+    @UseInterceptors(FileInterceptor('file', { 
+        storage: memoryStorage(), 
+        limits: { fileSize: 5 * 1024 * 1024 }, // 5MB límite de archivo
+    }))
+    async createdProfile(
+        @Param('userId') userId: string,
+        @UploadedFile() file?: Express.Multer.File,
+        @Body() updateProfileDto?: UpdateProfileDto,
+    ) {
+        if (!userId) {
+            throw new BadRequestException('User ID is required');
+        }
+
+        const createdProfile = await this.profileService.createProfile(userId, updateProfileDto, file);
+        return createdProfile;
+    }
 
     //Ruta para subir la imagen
     @Post('upload')
@@ -37,14 +58,15 @@ export class ProfileController {
         return { message: 'Image successfully uploaded', data: imageUrl };
     }
 
-    //Ruta para eliminar la imagen
-    @Delete('delete/:userId')
-    @ApiOperation({ summary: 'Delete profile image' })
-    @ApiResponse({ status: 200, description: 'Image successfully deleted' })
-    async deleteProfileImage(@Param('userId') userId: string) {      //Recibe userId como parametro
-        const result = await this.profileService.deleteImage(userId);   //Llama al servicio para eliminar la imagen
-        return { message: 'Image successfully deleted', data: result };
-    }
+  //Ruta para eliminar la imagen
+  @Delete('delete/:userId')
+  @ApiOperation({ summary: 'Delete profile image'  })
+  @ApiResponse({ status: 200, description: 'Image successfully deleted'  })
+  async deleteProfileImage(@Param('userId') userId: string)  {
+    //Recibe userId como parametro
+    const result = await this.profileService.deleteImage(userId); //Llama al servicio para eliminar la imagen
+    return { message: 'Image successfully deleted', data: result  };
+  }
 
     //Actualizar la info del usuario
     @Put('update/:userId')
@@ -52,8 +74,9 @@ export class ProfileController {
     @ApiResponse({ status: 200, description: 'Profile updated successfully' })
     async updateProfile(
         @Param('userId') userId: string,
-        @Body() updateProfileDto: UpdateProfileDto
+        @Body(new ValidationPipe({ transform: true })) updateProfileDto: UpdateProfileDto
     ) {
+        console.log("Datos recibidos en updateProfile:", updateProfileDto);
         const updatedUser = await this.profileService.updateProfile(userId, updateProfileDto);
         return { message: 'Profile updated successfully', data: updatedUser };
     }

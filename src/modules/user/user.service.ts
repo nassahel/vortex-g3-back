@@ -2,7 +2,7 @@ import {
   ConflictException,
   Injectable,
   InternalServerErrorException,
-  NotFoundException
+  NotFoundException,
 } from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
@@ -11,7 +11,7 @@ import * as bcrypt from 'bcrypt';
 
 @Injectable()
 export class UserService {
-  constructor(private readonly prisma: PrismaService) { }
+  constructor(private readonly prisma: PrismaService) {}
 
   // Crear un usuario
   async create(createUserDto: CreateUserDto) {
@@ -21,7 +21,9 @@ export class UserService {
       const formattedEmail = email.toLowerCase()
       const userExist = await this.prisma.user.findUnique({ where: { email: formattedEmail } });
       if (userExist) {
-        throw new ConflictException('Ya hay un usuario registrado con ese Email.');
+        throw new ConflictException(
+          'Ya hay un usuario registrado con ese Email.',
+        );
       }
 
       const hashedPassword = await bcrypt.hash(password, 15);
@@ -32,7 +34,7 @@ export class UserService {
           email: formattedEmail,
           password: hashedPassword,
           rol,
-        }
+        },
       });
 
       return {
@@ -40,8 +42,8 @@ export class UserService {
         newUser: {
           name: newUser.name,
           email: newUser.email,
-          rol: newUser.rol
-        }
+          rol: newUser.rol,
+        },
       };
     } catch (error) {
       throw new InternalServerErrorException('No se pudo registrar al usuario');
@@ -52,7 +54,7 @@ export class UserService {
   async findAll() {
     try {
       const allUsers = await this.prisma.user.findMany({
-        where: { isDeleted: false }
+        where: { isDeleted: false },
       });
 
       if (allUsers.length === 0) {
@@ -69,7 +71,7 @@ export class UserService {
   async findAllActive() {
     try {
       const allActiveUsers = await this.prisma.user.findMany({
-        where: { isActive: true }
+        where: { isActive: true },
       });
 
       if (allActiveUsers.length === 0) {
@@ -78,7 +80,9 @@ export class UserService {
 
       return allActiveUsers;
     } catch (error) {
-      throw new InternalServerErrorException('Error al obtener los usuarios activos.');
+      throw new InternalServerErrorException(
+        'Error al obtener los usuarios activos.',
+      );
     }
   }
 
@@ -88,8 +92,8 @@ export class UserService {
       const allUsers = await this.prisma.user.findMany({
         where: {
           isActive: true,
-          rol: 'USER'
-        }
+          rol: 'USER',
+        },
       });
 
       if (allUsers.length === 0) {
@@ -98,7 +102,9 @@ export class UserService {
 
       return allUsers;
     } catch (error) {
-      throw new InternalServerErrorException('Error al obtener los usuarios activos.');
+      throw new InternalServerErrorException(
+        'Error al obtener los usuarios activos.',
+      );
     }
   }
 
@@ -128,11 +134,11 @@ export class UserService {
     try {
       const updatedUser = await this.prisma.user.update({
         where: { id },
-        data: updateUserDto
+        data: updateUserDto,
       });
 
       return {
-        message: `Usuario ${updatedUser.name} actualizado.`
+        message: `Usuario ${updatedUser.name} actualizado.`,
       };
     } catch (error) {
       throw new InternalServerErrorException('Error al actualizar el usuario.');
@@ -144,12 +150,14 @@ export class UserService {
       const foundUser = await this.prisma.user.findUnique({ where: { id } });
 
       if (!foundUser) {
-        throw new NotFoundException(`No se encontró un usuario con el ID: ${id}`);
+        throw new NotFoundException(
+          `No se encontró un usuario con el ID: ${id}`,
+        );
       }
 
       await this.prisma.user.update({
         where: { id },
-        data: { isDeleted: true }
+        data: { isDeleted: true },
       });
 
       return {

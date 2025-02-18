@@ -9,5 +9,6 @@ import { MessageModule } from '../messages/messages.module';
   imports: [JwtModuleConfig(), MessageModule],
   controllers: [AuthController],
   providers: [AuthService, JwtStrategy],
+  exports: [AuthService]
 })
 export class AuthModule { }
