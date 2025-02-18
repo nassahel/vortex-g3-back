@@ -18,8 +18,10 @@ export class UserService {
     try {
       const { email, name, password, rol } = createUserDto;
 
-      const formattedEmail = email.toLowerCase()
-      const userExist = await this.prisma.user.findUnique({ where: { email: formattedEmail } });
+      const formattedEmail = email.toLowerCase();
+      const userExist = await this.prisma.user.findUnique({
+        where: { email: formattedEmail },
+      });
       if (userExist) {
         throw new ConflictException(
           'Ya hay un usuario registrado con ese Email.',
@@ -167,7 +169,6 @@ export class UserService {
       throw new InternalServerErrorException('Error al eliminar el usuario.');
     }
   }
-
 
   //borrado definitivo de un usuario
   async remove(id: string) {

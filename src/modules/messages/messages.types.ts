@@ -1,4 +1,4 @@
-import { string } from "joi";
+import { string } from 'joi';
 
 export const EMAIL_PROVIDER = 'EMAIL_PROVIDER' as const;
 
@@ -12,5 +12,3 @@ export type Email = {
 export interface EmailService {
   send(email: Email): Promise<void>;
 }
-
-

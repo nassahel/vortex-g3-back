@@ -1,5 +1,15 @@
-import { BadRequestException, ConflictException, Injectable, InternalServerErrorException, NotFoundException } from '@nestjs/common';
-import { CreateLoginDto, CreateRegisterDto, RecoveryPasswordDto } from './dto/create-auth.dto';
+import {
+  BadRequestException,
+  ConflictException,
+  Injectable,
+  InternalServerErrorException,
+  NotFoundException,
+} from '@nestjs/common';
+import {
+  CreateLoginDto,
+  CreateRegisterDto,
+  RecoveryPasswordDto,
+} from './dto/create-auth.dto';
 import { PrismaService } from '../prisma/prisma.service';
 import * as bcrypt from 'bcrypt';
 import { JwtService } from '@nestjs/jwt';
@@ -13,47 +23,45 @@ export class AuthService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly jwt: JwtService,
-    private messageService: MessageService
-  ) { }
+    private messageService: MessageService,
+  ) {}
   async register(createRegisterDto: CreateRegisterDto) {
     const { email, name, password, repeatPassword } = createRegisterDto;
-
 
     const formattedEmail = email.toLowerCase();
     const userExist = await this.prisma.user.findUnique({
       where: { email: formattedEmail },
-
-    })
+    });
 
     if (userExist) {
-      throw new ConflictException('Ya hay un usuario registrado con ese Email.')
+      throw new ConflictException(
+        'Ya hay un usuario registrado con ese Email.',
+      );
     }
 
     if (password !== repeatPassword) {
-      throw new ConflictException('Las contraseñas no son identicas.')
+      throw new ConflictException('Las contraseñas no son identicas.');
     }
 
     try {
       const newUser = {
         name: name,
         email: formattedEmail,
-        password: await bcrypt.hash(password, 15)
-      }
+        password: await bcrypt.hash(password, 15),
+      };
 
       const registeredUser = await this.prisma.user.create({
-        data: newUser
-      })
+        data: newUser,
+      });
 
       if (!registeredUser) {
-        throw new BadRequestException('No se pudo registrar al usuario')
-
+        throw new BadRequestException('No se pudo registrar al usuario');
       }
 
-      const link = `https://luxshop.com/`
+      const link = `https://luxshop.com/`;
       let emailBody = registrationTmplate;
       emailBody = emailBody.replace(/{{name}}/g, name);
       emailBody = emailBody.replace(/{{link}}/g, link);
-
 
       await this.messageService.sendRegisterUserEmail({
         from: messagingConfig.emailSender,
@@ -66,51 +74,50 @@ export class AuthService {
         message: 'Usuario registrado con éxito!',
         newUser: {
           name,
-          emailLower: formattedEmail
-        }
+          emailLower: formattedEmail,
+        },
       };
-
     } catch (error) {
-      throw new InternalServerErrorException('No se pudo registrar al usuario')
+      throw new InternalServerErrorException('No se pudo registrar al usuario');
     }
   }
 
-  async login(createLoginDto: CreateLoginDto): Promise<{ message: string; token: string }> {
-
+  async login(
+    createLoginDto: CreateLoginDto,
+  ): Promise<{ message: string; token: string }> {
     const { password, email } = createLoginDto;
-    const formattedEmail = email.toLowerCase()
+    const formattedEmail = email.toLowerCase();
     const userExist = await this.prisma.user.findUnique({
-      where: { email: formattedEmail }
-    })
+      where: { email: formattedEmail },
+    });
 
     if (!userExist) {
-      throw new NotFoundException('Credenciales invalidas.')
+      throw new NotFoundException('Credenciales invalidas.');
     }
 
-    const passwordsMatch = await bcrypt.compare(password, userExist.password)
+    const passwordsMatch = await bcrypt.compare(password, userExist.password);
 
     if (!passwordsMatch) {
-      throw new BadRequestException('Credenciales invalidas.')
+      throw new BadRequestException('Credenciales invalidas.');
     }
 
     const payload = {
       userId: userExist.id,
-      userRol: userExist.rol
-    }
+      userRol: userExist.rol,
+    };
 
-    const token = this.jwt.sign(payload, { expiresIn: "24h" })
+    const token = this.jwt.sign(payload, { expiresIn: '24h' });
 
     return {
       message: 'Usuario logueado',
-      token
+      token,
     };
   }
 
   async RequestRecoveryPassword(email: string) {
-
-    const formattedEmail = email.toLowerCase()
+    const formattedEmail = email.toLowerCase();
     const foundUser = await this.prisma.user.findUnique({
-      where: { email: formattedEmail }
+      where: { email: formattedEmail },
     });
     if (!foundUser) {
       throw new BadRequestException('User not found');
@@ -120,7 +127,7 @@ export class AuthService {
       const payload = { id: foundUser.id, email: foundUser.email };
       const token = this.jwt.sign(payload, { expiresIn: '30m' });
 
-      const link = `https://tu-dominio.com/reset-password?token=${token}`
+      const link = `https://tu-dominio.com/reset-password?token=${token}`;
 
       //Obtengo la plantilla y le reemplazo las variables
       let emailBody = recoveryTemplate;
@@ -136,14 +143,14 @@ export class AuthService {
 
       return {
         message: 'Link de recuperación de contraseña generado',
-        token
+        token,
       };
-
     } catch (error) {
-      throw new InternalServerErrorException('No se pudo enviar recuperación de contraseña');
+      throw new InternalServerErrorException(
+        'No se pudo enviar recuperación de contraseña',
+      );
     }
   }
-
 
   //AQUI DEBERIA IR LA LOGICA PARA MAILJET
 
@@ -166,11 +173,9 @@ export class AuthService {
         data: { password: hashedPassword },
       });
 
-
       return {
-        message: 'contraseña cambiada con exito'
-      }
-
+        message: 'contraseña cambiada con exito',
+      };
     } catch (error) {
       throw new BadRequestException('Invalid or expirex token');
     }

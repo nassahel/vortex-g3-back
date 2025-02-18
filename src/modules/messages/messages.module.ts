@@ -4,11 +4,11 @@ import { EMAIL_PROVIDER } from './messages.types';
 import { MessageService } from './messages.service';
 
 const mailServicePrivider: Provider = {
-    provide: EMAIL_PROVIDER,
-    useClass: MailjetService,
+  provide: EMAIL_PROVIDER,
+  useClass: MailjetService,
 };
 @Module({
-    providers: [MessageService, mailServicePrivider],
-    exports: [MessageService],
+  providers: [MessageService, mailServicePrivider],
+  exports: [MessageService],
 })
-export class MessageModule { }
+export class MessageModule {}

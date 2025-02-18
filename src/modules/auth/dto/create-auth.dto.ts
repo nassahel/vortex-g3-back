@@ -45,11 +45,10 @@ export class CreateLoginDto {
   password: string;
 }
 
-
 export class RecoveryPasswordDto {
-    @IsString()
-    newPassword: string;
+  @IsString()
+  newPassword: string;
 
-    @IsString()
-    token: string;
+  @IsString()
+  token: string;
 }

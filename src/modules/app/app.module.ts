@@ -9,7 +9,7 @@ import { UserModule } from '../user/user.module';
 import { ProfileModule } from '../profile/profile.module';
 import { ProductsModule } from '../products/products.module';
 import { CategoriesModule } from '../categories/categories.module';
-import { CompraModule } from '../compra/compra.module';
+import { ImagesModule } from '../images/images.module';
 import { CartModule } from '../cart/cart.module';
 import { ChartModule } from '../chart/chart.module';
 
@@ -27,7 +27,7 @@ import { ChartModule } from '../chart/chart.module';
     ChartModule,
     ProductsModule,
     CategoriesModule,
-    CompraModule,
+    ImagesModule,
     CartModule,
   ],
   controllers: [AppController],
