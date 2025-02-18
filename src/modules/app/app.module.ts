@@ -10,6 +10,7 @@ import { ProfileModule } from '../profile/profile.module';
 import { ProductsModule } from '../products/products.module';
 import { CategoriesModule } from '../categories/categories.module';
 import { CompraModule } from '../compra/compra.module';
+import { CartModule } from '../cart/cart.module';
 
 @Module({
   imports: [
@@ -25,6 +26,7 @@ import { CompraModule } from '../compra/compra.module';
     ProductsModule,
     CategoriesModule,
     CompraModule,
+    CartModule,
   ],
   controllers: [AppController],
   providers: [AppService],

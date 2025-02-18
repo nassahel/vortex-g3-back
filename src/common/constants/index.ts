@@ -1,7 +1,7 @@
 // import * as dotenv from 'dotenv';
 // dotenv.config();
 
-
+const env = process.env;
 
 export enum RoleEnum {
     ADMIN = 'ADMIN',
@@ -29,7 +29,7 @@ export const awsConfig = {
 
 
 
-// CONSTANTES MAILJET
+//CONSTANTES MAILJET
   export const messagingConfig = {
     emailSender: env.EMAIL_SENDER,
     apiKey: env.MAILJET_API_KEY,

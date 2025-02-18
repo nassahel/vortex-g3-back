@@ -14,8 +14,8 @@ export class CompraController {
   updateStockAll(@Body() body: UpdateStockDto) {
     return this.productsService.updateAllStock(body);
   }
-  @Patch('/incrementar-stock-productos')
-  incrementarStockAll(@Body() body: UpdateStockDto) {
-    return this.productsService.incrementAllStock(body);
-  }
+  // @Patch('/incrementar-stock-productos')
+  // incrementarStockAll(@Body() body: UpdateStockDto) {
+  //   return this.productsService.incrementAllStock(body);
+  // }
 }

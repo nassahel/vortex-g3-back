@@ -48,7 +48,6 @@ import { AuthService } from '../auth/auth.service';
                 callback(new BadRequestException('Only JPEG and PNG files are allowed'), false);
             }
         }
-        limits: {fileSize: 5 * 1024 * 1024}        // Tamaño limite de 5MB
     }))
 
     async uploadProfileImage(
