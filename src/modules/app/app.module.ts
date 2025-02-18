@@ -11,6 +11,7 @@ import { ProductsModule } from '../products/products.module';
 import { CategoriesModule } from '../categories/categories.module';
 import { ImagesModule } from '../images/images.module';
 import { CartModule } from '../cart/cart.module';
+import { ChartModule } from '../chart/chart.module';
 
 @Module({
   imports: [
@@ -23,6 +24,7 @@ import { CartModule } from '../cart/cart.module';
     AuthModule,
     UserModule,
     ProfileModule,
+    ChartModule,
     ProductsModule,
     CategoriesModule,
     ImagesModule,
