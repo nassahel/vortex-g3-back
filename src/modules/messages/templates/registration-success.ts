@@ -1,4 +1,4 @@
-export let registrationTmplate = `
+export const registrationTmplate = `
 <!DOCTYPE html>
 <html lang="es">
 
@@ -70,4 +70,4 @@ export let registrationTmplate = `
 </body>
 
 </html>
-`
+`;

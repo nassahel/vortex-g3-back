@@ -1,4 +1,4 @@
-export let recoveryTemplate = `
+export const recoveryTemplate = `
 <!DOCTYPE html>
 <html lang="es">
 
@@ -82,4 +82,4 @@ export let recoveryTemplate = `
 
 </html>
 
-`
+`;

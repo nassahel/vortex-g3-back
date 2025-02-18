@@ -9,7 +9,6 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-
 enum Rol {
   ADMIN
   USER
@@ -89,7 +88,7 @@ model Image {
 
 model Order {
   id        String      @id @unique @default(cuid())
-  items     OrderItem[]
+  items     OrderItem[]   //no deberia tener un product?
   status    OrderStatus @default(PENDING)
   price     Decimal     @default(0.00)
   user      User        @relation(fields: [userId], references: [id])
