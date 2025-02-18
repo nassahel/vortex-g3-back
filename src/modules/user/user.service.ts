@@ -18,7 +18,10 @@ export class UserService {
     try {
       const { email, name, password, rol } = createUserDto;
 
-      const userExist = await this.prisma.user.findUnique({ where: { email } });
+      const formattedEmail = email.toLowerCase();
+      const userExist = await this.prisma.user.findUnique({
+        where: { email: formattedEmail },
+      });
       if (userExist) {
         throw new ConflictException(
           'Ya hay un usuario registrado con ese Email.',
@@ -30,7 +33,7 @@ export class UserService {
       const newUser = await this.prisma.user.create({
         data: {
           name,
-          email,
+          email: formattedEmail,
           password: hashedPassword,
           rol,
         },

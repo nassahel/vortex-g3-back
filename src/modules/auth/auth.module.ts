@@ -1,13 +1,14 @@
 import { Module } from '@nestjs/common';
-import { CacheModule } from '@nestjs/cache-manager';
 import { AuthService } from './auth.service';
 import { AuthController } from './auth.controller';
 import JwtModuleConfig from 'src/config/jwt.config';
+import { JwtStrategy } from './strategies/jwt.strategy';
+import { MessageModule } from '../messages/messages.module';
 
 @Module({
-  imports: [JwtModuleConfig(), CacheModule.register()],
+  imports: [JwtModuleConfig(), MessageModule],
   controllers: [AuthController],
-  providers: [AuthService],
+  providers: [AuthService, JwtStrategy],
   exports: [AuthService],
 })
 export class AuthModule {}

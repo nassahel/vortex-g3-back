@@ -8,7 +8,6 @@ import {
   UseInterceptors,
   BadRequestException,
   Put,
-  Get,
   ValidationPipe,
 } from '@nestjs/common';
 import {
@@ -20,10 +19,8 @@ import {
 import { memoryStorage } from 'multer';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { ProfileService } from './profile.service';
-import { AuthService } from '../auth/auth.service';
 import { UpdateProfileDto } from './dto/update.profile.dto';
-import { ChangePasswordRequestDto } from './dto/change.password.request.dto';
-import { ChangePasswordDto } from './dto/change.password.dto';
+import { AuthService } from '../auth/auth.service';
 
 @ApiTags('Profile')
 @Controller('profile')
@@ -51,7 +48,6 @@ export class ProfileController {
     if (!userId) {
       throw new BadRequestException('User ID is required');
     }
-
     const createdProfile = await this.profileService.createProfile(
       userId,
       updateProfileDto,
@@ -70,6 +66,16 @@ export class ProfileController {
       //Configuro como manejar la carga de archivos
       storage: memoryStorage(), //almaceno en la memoria
       limits: { fileSize: 5 * 1024 * 1024 }, // Tamaño limite de 5MB
+      fileFilter: (req, file, callback) => {
+        if (file.mimetype === 'image.png' || file.mimetype === 'image.jpeg') {
+          callback(null, true);
+        } else {
+          callback(
+            new BadRequestException('Only JPEG and PNG files are allowed'),
+            false,
+          );
+        }
+      },
     }),
   )
   async uploadProfileImage(
@@ -105,32 +111,5 @@ export class ProfileController {
       updateProfileDto,
     );
     return { message: 'Profile updated successfully', data: updatedUser };
-  }
-
-  //Modulos de cambio de contraseña
-  @Post('change-password-request')
-  @ApiOperation({ summary: 'Request a password change email' })
-  @ApiResponse({
-    status: 200,
-    description: 'Password change email sent successfully',
-  })
-  async requestPasswordChange(
-    @Body() changePasswordRequestDto: ChangePasswordRequestDto,
-  ) {
-    await this.authService.requestPasswordChange(
-      changePasswordRequestDto.email,
-    );
-    return { message: 'Password change email sent successfully' };
-  }
-
-  @Put('change-password')
-  @ApiOperation({ summary: 'Change the user password' })
-  @ApiResponse({ status: 200, description: 'Password updated successfully' })
-  async changePassword(@Body() changePasswordDto: ChangePasswordDto) {
-    await this.authService.changePassword(
-      changePasswordDto.token,
-      changePasswordDto.newPassword,
-    );
-    return { message: 'Password updated successfully' };
   }
 }

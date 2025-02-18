@@ -9,7 +9,6 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-
 enum Rol {
   ADMIN
   USER
@@ -23,15 +22,16 @@ enum OrderStatus {
 }
 
 model User {
-  id        String    @id @unique @default(cuid())
+  id        String  @id @unique @default(cuid())
   name      String
-  email     String    @unique
-  rol       Rol       @default(USER)
+  email     String  @unique
+  rol       Rol     @default(USER)
   password  String
-  isActive  Boolean   @default(true)
-  isDeleted Boolean   @default(false)
+  isActive  Boolean @default(true)
+  isDeleted Boolean @default(false)
   orders    Order[]
-  profile   Profile[]
+
+  profile   Profile? 
 }
 
 model Profile {
@@ -78,17 +78,17 @@ model ProductCategory {
 
 
 model Image {
-  id        String   @id @unique @default(cuid())
+  id        String  @id @unique @default(cuid())
   url       String
   altText   String?
-  product   Product  @relation(fields: [productId], references: [id])
+  product   Product @relation(fields: [productId], references: [id])
   productId String
 }
 
 
 model Order {
   id        String      @id @unique @default(cuid())
-  items     OrderItem[]
+  items     OrderItem[]   //no deberia tener un product?
   status    OrderStatus @default(PENDING)
   price     Decimal     @default(0.00)
   user      User        @relation(fields: [userId], references: [id])
@@ -105,5 +105,3 @@ model OrderItem {
   productId String?
   orderId   String
 }
-
-

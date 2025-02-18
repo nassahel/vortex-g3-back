@@ -44,3 +44,11 @@ export class CreateLoginDto {
   @MaxLength(100)
   password: string;
 }
+
+export class RecoveryPasswordDto {
+  @IsString()
+  newPassword: string;
+
+  @IsString()
+  token: string;
+}
