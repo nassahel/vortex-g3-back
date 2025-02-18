@@ -355,7 +355,7 @@ export class ProductsService {
       console.log(error);
       throw new BadRequestException(
         'Error al actualizar el producto:',
-        error.response,
+        error.response.message,
       );
     }
   }
@@ -366,7 +366,9 @@ export class ProductsService {
         where: { id, isDeleted: false },
       });
       if (!productExists) {
-        throw new NotFoundException(`Producto con id ${id} no encontrado.`);
+        throw new NotFoundException(
+          `El producto no existe o ya fue eliminado.`,
+        );
       }
       const productDeleted = await this.prisma.product.update({
         where: { id },
@@ -388,10 +390,13 @@ export class ProductsService {
   async restoreProduct(id: string) {
     try {
       const productExists = await this.prisma.product.findUnique({
-        where: { id, isDeleted: true },
+        where: { id },
       });
       if (!productExists) {
-        throw new NotFoundException(`Producto con id ${id} no encontrado.`);
+        throw new NotFoundException(`El producto no existe.`);
+      }
+      if (!productExists.isDeleted) {
+        throw new BadRequestException('El producto está activo.');
       }
       const restoredProduct = await this.prisma.product.update({
         where: { id },
@@ -413,7 +418,7 @@ export class ProductsService {
   //verifica que todas las categorías existan
   async validateCategories(categoryId: string[]) {
     const existingCategories = await this.prisma.category.findMany({
-      where: { id: { in: categoryId } },
+      where: { id: { in: categoryId }, isDeleted: false },
       select: { id: true },
     });
 
@@ -424,7 +429,7 @@ export class ProductsService {
 
     if (missingCategories.length > 0) {
       throw new BadRequestException(
-        `Las siguientes categorías no existen: ${missingCategories.join(', ')}`,
+        `Las siguientes categorías no existen o fueron eliminadas: ${missingCategories.join(', ')}`,
       );
     }
 

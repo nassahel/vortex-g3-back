@@ -49,16 +49,6 @@ export class CategoriesService {
                       altText: true,
                     },
                   },
-                  categories: {
-                    include: {
-                      category: {
-                        select: {
-                          id: true,
-                          name: true,
-                        },
-                      },
-                    },
-                  },
                 },
               },
             },
@@ -174,7 +164,7 @@ export class CategoriesService {
         where: { id, isDeleted: false },
       });
       if (!categoryExists) {
-        throw new NotFoundException(`Categoría con id ${id} no encontrada.`);
+        throw new NotFoundException(`La categoria no existe o fue eliminada.`);
       }
       const deletedCategory = await this.prisma.category.update({
         where: { id },
@@ -196,10 +186,13 @@ export class CategoriesService {
   async restoreCategory(id: string) {
     try {
       const categoryExists = await this.prisma.category.findUnique({
-        where: { id, isDeleted: true },
+        where: { id },
       });
       if (!categoryExists) {
-        throw new NotFoundException(`Categoría con id ${id} no encontrada.`);
+        throw new NotFoundException(`La categoria no existe.`);
+      }
+      if (!categoryExists.isDeleted) {
+        throw new BadRequestException('La categoría está activa.');
       }
       const restoredCategory = await this.prisma.category.update({
         where: { id },

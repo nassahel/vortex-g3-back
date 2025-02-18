@@ -3,7 +3,6 @@ import {
   Get,
   Post,
   Body,
-  Patch,
   Param,
   Delete,
   UploadedFile,
@@ -44,20 +43,15 @@ export class ImagesController {
     return this.imagesService.uploadImage(id, image, altText);
   }
 
-  @Get('/all')
-  findAll() {
-    return this.imagesService.findAll();
+  @Get('/all/:productId')
+  findAll(@Param('productId') productId: string) {
+    return this.imagesService.findAll(productId);
   }
 
   @Get('/:id')
   findOne(@Param('id') id: string) {
     return this.imagesService.findOne(id);
   }
-
-  /* @Patch('/update/:id')
-  update(@Param('id') id: string, @Body() updateImageDto: UpdateImageDto) {
-    return this.imagesService.update(id, updateImageDto);
-  } */
 
   @Delete('/delete/:id')
   remove(@Param('id') id: string) {

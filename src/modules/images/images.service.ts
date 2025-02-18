@@ -42,17 +42,30 @@ export class ImagesService {
     }
   }
 
-  findAll() {
-    return `This action returns all images`;
+  async findAll(productId: string) {
+    try {
+      const images = await this.prisma.image.findMany({
+        where: { productId },
+      });
+      return images;
+    } catch (error) {
+      throw new BadRequestException('Error al obtener las imágenes.', error);
+    }
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} image`;
+  async findOne(id: string) {
+    try {
+      const image = await this.prisma.image.findUnique({
+        where: { id },
+      });
+      if (!image) {
+        throw new NotFoundException(`Imagen no encontrada.`);
+      }
+      return image;
+    } catch (error) {
+      throw new BadRequestException('Error al obtener la imagen.', error);
+    }
   }
-
-  /* update(id: number, updateImageDto: UpdateImageDto) {
-    return `This action updates a #${id} image`;
-  } */
 
   async deleteImage(id: string): Promise<{ message: string }> {
     try {
@@ -72,7 +85,7 @@ export class ImagesService {
 
           await this.aws.deleteImage(key);
         } catch (error) {
-          throw new BadRequestException('URL de imagen inválida.');
+          throw new BadRequestException('URL de imagen inválida.', error);
         }
       }
 
@@ -82,6 +95,7 @@ export class ImagesService {
     } catch (error) {
       throw new BadRequestException(
         'Error al eliminar la imagen del producto.',
+        error,
       );
     }
   }

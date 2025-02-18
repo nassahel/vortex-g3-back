@@ -52,11 +52,11 @@ CREATE TABLE "Product" (
 );
 
 -- CreateTable
-CREATE TABLE "ProductsOnCategories" (
+CREATE TABLE "ProductCategory" (
     "productId" TEXT NOT NULL,
     "categoryId" TEXT NOT NULL,
 
-    CONSTRAINT "ProductsOnCategories_pkey" PRIMARY KEY ("productId","categoryId")
+    CONSTRAINT "ProductCategory_pkey" PRIMARY KEY ("productId","categoryId")
 );
 
 -- CreateTable
@@ -125,10 +125,10 @@ CREATE UNIQUE INDEX "OrderItem_id_key" ON "OrderItem"("id");
 ALTER TABLE "Profile" ADD CONSTRAINT "Profile_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "ProductsOnCategories" ADD CONSTRAINT "ProductsOnCategories_productId_fkey" FOREIGN KEY ("productId") REFERENCES "Product"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "ProductCategory" ADD CONSTRAINT "ProductCategory_productId_fkey" FOREIGN KEY ("productId") REFERENCES "Product"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "ProductsOnCategories" ADD CONSTRAINT "ProductsOnCategories_categoryId_fkey" FOREIGN KEY ("categoryId") REFERENCES "Category"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "ProductCategory" ADD CONSTRAINT "ProductCategory_categoryId_fkey" FOREIGN KEY ("categoryId") REFERENCES "Category"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "Image" ADD CONSTRAINT "Image_productId_fkey" FOREIGN KEY ("productId") REFERENCES "Product"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
