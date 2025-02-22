@@ -5,12 +5,14 @@ import {
 } from '@nestjs/common';
 import { AwsService } from 'src/aws/aws.service';
 import { PrismaService } from '../prisma/prisma.service';
+import { I18nService } from 'nestjs-i18n';
 
 @Injectable()
 export class ImagesService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly aws: AwsService,
+    private readonly i18n: I18nService,
   ) {}
   async uploadImage(id: string, image: Express.Multer.File, altText: string) {
     try {
@@ -18,7 +20,7 @@ export class ImagesService {
         where: { id, isDeleted: false },
       });
       if (!productExists) {
-        throw new NotFoundException(`Producto con id ${id} no encontrado.`);
+        throw new NotFoundException(this.i18n.translate('images.error.PRODUCT_ID_NOT_FOUND', { args: { id } }));
       }
       //subir la nueva imagen
       const imageUrl = await this.aws.uploadImage(image, id);
@@ -31,12 +33,12 @@ export class ImagesService {
         },
       });
       return {
-        message: 'Imagen actualizada correctamente.',
+        message: this.i18n.translate('images.success.UPLOADING_IMAGE'),
       };
     } catch (error) {
       console.log(error);
       throw new BadRequestException(
-        'Error al actualizar la imagen del producto:',
+        this.i18n.translate('images.error.UPLOADING_IMAGE_ERROR'),
         error.response,
       );
     }
@@ -49,7 +51,7 @@ export class ImagesService {
       });
       return images;
     } catch (error) {
-      throw new BadRequestException('Error al obtener las imágenes.', error);
+      throw new BadRequestException(this.i18n.translate('images.error.IMAGE_ERROR'), error);
     }
   }
 
@@ -59,11 +61,11 @@ export class ImagesService {
         where: { id },
       });
       if (!image) {
-        throw new NotFoundException(`Imagen no encontrada.`);
+        throw new NotFoundException(this.i18n.translate('images.error.IMAGE_NOT_FOUND'));
       }
       return image;
     } catch (error) {
-      throw new BadRequestException('Error al obtener la imagen.', error);
+      throw new BadRequestException(this.i18n.translate('images.error.IMAGE_NOT_FOUND'), error);
     }
   }
 
@@ -74,7 +76,7 @@ export class ImagesService {
       });
 
       if (!imageExists) {
-        throw new NotFoundException(`Imagen con id ${id} no encontrada.`);
+        throw new NotFoundException(this.i18n.translate('images.error.IMAGE_ID_NOT_FOUND', { args: { id } }));
       }
 
       const imageUrl = imageExists.url;
@@ -85,16 +87,16 @@ export class ImagesService {
 
           await this.aws.deleteImage(key);
         } catch (error) {
-          throw new BadRequestException('URL de imagen inválida.', error);
+          throw new BadRequestException(this.i18n.translate('images.error.INVALID_URL'), error);
         }
       }
 
       await this.prisma.image.delete({ where: { id } });
 
-      return { message: 'Imagen eliminada correctamente.' };
+      return { message: this.i18n.translate('images.success.DELETED_SUCCESS') };
     } catch (error) {
       throw new BadRequestException(
-        'Error al eliminar la imagen del producto.',
+        this.i18n.translate('images.error.DELETED_ERROR'),
         error,
       );
     }

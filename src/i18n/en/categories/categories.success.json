@@ -1,0 +1,10 @@
+{
+    "success": {
+      "CATEGORY_CREATED": "Category created successfully.",
+      "CATEGORY_RETRIEVED": "Cart retreived successfully.",
+      "CATEGORY_IMPORTED": "Category imported successfully.",
+      "CATEGORY_UPDATED": "Category updated successfully.",
+      "CATEGORY_DELETED": "Category deleted successfully.",
+      "CATEGORY_RESTORED": "Category restored successfully."
+    }
+}

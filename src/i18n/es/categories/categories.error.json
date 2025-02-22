@@ -1,0 +1,13 @@
+{
+    "errors": {
+      "CATEGORY_NOT_FOUND": "Categoría no encontrada",
+      "CATEGORY_ID_NOT_FOUND": "Categoría con id: {id} no encontrada",
+      "CATEGORY_ALREADY_EXISTS": "La categoría ya existe",
+      "CATEGORY_CREATION_FAILED": "Error al crear la categoría",
+      "CATEGORY_IMPORTED_FAILED": "Error al importar la categoría",
+      "CATEGORY_UPDATE_FAILED": "Error al actualizar la categoría",
+      "CATEGORY_DELETE_FAILED": "Error al eliminar la categoría",
+      "CATEGORY_NOT_DELETED": "La categoría está activa y no puede ser eliminada",
+      "CATEGORY_RESTORE_FAILED": "Error al restaurar la categoría"
+    }
+}

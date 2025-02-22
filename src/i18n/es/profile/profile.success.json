@@ -1,0 +1,9 @@
+{
+    "success": {
+        "CREATED_PROFILE": "Perfil creado con éxito.",
+        "PROFILE_IMAGE_UPLOADED": "Imagen de perfil subida con éxito.",
+        "IMAGE_DELETED": "Imagen eliminada con éxito.",
+        "IMAGE_UPLOADED": "Imagen subida con éxito.",
+        "PROFILE_UPDATED": "Perfil actualizado con éxito."
+    }
+}

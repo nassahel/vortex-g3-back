@@ -1,0 +1,12 @@
+{
+    "errors": {
+        "PRODUCT_ID_NOT_FOUND": "Producto con id: {id} no encontrado",
+        "UPLOADING_IMAGE": "Imagen subida con éxito",
+        "UPLOADING_IMAGE_ERROR": "Error al subir la imagen",
+        "IMAGE_ERROR": "Error al obtener la imagen",
+        "IMAGE_NOT_FOUND": "Imagen no encontrada",
+        "IMAGE_ID_NOT_FOUND": "Imagen con id: {id} no encontrada",
+        "INVALID_URL": "URL inválida",
+        "DELETED_ERROR": "Error al eliminar la imagen"
+    }
+}

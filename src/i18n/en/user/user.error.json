@@ -1,0 +1,9 @@
+{
+    "errors":{
+        "USER_ALREADY_EXISTS": "User already exists with this email",
+        "USER_REGISTER_FAILED": "User registration failed",
+        "USER_NOT_FOUND": "User not found",
+        "UPDATED_ERROR": "Error updating user",
+        "DELETE_USER_FAILED": "Failed when deleting user"
+    }
+}

@@ -1,0 +1,12 @@
+{
+    "errors": {
+        "NO_REGISTERED_USER": "No hay un usuario registrado",
+        "NO_FILE": "No se proporcionó ningún archivo",
+        "MIMETYPE": "Solo se permiten archivos JPEG y PNG",
+        "PROFILE_NOT_FOUND": "Perfil no encontrado para el userId {userId}",
+        "ERROR_DELETING_IMAGE": "Error al eliminar la imagen",
+        "ERROR_UPLOADING_IMAGE": "Error al subir la imagen",
+        "IMAGE_NOT_FOUND": "Imagen no encontrada",
+        "USER_ID_REQUIRED": "El ID de usuario es obligatorio"
+    }
+}

@@ -1,0 +1,6 @@
+{
+    "errors":{
+        "EXCEL_EMPTY": "The Excel file is empty",
+        "EXCEL_MISSING_ROW": "There are missing rows on the file"
+    }
+}

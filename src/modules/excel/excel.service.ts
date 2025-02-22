@@ -1,8 +1,11 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
 import * as XLSX from 'xlsx';
+import { I18nService } from 'nestjs-i18n';
 
 @Injectable()
 export class ExcelService {
+  constructor(private readonly i18n: I18nService) {}
+
   async readExcel(buffer: Buffer, columnsRequired: string[]) {
     const workbook = XLSX.read(buffer, { type: 'buffer' });
     //se obtiene el nombre de la hoja
@@ -13,7 +16,7 @@ export class ExcelService {
 
     // Validamos que el archivo tenga contenido
     if (!datos.length) {
-      throw new BadRequestException('El archivo Excel está vacío.');
+      throw new BadRequestException(this.i18n.translate('excel.error.EXCEL_EMPTY'));
     }
 
     // Obtenemos las claves (nombres de columnas) de la primera fila
@@ -26,7 +29,7 @@ export class ExcelService {
 
     if (columnasFaltantes.length > 0) {
       throw new BadRequestException(
-        `El archivo no contiene las columnas obligatorias`,
+        this.i18n.translate('excel.error.EXCEL_MISSING_ROW'),
       );
     }
 

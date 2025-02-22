@@ -1,0 +1,9 @@
+{
+    "success": {
+      "ITEM_UPDATED": "Item updated in cart.",
+      "ITEM_ADDED": "Item added to cart.",
+      "CART_CHECKOUT": "Cart checkedout successfully.",
+      "CART_CANCELED": "Cart canceled successfully.",
+      "CART_RETREIVED": "Cart retreived successfully."
+    }
+}

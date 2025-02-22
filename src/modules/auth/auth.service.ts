@@ -17,6 +17,7 @@ import { MessageService } from '../messages/messages.service';
 import { messagingConfig } from 'src/common/constants';
 import { recoveryTemplate } from '../messages/templates/recovery-template';
 import { registrationTmplate } from '../messages/templates/registration-success';
+import { I18nService } from 'nestjs-i18n';
 
 @Injectable()
 export class AuthService {
@@ -24,6 +25,7 @@ export class AuthService {
     private readonly prisma: PrismaService,
     private readonly jwt: JwtService,
     private messageService: MessageService,
+    private readonly i18n: I18nService,
   ) {}
   async register(createRegisterDto: CreateRegisterDto) {
     const { email, name, password, repeatPassword } = createRegisterDto;
@@ -35,12 +37,14 @@ export class AuthService {
 
     if (userExist) {
       throw new ConflictException(
-        'Ya hay un usuario registrado con ese Email.',
+        this.i18n.translate('auth.errors.USER_ALREADY_EXISTS')
       );
     }
 
     if (password !== repeatPassword) {
-      throw new ConflictException('Las contraseñas no son identicas.');
+      throw new ConflictException(
+        this.i18n.translate('auth.errors.PASSWORDS_DO_NOT_MATCH')
+      );
     }
 
     try {
@@ -55,7 +59,7 @@ export class AuthService {
       });
 
       if (!registeredUser) {
-        throw new BadRequestException('No se pudo registrar al usuario');
+        throw new InternalServerErrorException(this.i18n.translate('auth.errors.USER_REGISTRATION_FAILED'));
       }
 
       const link = `https://luxshop.com/`;
@@ -66,19 +70,19 @@ export class AuthService {
       await this.messageService.sendRegisterUserEmail({
         from: messagingConfig.emailSender,
         to: email,
-        subject: 'LuxShop - Registro exitoso!',
+        subject: this.i18n.translate('auth.success.USER_REGISTERED'),
         emailBody,
       });
 
       return {
-        message: 'Usuario registrado con éxito!',
+        message: this.i18n.translate('auth.success.USER_REGISTERED'),
         newUser: {
           name,
           emailLower: formattedEmail,
         },
       };
     } catch (error) {
-      throw new InternalServerErrorException('No se pudo registrar al usuario');
+      throw new InternalServerErrorException(this.i18n.translate('auth.errors.USER_REGISTRATION_FAILED'));
     }
   }
 
@@ -92,13 +96,13 @@ export class AuthService {
     });
 
     if (!userExist) {
-      throw new NotFoundException('Credenciales invalidas.');
+      throw new NotFoundException(this.i18n.translate('auth.errors.INVALID_CREDENTIALS'));
     }
 
     const passwordsMatch = await bcrypt.compare(password, userExist.password);
 
     if (!passwordsMatch) {
-      throw new BadRequestException('Credenciales invalidas.');
+      throw new BadRequestException(this.i18n.translate('auth.errors.INVALID_CREDENTIALS'));
     }
 
     const payload = {
@@ -109,7 +113,7 @@ export class AuthService {
     const token = this.jwt.sign(payload, { expiresIn: '24h' });
 
     return {
-      message: 'Usuario logueado',
+      message: this.i18n.translate('auth.success.LOGGED_IN'),
       token,
     };
   }
@@ -120,7 +124,7 @@ export class AuthService {
       where: { email: formattedEmail },
     });
     if (!foundUser) {
-      throw new BadRequestException('User not found');
+      throw new BadRequestException(this.i18n.translate('auth.errors.USER_NOT_FOUND'));
     }
 
     try {
@@ -137,22 +141,20 @@ export class AuthService {
       await this.messageService.sendRegisterUserEmail({
         from: messagingConfig.emailSender,
         to: email,
-        subject: 'LuxShop - Recuperacion de contraseña',
+        subject: this.i18n.translate('auth.success.PASSWORD_RECOVERY'),
         emailBody,
       });
 
       return {
-        message: 'Link de recuperación de contraseña generado',
+        message: this.i18n.translate('auth.success.RECOVERY_LINK_SENT'),
         token,
       };
     } catch (error) {
       throw new InternalServerErrorException(
-        'No se pudo enviar recuperación de contraseña',
+        this.i18n.translate('auth.errors.LINK_RECOVERY_FAILED'),
       );
     }
   }
-
-  //AQUI DEBERIA IR LA LOGICA PARA MAILJET
 
   async RecoveryPassword(recoveryPassword: RecoveryPasswordDto) {
     const { newPassword, token } = recoveryPassword;
@@ -163,7 +165,7 @@ export class AuthService {
       const { id } = payload;
 
       if (!id) {
-        throw new BadRequestException('Invalid token payload');
+        throw new BadRequestException(this.i18n.translate('auth.errors.TOKEN_INVALID'));
       }
 
       const hashedPassword = await bcrypt.hash(newPassword, 15);
@@ -174,10 +176,10 @@ export class AuthService {
       });
 
       return {
-        message: 'contraseña cambiada con exito',
+        message: this.i18n.translate('auth.errors.PASSWORD_CHANGED'),
       };
     } catch (error) {
-      throw new BadRequestException('Invalid or expirex token');
+      throw new BadRequestException(this.i18n.translate('auth.errors.TOKEN_EXPIRED'));
     }
   }
 }

@@ -1,0 +1,10 @@
+{
+    "errors": {
+      "PRODUCT_NOT_FOUND": "Product not found.",
+      "ITEM_REMOVED": "Item removed from cart.",
+      "ITEM_NOT_FOUND": "Item not found in cart.",
+      "CART_EMPTY": "Cart is empty.",
+      "CART_NOT_FOUND": "Cart not found.",
+      "ITEM_NOT_REMOVED": "Item removed from cart."
+    }
+}

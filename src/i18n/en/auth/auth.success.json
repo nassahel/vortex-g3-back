@@ -1,0 +1,9 @@
+{
+  "success": {
+    "USER_REGISTERED": "LuxShop - User successfully registered!",
+    "LOGGED_IN": "User successfully logged in.",
+    "PASSWORD_CHANGED": "Password successfully changed.",
+    "RECOVERY_LINK_SENT": "Password recovery link generated.",
+    "PASSWORD_RECOVERY": "LuxShop - Password Recovery"
+  }
+}

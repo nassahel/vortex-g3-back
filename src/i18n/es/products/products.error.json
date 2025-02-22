@@ -1,0 +1,17 @@
+{
+    "errors": {
+        "PRODUCT_NOT_FOUND": "Producto no encontrado",
+        "PRODUCT_ID_NOT_FOUND": "Producto con id: {id} no encontrado",
+        "PRODUCT_EXISTS": "El producto ya existe",
+        "PRODUCT_CREATION_FAILED": "Error al crear el producto",
+        "NO_VALID_PRODUCT": "Producto no válido",
+        "PRODUCTS_IMPORT_FAILED": "Error al importar productos",
+        "PRODUCT_UPDATE_FAILED": "Error al actualizar el producto",
+        "PRODUCT_DELETION_FAILED": "Error al eliminar el producto",
+        "ACTIVE_PRODUCT": "El producto está activo",
+        "PRODUCT_RESTAURED_FAILED": "Error al restaurar el producto",
+        "MISSING_CATEGORIES": "Faltan las siguientes categorías: ",
+        "CATEGORY_ASSOCIATION_FAILED": "Error al asociar la categoría",
+        "REQUIRED_DATA": "Faltan datos obligatorios"
+    }
+}

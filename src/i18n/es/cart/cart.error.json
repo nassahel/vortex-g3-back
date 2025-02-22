@@ -1,0 +1,10 @@
+{
+    "errors": {
+      "PRODUCT_NOT_FOUND": "Producto no encontrado.",
+      "ITEM_REMOVED": "Artículo eliminado del carrito.",
+      "ITEM_NOT_FOUND": "Artículo no encontrado en el carrito.",
+      "CART_EMPTY": "El carrito está vacío.",
+      "CART_NOT_FOUND": "Carrito no encontrado.",
+      "USER_ID_REQUIRED": "Se requiere el ID de usuario."
+    }
+}

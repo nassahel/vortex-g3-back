@@ -12,6 +12,7 @@ import { CategoriesModule } from '../categories/categories.module';
 import { ImagesModule } from '../images/images.module';
 import { CartModule } from '../cart/cart.module';
 import { ChartModule } from '../chart/chart.module';
+import I18nModuleConfig from 'src/config/i18n.config';
 
 @Module({
   imports: [
@@ -20,6 +21,7 @@ import { ChartModule } from '../chart/chart.module';
       envFilePath: ['.env'],
       validationSchema: envVaidationSchema,
     }),
+    I18nModuleConfig(),
     PrismaModule,
     AuthModule,
     UserModule,
