@@ -1,7 +1,0 @@
-{
-    "errors": {
-        "EMAIL_SENT": "El correo electrónico fue enviado con éxito a {to}.",
-        "EMAIL_FAILED": "Error al enviar el correo electrónico",
-        "MAILJET_ERROR": "Error de Mailjet: "
-    }
-}

@@ -29,12 +29,12 @@ export class MailjetService implements EmailService {
           },
         ],
       })
-      .then(() => {
-        this.logger.debug(this.i18n.t('messages.error.EMAIL_SENT', { args: { to } }));
+      .then(async () => {
+        this.logger.debug(await this.i18n.t('error.EMAIL_SENT', { args: { to } }));
       })
-      .catch((error) => {
-        this.logger.error(this.i18n.t('messages.error.EMAIL_FAILED', error.stack));
-        console.error(this.i18n.t('messages.error.MAILJET_ERROR', error));
+      .catch(async (error) => {
+        this.logger.error(await this.i18n.t('error.EMAIL_FAILED', error.stack));
+        console.error(await this.i18n.t('error.MAILJET_ERROR', error));
       });
   }
 }

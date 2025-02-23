@@ -14,7 +14,7 @@ import { FileInterceptor } from '@nestjs/platform-express';
 import { memoryStorage } from 'multer';
 import { I18nService } from 'nestjs-i18n';
 import { ApiOperation, ApiResponse } from '@nestjs/swagger';
-import { SWAGGER_TRANSLATIONS } from 'src/i18n/en/swagger/i18n.swagger';
+import { SWAGGER_TRANSLATIONS } from 'src/i18n/en/i18n.swagger';
 
 @Controller('images')
 export class ImagesController {

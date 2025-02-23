@@ -22,7 +22,7 @@ import { ProfileService } from './profile.service';
 import { UpdateProfileDto } from './dto/update.profile.dto';
 import { AuthService } from '../auth/auth.service';
 import { I18nService } from 'nestjs-i18n';
-import { SWAGGER_TRANSLATIONS } from 'src/i18n/en/swagger/i18n.swagger';
+import { SWAGGER_TRANSLATIONS } from 'src/i18n/en/i18n.swagger';
 
 @ApiTags('Profile')
 @Controller('profile')
@@ -49,7 +49,7 @@ export class ProfileController {
     @Body() updateProfileDto?: UpdateProfileDto,
   ) {
     if (!userId) {
-      throw new BadRequestException(this.i18n.t('profile.errors.USER_ID_REQUIRED'));
+      throw new BadRequestException(await this.i18n.t('errors.USER_ID_REQUIRED'));
     }
     const createdProfile = await this.profileService.createProfile(
       userId,
@@ -86,7 +86,7 @@ export class ProfileController {
     @Body('userId') userId: string,
   ) {
     const imageUrl = await this.profileService.uploadImage(file, userId); //Llama al servicio AwsService para manejar la carga de la imagen
-    return { message: this.i18n.t('profile.success.IMAGE_UPLOADED'), data: imageUrl };
+    return { message: await this.i18n.t('success.IMAGE_UPLOADED'), data: imageUrl };
   }
 
   //Ruta para eliminar la imagen
@@ -96,7 +96,7 @@ export class ProfileController {
   async deleteProfileImage(@Param('userId') userId: string) {
     //Recibe userId como parametro
     const result = await this.profileService.deleteImage(userId); //Llama al servicio para eliminar la imagen
-    return { message: this.i18n.t('profile.success.IMAGE_DELETED'), data: result };
+    return { message: await this.i18n.t('success.IMAGE_DELETED'), data: result };
   }
 
   //Actualizar la info del usuario
@@ -112,6 +112,6 @@ export class ProfileController {
       userId,
       updateProfileDto,
     );
-    return { message: this.i18n.t('profile.success.PROFILE_UPDATED'), data: updatedUser };
+    return { message: await this.i18n.t('success.PROFILE_UPDATED'), data: updatedUser };
   }
 }

@@ -6,7 +6,7 @@ import {
   CreateRegisterDto,
   RecoveryPasswordDto,
 } from './dto/create-auth.dto';
-import { SWAGGER_TRANSLATIONS } from 'src/i18n/en/swagger/i18n.swagger';
+import { SWAGGER_TRANSLATIONS } from 'src/i18n/en/i18n.swagger';
 import { ApiOperation, ApiResponse } from '@nestjs/swagger';
 
 @Controller('auth')

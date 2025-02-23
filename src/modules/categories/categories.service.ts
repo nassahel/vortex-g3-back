@@ -26,7 +26,7 @@ export class CategoriesService {
       return categories;
     } catch (error) {
       console.error(error);
-      throw new BadRequestException(this.i18n.translate('categories.error.CATEGORY_NOT_FOUND'), error);
+      throw new BadRequestException(await this.i18n.translate('error.CATEGORY_NOT_FOUND'), error);
     }
   }
 
@@ -58,13 +58,13 @@ export class CategoriesService {
         },
       });
       if (!category) {
-        throw new NotFoundException(this.i18n.translate('categories.error.CATEGORY_ID_NOT_FOUND', { args: { id } }));
+        throw new NotFoundException(await this.i18n.translate('error.CATEGORY_ID_NOT_FOUND', { args: { id } }));
       }
       return category;
     } catch (error) {
       console.error(error);
       throw new BadRequestException(
-        this.i18n.translate('categories.error.CATEGORY_NOT_FOUND'),
+        await this.i18n.translate('error.CATEGORY_NOT_FOUND'),
         error.response.message,
       );
     }
@@ -78,17 +78,17 @@ export class CategoriesService {
           where: { name },
         });
         if (categoryExists) {
-          throw new BadRequestException(this.i18n.translate('categories.error.CATEGORY_ALREADY_EXISTS'));
+          throw new BadRequestException(await this.i18n.translate('error.CATEGORY_ALREADY_EXISTS'));
         }
         return tx.category.create({
           data: { name },
         });
       });
-      return { message: this.i18n.translate('categories.success.CATEGORY_CREATED'), newCategory };
+      return { message: await this.i18n.translate('success.CATEGORY_CREATED'), newCategory };
     } catch (error) {
       console.error(error);
       throw new BadRequestException(
-        this.i18n.translate('categories.error.CATEGORY_CREATION_FAILED'),
+        await this.i18n.translate('error.CATEGORY_CREATION_FAILED'),
         error.response.message,
       );
     }
@@ -114,12 +114,12 @@ export class CategoriesService {
       });
 
       return {
-        message: this.i18n.translate('categories.success.CATEGORY_IMPORTED'),
+        message: await this.i18n.translate('success.CATEGORY_IMPORTED'),
         cantidad: categories.length,
       };
     } catch (error) {
       throw new BadRequestException(
-        this.i18n.translate('categories.error.CATRGORY_IMPORTED_FAILED') + error.message,
+        await this.i18n.translate('error.CATRGORY_IMPORTED_FAILED') + error.message,
       );
     }
   }
@@ -131,14 +131,14 @@ export class CategoriesService {
         where: { id, isDeleted: false },
       });
       if (!categoryExists) {
-        throw new NotFoundException(this.i18n.translate('categories.error.CATEGORY_ID_NOT_FOUND', { args: { id } }));
+        throw new NotFoundException(await this.i18n.translate('error.CATEGORY_ID_NOT_FOUND', { args: { id } }));
       }
       //verifica que el nombre de la categoria no exista
       const categoryNameExist = await this.prisma.category.findFirst({
         where: { name: updateCategoryDto.name, isDeleted: false },
       });
       if (categoryNameExist) {
-        throw new BadRequestException(this.i18n.translate('categories.error.CATEGORY_ALREADY_EXISTS'));
+        throw new BadRequestException(await this.i18n.translate('error.CATEGORY_ALREADY_EXISTS'));
       }
       //actualiza la categoria
       const updatedCategory = await this.prisma.category.update({
@@ -148,13 +148,13 @@ export class CategoriesService {
         },
       });
       return {
-        message: this.i18n.translate('categories.success.CATEGORY_UPDATED'),
+        message: await this.i18n.translate('success.CATEGORY_UPDATED'),
         updatedCategory,
       };
     } catch (error) {
       console.error(error);
       throw new BadRequestException(
-        this.i18n.translate('categories.error.CATEGORY_UPDATE_FAILED'),
+        await this.i18n.translate('error.CATEGORY_UPDATE_FAILED'),
         error.response.message,
       );
     }
@@ -166,20 +166,20 @@ export class CategoriesService {
         where: { id, isDeleted: false },
       });
       if (!categoryExists) {
-        throw new NotFoundException(this.i18n.translate('categories.error.CATEGORY_NOT_FOUND'));
+        throw new NotFoundException(await this.i18n.translate('error.CATEGORY_NOT_FOUND'));
       }
       const deletedCategory = await this.prisma.category.update({
         where: { id },
         data: { isDeleted: true },
       });
       return {
-        message: this.i18n.translate('categories.success.CATEGORY_DELETED'),
+        message: await this.i18n.translate('success.CATEGORY_DELETED'),
         category: deletedCategory,
       };
     } catch (error) {
       console.error(error);
       throw new BadRequestException(
-        this.i18n.translate('categories.error.CATEGORY_DELETE_FAILED'),
+        await this.i18n.translate('error.CATEGORY_DELETE_FAILED'),
         error.response.message,
       );
     }
@@ -191,23 +191,23 @@ export class CategoriesService {
         where: { id },
       });
       if (!categoryExists) {
-        throw new NotFoundException(this.i18n.translate('categories.error.CATEGORY_NOT_FOUND'));
+        throw new NotFoundException(await this.i18n.translate('error.CATEGORY_NOT_FOUND'));
       }
       if (!categoryExists.isDeleted) {
-        throw new BadRequestException(this.i18n.translate('categories.error.CATEGORY_NOT_DELETED'));
+        throw new BadRequestException(await this.i18n.translate('error.CATEGORY_NOT_DELETED'));
       }
       const restoredCategory = await this.prisma.category.update({
         where: { id },
         data: { isDeleted: false },
       });
       return {
-        message: this.i18n.translate('categories.success.CATEGORY_RESTORED'),
+        message: await this.i18n.translate('success.CATEGORY_RESTORED'),
         restoredCategory,
       };
     } catch (error) {
       console.error(error);
       throw new BadRequestException(
-        this.i18n.translate('categories.error.CATEGORY_RESTORE_FAILED'),
+        await this.i18n.translate('error.CATEGORY_RESTORE_FAILED'),
         error.response.message,
       );
     }

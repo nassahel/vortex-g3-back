@@ -20,7 +20,7 @@ import { FileInterceptor, FilesInterceptor } from '@nestjs/platform-express';
 import { memoryStorage } from 'multer';
 import { ApiConsumes, ApiOperation, ApiResponse } from '@nestjs/swagger';
 import { I18nService } from 'nestjs-i18n';
-import { SWAGGER_TRANSLATIONS } from 'src/i18n/en/swagger/i18n.swagger';
+import { SWAGGER_TRANSLATIONS } from 'src/i18n/en/i18n.swagger';
 
 @Controller('product')
 export class ProductsController {
@@ -45,7 +45,7 @@ export class ProductsController {
   ) {
     try {
       if (!createProductDto) {
-        throw new BadRequestException(this.i18n.t('products.error.REQUIRED_DATA'));
+        throw new BadRequestException(await this.i18n.t('error.REQUIRED_DATA'));
       }
       const createdProduct = await this.productsService.createProduct(
         createProductDto,
@@ -54,7 +54,7 @@ export class ProductsController {
 
       return createdProduct;
     } catch (error) {
-      throw new BadRequestException(this.i18n.t('products.error.PRODUCT_CREATION_FAILED'));
+      throw new BadRequestException(await this.i18n.t('error.PRODUCT_CREATION_FAILED'));
     }
   }
 

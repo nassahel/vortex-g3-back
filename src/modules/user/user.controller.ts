@@ -16,7 +16,7 @@ import { RolesGuard } from '../auth/guards/roles.guard';
 import { Roles } from 'src/common/decorators/roles.decorator';
 import { RoleEnum } from 'src/common/constants';
 import { I18nService } from 'nestjs-i18n';
-import { SWAGGER_TRANSLATIONS } from 'src/i18n/en/swagger/i18n.swagger';
+import { SWAGGER_TRANSLATIONS } from 'src/i18n/en/i18n.swagger';
 import { ApiOperation, ApiResponse } from '@nestjs/swagger';
 
 @Controller('users')

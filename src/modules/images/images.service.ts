@@ -20,7 +20,7 @@ export class ImagesService {
         where: { id, isDeleted: false },
       });
       if (!productExists) {
-        throw new NotFoundException(this.i18n.translate('images.error.PRODUCT_ID_NOT_FOUND', { args: { id } }));
+        throw new NotFoundException(await this.i18n.translate('error.PRODUCT_ID_NOT_FOUND', { args: { id } }));
       }
       //subir la nueva imagen
       const imageUrl = await this.aws.uploadImage(image, id);
@@ -33,12 +33,12 @@ export class ImagesService {
         },
       });
       return {
-        message: this.i18n.translate('images.success.UPLOADING_IMAGE'),
+        message: await this.i18n.translate('success.UPLOADING_IMAGE'),
       };
     } catch (error) {
       console.log(error);
       throw new BadRequestException(
-        this.i18n.translate('images.error.UPLOADING_IMAGE_ERROR'),
+        await this.i18n.translate('error.UPLOADING_IMAGE_ERROR'),
         error.response,
       );
     }
@@ -51,7 +51,7 @@ export class ImagesService {
       });
       return images;
     } catch (error) {
-      throw new BadRequestException(this.i18n.translate('images.error.IMAGE_ERROR'), error);
+      throw new BadRequestException(await this.i18n.translate('error.IMAGE_ERROR'), error);
     }
   }
 
@@ -61,11 +61,11 @@ export class ImagesService {
         where: { id },
       });
       if (!image) {
-        throw new NotFoundException(this.i18n.translate('images.error.IMAGE_NOT_FOUND'));
+        throw new NotFoundException(await this.i18n.translate('error.IMAGE_NOT_FOUND'));
       }
       return image;
     } catch (error) {
-      throw new BadRequestException(this.i18n.translate('images.error.IMAGE_NOT_FOUND'), error);
+      throw new BadRequestException(await this.i18n.translate('error.IMAGE_NOT_FOUND'), error);
     }
   }
 
@@ -76,7 +76,7 @@ export class ImagesService {
       });
 
       if (!imageExists) {
-        throw new NotFoundException(this.i18n.translate('images.error.IMAGE_ID_NOT_FOUND', { args: { id } }));
+        throw new NotFoundException(await this.i18n.translate('error.IMAGE_ID_NOT_FOUND', { args: { id } }));
       }
 
       const imageUrl = imageExists.url;
@@ -87,16 +87,16 @@ export class ImagesService {
 
           await this.aws.deleteImage(key);
         } catch (error) {
-          throw new BadRequestException(this.i18n.translate('images.error.INVALID_URL'), error);
+          throw new BadRequestException(await this.i18n.translate('error.INVALID_URL'), error);
         }
       }
 
       await this.prisma.image.delete({ where: { id } });
 
-      return { message: this.i18n.translate('images.success.DELETED_SUCCESS') };
+      return { message: await this.i18n.translate('success.DELETED_SUCCESS') };
     } catch (error) {
       throw new BadRequestException(
-        this.i18n.translate('images.error.DELETED_ERROR'),
+        await this.i18n.translate('error.DELETED_ERROR'),
         error,
       );
     }

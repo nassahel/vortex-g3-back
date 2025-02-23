@@ -1,9 +1,0 @@
-{
-    "success":{
-        "CREATED_PRODUCT": "Product created successfully",
-        "PRODUCTS_IMPORTED": "Products imported successfully",
-        "UPDATED_PRODUCT": "Product updated successfully",
-        "DELETED_PRODUCT": "Product deleted successfully",
-        "PRODUCT_RESTORED": "Product restaured successfully"
-    }
-}

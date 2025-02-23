@@ -13,7 +13,7 @@ import { CartService } from './cart.service';
 import { UpsertCartItemDto } from './dto/upsert.cart.item.dto';
 import { CheckoutCartDto } from './dto/checkout.cart.dto';
 import { I18nService } from 'nestjs-i18n';
-import { SWAGGER_TRANSLATIONS } from 'src/i18n/en/swagger/i18n.swagger';
+import { SWAGGER_TRANSLATIONS } from 'src/i18n/en/i18n.swagger';
 
 @ApiTags('cart')
 @Controller('cart')
@@ -28,11 +28,11 @@ export class CartController {
   @ApiResponse({ status: 200, description: SWAGGER_TRANSLATIONS.CART_RETRIEVED })
   async getActiveCart(@Param('userId') userId: string) {
     if (!userId) {
-      throw new BadRequestException(this.i18n.translate('cart.error.USER_ID_REQUIRED'));
+      throw new BadRequestException(await this.i18n.translate('error.USER_ID_REQUIRED'));
     }
 
     const cart = await this.cartService.getActiveCart(userId);
-    return { message: (this.i18n.translate('cart.success.CART_RETRIEVED')), data: cart };
+    return { message: (await this.i18n.translate('success.CART_RETRIEVED')), data: cart };
   }
 
   @Post('item/:userId')
@@ -47,7 +47,7 @@ export class CartController {
     @Body() upsertCartItemDto: UpsertCartItemDto,
   ) {
     if (!userId) {
-      throw new BadRequestException(this.i18n.translate('cart.error.USER_ID_REQUIRED'));
+      throw new BadRequestException(await this.i18n.translate('error.USER_ID_REQUIRED'));
     }
 
     try {
@@ -58,9 +58,9 @@ export class CartController {
       return { message: result.message };
     } catch (error) {
       if (error instanceof NotFoundException) {
-        throw new NotFoundException(this.i18n.translate('cart.error.PRODUCT_NOT_FOUND'));
+        throw new NotFoundException(await this.i18n.translate('error.PRODUCT_NOT_FOUND'));
       }
-      throw new BadRequestException(this.i18n.translate('cart.error.UPDATING_CART'));
+      throw new BadRequestException(await this.i18n.translate('error.UPDATING_CART'));
     }
   }
 
@@ -74,8 +74,8 @@ export class CartController {
   ) {
     if (!userId || !productId) {
       throw new BadRequestException(
-        this.i18n.translate('cart.error.USER_ID_REQUIRED') 
-        && this.i18n.translate('cart.error.PRODUCT_ID_REQUIRED'));
+        await this.i18n.translate('error.USER_ID_REQUIRED') 
+        && await this.i18n.translate('error.PRODUCT_ID_REQUIRED'));
     }
 
     try {
@@ -86,9 +86,9 @@ export class CartController {
       return { message: result.message };
     } catch (error) {
       if (error instanceof NotFoundException) {
-        throw new NotFoundException(this.i18n.translate('cart.error.ITEM_NOT_FOUND'));
+        throw new NotFoundException(await this.i18n.translate('error.ITEM_NOT_FOUND'));
       }
-      throw new BadRequestException(this.i18n.translate('cart.error.ITEM_NOT_REMOVED'));
+      throw new BadRequestException(await this.i18n.translate('error.ITEM_NOT_REMOVED'));
     }
   }
 

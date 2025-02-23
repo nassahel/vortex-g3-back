@@ -1,6 +1,0 @@
-{
-    "errors": {
-        "EXCEL_EMPTY": "El archivo de Excel está vacío",
-        "EXCEL_MISSING_ROW": "Faltan filas en el archivo"
-    }
-}

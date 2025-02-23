@@ -76,7 +76,7 @@ export class ProductsService {
       return formattedProducts;
     } catch (error) {
       console.log(error);
-      throw new BadRequestException(this.i18n.t('products.error.PRODUCT_NOT_FOUND'), error);
+      throw new BadRequestException(await this.i18n.t('error.PRODUCT_NOT_FOUND'), error);
     }
   }
 
@@ -106,13 +106,13 @@ export class ProductsService {
       });
 
       if (!product) {
-        throw new NotFoundException(this.i18n.t('products.error.PRODUCT_ID_NOT_FOUND'));
+        throw new NotFoundException(await this.i18n.t('error.PRODUCT_ID_NOT_FOUND'));
       }
       return product;
     } catch (error) {
       console.log(error);
       throw new BadRequestException(
-        this.i18n.t('products.error.PRODUCT_NOT_FOUND'),
+        await this.i18n.t('error.PRODUCT_NOT_FOUND'),
         error.response.message,
       );
     }
@@ -131,7 +131,7 @@ export class ProductsService {
           where: { name: { equals: name, mode: 'insensitive' } },
         });
         if (productExists) {
-          throw new BadRequestException(this.i18n.t('products.error.PRODUCT_EXISTS'));
+          throw new BadRequestException(await this.i18n.t('error.PRODUCT_EXISTS'));
         }
         //verifica que todas las categorías existan, retorna true si todas las categorías existen
         await this.validateCategories(categories);
@@ -171,11 +171,11 @@ export class ProductsService {
           await Promise.all(imagePromises);
         }
       });
-      return { message: this.i18n.t('products.success.CREATED_PRODUCT'), newProduct };
+      return { message: await this.i18n.t('success.CREATED_PRODUCT'), newProduct };
     } catch (error) {
       console.log(error);
       throw new BadRequestException(
-        this.i18n.t('products.success.PRODUCT_CREATION_FAILED'),
+        await this.i18n.t('success.PRODUCT_CREATION_FAILED'),
         error.response?.message,
       );
     }
@@ -212,7 +212,7 @@ export class ProductsService {
         .filter((product) => product !== null); //se filtra los productos que no son correctos
 
       if (!products.length) {
-        throw new BadRequestException(this.i18n.t('products.error.NO_VALID_PRODUCT'));
+        throw new BadRequestException(await this.i18n.t('error.NO_VALID_PRODUCT'));
       }
       //se eliminan los productos importados duplicados
       const productosSinDuplicar = products.filter(
@@ -237,7 +237,7 @@ export class ProductsService {
 
         if (existingNames.length > 0) {
           throw new BadRequestException(
-            this.i18n.t('products.error.PRODUCT_EXISTS', { args: { names: existingNames.map((p) => p.name).join(', ') } }),
+            await this.i18n.t('error.PRODUCT_EXISTS', { args: { names: existingNames.map((p) => p.name).join(', ') } }),
           );
         }
 
@@ -281,13 +281,13 @@ export class ProductsService {
       });
 
       return {
-        message: this.i18n.t('products.error.PRODUCTS_IMPORTED'),
+        message: await this.i18n.t('error.PRODUCTS_IMPORTED'),
         cantidad: result.length,
       };
     } catch (error) {
       console.log(error);
       throw new BadRequestException(
-        this.i18n.t('products.error.PRODUCTS_IMPORT_FAILED') + error.message,
+        await this.i18n.t('error.PRODUCTS_IMPORT_FAILED') + error.message,
       );
     }
   }
@@ -304,7 +304,7 @@ export class ProductsService {
         });
 
         if (!productExists) {
-          throw new NotFoundException(this.i18n.t('products.error.PRODUCT_ID_NOT_FOUND', { args: { id } }));
+          throw new NotFoundException(await this.i18n.t('error.PRODUCT_ID_NOT_FOUND', { args: { id } }));
         }
 
         // Preparar los datos de actualización
@@ -350,13 +350,13 @@ export class ProductsService {
       });
 
       return {
-        message: this.i18n.t('products.success.UPDATED_PRODUCT'),
+        message: await this.i18n.t('success.UPDATED_PRODUCT'),
         updatedProduct,
       };
     } catch (error) {
       console.log(error);
       throw new BadRequestException(
-        this.i18n.t('products.success.PRODUCT_UPDATE_FAILED'),
+        await this.i18n.t('success.PRODUCT_UPDATE_FAILED'),
         error.response.message,
       );
     }
@@ -369,7 +369,7 @@ export class ProductsService {
       });
       if (!productExists) {
         throw new NotFoundException(
-          this.i18n.t('products.error.PRODUCT_NOT_FOUND'),
+          await this.i18n.t('error.PRODUCT_NOT_FOUND'),
         );
       }
       const productDeleted = await this.prisma.product.update({
@@ -377,13 +377,13 @@ export class ProductsService {
         data: { isDeleted: true },
       });
       return {
-        message: this.i18n.t('products.error.DELETED_PRODUCT'),
+        message: await this.i18n.t('error.DELETED_PRODUCT'),
         productDeleted,
       };
     } catch (error) {
       console.log(error);
       throw new BadRequestException(
-        this.i18n.t('products.error.PRODUCT_DELETION_FAILED'),
+        await this.i18n.t('error.PRODUCT_DELETION_FAILED'),
         error.response.message,
       );
     }
@@ -395,23 +395,23 @@ export class ProductsService {
         where: { id },
       });
       if (!productExists) {
-        throw new NotFoundException(this.i18n.t('products.error.PRODUCT_NOT_FOUND'));
+        throw new NotFoundException(await this.i18n.t('error.PRODUCT_NOT_FOUND'));
       }
       if (!productExists.isDeleted) {
-        throw new BadRequestException(this.i18n.t('products.error.ACTIVE_PRODUCT'));
+        throw new BadRequestException(await this.i18n.t('error.ACTIVE_PRODUCT'));
       }
       const restoredProduct = await this.prisma.product.update({
         where: { id },
         data: { isDeleted: false },
       });
       return {
-        message: this.i18n.t('products.error.PRODUCT_RESTORED'),
+        message: await this.i18n.t('error.PRODUCT_RESTORED'),
         restoredProduct,
       };
     } catch (error) {
       console.log(error);
       throw new BadRequestException(
-        this.i18n.t('products.error.PRODUCT_RESTORED_FAILED'),
+        await this.i18n.t('error.PRODUCT_RESTORED_FAILED'),
         error.response.message,
       );
     }
@@ -431,7 +431,7 @@ export class ProductsService {
 
     if (missingCategories.length > 0) {
       throw new BadRequestException(
-        this.i18n.t('products.error.MISSING_CATEGORIES', { args: { missingCategories: missingCategories.join(', ') } }),
+        await this.i18n.t('error.MISSING_CATEGORIES', { args: { missingCategories: missingCategories.join(', ') } }),
       );
     }
 
@@ -452,7 +452,7 @@ export class ProductsService {
     } catch (error) {
       console.log(error);
       throw new BadRequestException(
-        this.i18n.t('products.error.CATEGORY_ASSOCIATION_FAILED'),
+        await this.i18n.t('error.CATEGORY_ASSOCIATION_FAILED'),
         error.response,
       );
     }

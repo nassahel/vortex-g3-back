@@ -1,7 +1,0 @@
-{
-    "success": {
-        "USER_REGISTER_SUCCESS": "Usuario registrado con éxito",
-        "UPDATED_USER_SUCCESS": "Usuario actualizado con éxito",
-        "DELETED_USER_SUCCESS": "Usuario eliminado con éxito"
-    }
-}

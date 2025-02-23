@@ -17,7 +17,7 @@ import { MessageService } from '../messages/messages.service';
 import { messagingConfig } from 'src/common/constants';
 import { recoveryTemplate } from '../messages/templates/recovery-template';
 import { registrationTmplate } from '../messages/templates/registration-success';
-import { I18nService } from 'nestjs-i18n';
+import { I18nLang, I18nService } from 'nestjs-i18n';
 
 @Injectable()
 export class AuthService {
@@ -37,13 +37,13 @@ export class AuthService {
 
     if (userExist) {
       throw new ConflictException(
-        this.i18n.translate('auth.errors.USER_ALREADY_EXISTS')
+        await this.i18n.translate('error.USER_ALREADY_EXISTS')
       );
     }
 
     if (password !== repeatPassword) {
       throw new ConflictException(
-        this.i18n.translate('auth.errors.PASSWORDS_DO_NOT_MATCH')
+        await this.i18n.translate('error.PASSWORDS_DO_NOT_MATCH')
       );
     }
 
@@ -59,7 +59,7 @@ export class AuthService {
       });
 
       if (!registeredUser) {
-        throw new InternalServerErrorException(this.i18n.translate('auth.errors.USER_REGISTRATION_FAILED'));
+        throw new InternalServerErrorException(await this.i18n.translate('error.USER_REGISTRATION_FAILED'));
       }
 
       const link = `https://luxshop.com/`;
@@ -70,19 +70,19 @@ export class AuthService {
       await this.messageService.sendRegisterUserEmail({
         from: messagingConfig.emailSender,
         to: email,
-        subject: this.i18n.translate('auth.success.USER_REGISTERED'),
+        subject: await this.i18n.translate('success.USER_REGISTERED'),
         emailBody,
       });
 
       return {
-        message: this.i18n.translate('auth.success.USER_REGISTERED'),
+        message: await this.i18n.translate('success.USER_REGISTERED'),
         newUser: {
           name,
           emailLower: formattedEmail,
         },
       };
     } catch (error) {
-      throw new InternalServerErrorException(this.i18n.translate('auth.errors.USER_REGISTRATION_FAILED'));
+      throw new InternalServerErrorException(await this.i18n.translate('error.USER_REGISTRATION_FAILED'));
     }
   }
 
@@ -96,13 +96,13 @@ export class AuthService {
     });
 
     if (!userExist) {
-      throw new NotFoundException(this.i18n.translate('auth.errors.INVALID_CREDENTIALS'));
+      throw new NotFoundException(await this.i18n.translate('error.INVALID_CREDENTIALS'));
     }
 
     const passwordsMatch = await bcrypt.compare(password, userExist.password);
 
     if (!passwordsMatch) {
-      throw new BadRequestException(this.i18n.translate('auth.errors.INVALID_CREDENTIALS'));
+      throw new BadRequestException(await this.i18n.translate('error.INVALID_CREDENTIALS'));
     }
 
     const payload = {
@@ -113,7 +113,7 @@ export class AuthService {
     const token = this.jwt.sign(payload, { expiresIn: '24h' });
 
     return {
-      message: this.i18n.translate('auth.success.LOGGED_IN'),
+      message: await this.i18n.translate('success.LOGGED_IN'),
       token,
     };
   }
@@ -124,7 +124,7 @@ export class AuthService {
       where: { email: formattedEmail },
     });
     if (!foundUser) {
-      throw new BadRequestException(this.i18n.translate('auth.errors.USER_NOT_FOUND'));
+      throw new BadRequestException(await this.i18n.translate('error.USER_NOT_FOUND'));
     }
 
     try {
@@ -141,17 +141,17 @@ export class AuthService {
       await this.messageService.sendRegisterUserEmail({
         from: messagingConfig.emailSender,
         to: email,
-        subject: this.i18n.translate('auth.success.PASSWORD_RECOVERY'),
+        subject: await this.i18n.translate('success.PASSWORD_RECOVERY'),
         emailBody,
       });
 
       return {
-        message: this.i18n.translate('auth.success.RECOVERY_LINK_SENT'),
+        message: await this.i18n.translate('success.RECOVERY_LINK_SENT'),
         token,
       };
     } catch (error) {
       throw new InternalServerErrorException(
-        this.i18n.translate('auth.errors.LINK_RECOVERY_FAILED'),
+        await this.i18n.translate('error.LINK_RECOVERY_FAILED'),
       );
     }
   }
@@ -165,7 +165,7 @@ export class AuthService {
       const { id } = payload;
 
       if (!id) {
-        throw new BadRequestException(this.i18n.translate('auth.errors.TOKEN_INVALID'));
+        throw new BadRequestException(await this.i18n.translate('error.TOKEN_INVALID'));
       }
 
       const hashedPassword = await bcrypt.hash(newPassword, 15);
@@ -176,10 +176,10 @@ export class AuthService {
       });
 
       return {
-        message: this.i18n.translate('auth.errors.PASSWORD_CHANGED'),
+        message: await this.i18n.translate('error.PASSWORD_CHANGED'),
       };
     } catch (error) {
-      throw new BadRequestException(this.i18n.translate('auth.errors.TOKEN_EXPIRED'));
+      throw new BadRequestException(await this.i18n.translate('error.TOKEN_EXPIRED'));
     }
   }
 }

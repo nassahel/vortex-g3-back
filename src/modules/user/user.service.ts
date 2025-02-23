@@ -28,7 +28,7 @@ export class UserService {
       });
       if (userExist) {
         throw new ConflictException(
-          this.i18n.t('user.error.USER_ALREADY_EXISTS'),
+          await this.i18n.t('error.USER_ALREADY_EXISTS'),
         );
       }
 
@@ -44,7 +44,7 @@ export class UserService {
       });
 
       return {
-        message: this.i18n.t('user.success.USER_REGISTERED'),
+        message: await this.i18n.t('success.USER_REGISTERED'),
         newUser: {
           name: newUser.name,
           email: newUser.email,
@@ -52,7 +52,7 @@ export class UserService {
         },
       };
     } catch (error) {
-      throw new InternalServerErrorException(this.i18n.t('user.error.USER_REGISTER_FAILED'));
+      throw new InternalServerErrorException(await this.i18n.t('error.USER_REGISTER_FAILED'));
     }
   }
 
@@ -64,12 +64,12 @@ export class UserService {
       });
 
       if (allUsers.length === 0) {
-        return { message: this.i18n.t('user.error.USER_NOT_FOUND') };
+        return { message: await this.i18n.t('error.USER_NOT_FOUND') };
       }
 
       return allUsers;
     } catch (error) {
-      throw new InternalServerErrorException(this.i18n.t('user.error.USER_NOT_FOUND'));
+      throw new InternalServerErrorException(await this.i18n.t('error.USER_NOT_FOUND'));
     }
   }
 
@@ -81,13 +81,13 @@ export class UserService {
       });
 
       if (allActiveUsers.length === 0) {
-        return { message: this.i18n.t('user.error.USER_NOT_FOUND') };
+        return { message: await this.i18n.t('error.USER_NOT_FOUND') };
       }
 
       return allActiveUsers;
     } catch (error) {
       throw new InternalServerErrorException(
-        this.i18n.t('user.error.USER_NOT_FOUND'),
+        await this.i18n.t('error.USER_NOT_FOUND'),
       );
     }
   }
@@ -103,13 +103,13 @@ export class UserService {
       });
 
       if (allUsers.length === 0) {
-        return { message: this.i18n.t('user.error.USER_NOT_FOUND') };
+        return { message: await this.i18n.t('error.USER_NOT_FOUND') };
       }
 
       return allUsers;
     } catch (error) {
       throw new InternalServerErrorException(
-        this.i18n.t('user.error.USER_NOT_FOUND'),
+        await this.i18n.t('error.USER_NOT_FOUND'),
       );
     }
   }
@@ -120,7 +120,7 @@ export class UserService {
       const foundUser = await this.prisma.user.findUnique({ where: { id } });
 
       if (!foundUser) {
-        throw new NotFoundException(this.i18n.t('user.error.USER_NOT_FOUND'));
+        throw new NotFoundException(await this.i18n.t('error.USER_NOT_FOUND'));
       }
 
       return {
@@ -131,7 +131,7 @@ export class UserService {
         isActive: foundUser.isActive,
       };
     } catch (error) {
-      throw new InternalServerErrorException(this.i18n.t('user.error.USER_NOT_FOUND'));
+      throw new InternalServerErrorException(await this.i18n.t('error.USER_NOT_FOUND'));
     }
   }
 
@@ -144,10 +144,10 @@ export class UserService {
       });
 
       return {
-        message: this.i18n.t('user.success.UPDATED_USER_SUCCESS'),
+        message: await this.i18n.t('success.UPDATED_USER_SUCCESS'),
       };
     } catch (error) {
-      throw new InternalServerErrorException(this.i18n.t('user.error.UPDATED_ERROR'));
+      throw new InternalServerErrorException(await this.i18n.t('error.UPDATED_ERROR'));
     }
   }
 
@@ -157,7 +157,7 @@ export class UserService {
 
       if (!foundUser) {
         throw new NotFoundException(
-          this.i18n.t('user.error.USER_NOT_FOUND'),
+          await this.i18n.t('error.USER_NOT_FOUND'),
         );
       }
 
@@ -167,10 +167,10 @@ export class UserService {
       });
 
       return {
-        message: this.i18n.t('user.success.DELETED_USER_SUCCESS'),
+        message: await this.i18n.t('success.DELETED_USER_SUCCESS'),
       };
     } catch (error) {
-      throw new InternalServerErrorException(this.i18n.t('user.error.DELETE_USER_FAILED'));
+      throw new InternalServerErrorException(await this.i18n.t('error.DELETE_USER_FAILED'));
     }
   }
 
@@ -180,14 +180,14 @@ export class UserService {
       const foundUser = await this.prisma.user.findUnique({ where: { id } });
 
       if (!foundUser) {
-        throw new NotFoundException(this.i18n.t('user.error.USER_NOT_FOUND'));
+        throw new NotFoundException(await this.i18n.t('error.USER_NOT_FOUND'));
       }
 
       await this.prisma.user.delete({ where: { id } });
 
-      return { message: this.i18n.t('user.success.DELETED_USER_SUCCESS') };
+      return { message: await this.i18n.t('success.DELETED_USER_SUCCESS') };
     } catch (error) {
-      throw new InternalServerErrorException(this.i18n.t('user.error.DELETE_USER_FAILED'));
+      throw new InternalServerErrorException(await this.i18n.t('error.DELETE_USER_FAILED'));
     }
   }
 }

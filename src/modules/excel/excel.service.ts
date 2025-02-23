@@ -16,7 +16,7 @@ export class ExcelService {
 
     // Validamos que el archivo tenga contenido
     if (!datos.length) {
-      throw new BadRequestException(this.i18n.translate('excel.error.EXCEL_EMPTY'));
+      throw new BadRequestException(await this.i18n.translate('error.EXCEL_EMPTY'));
     }
 
     // Obtenemos las claves (nombres de columnas) de la primera fila
@@ -29,7 +29,7 @@ export class ExcelService {
 
     if (columnasFaltantes.length > 0) {
       throw new BadRequestException(
-        this.i18n.translate('excel.error.EXCEL_MISSING_ROW'),
+        await this.i18n.translate('error.EXCEL_MISSING_ROW'),
       );
     }
 

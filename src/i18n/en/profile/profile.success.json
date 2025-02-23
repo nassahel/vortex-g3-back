@@ -1,9 +1,0 @@
-{
-    "success":{
-        "CREATED_PROFILE": "Profile created successfully.",
-        "PROFILE_IMAGE_UPLOADED": "Profile image uploaded successfully.",
-        "IMAGE_DELETED": "Image deleted successfully.",
-        "IMAGE_UPLOADED": "Image uploaded successfully.",
-        "PROFILE_UPDATED": "Profile updated successfully"
-    }
-}

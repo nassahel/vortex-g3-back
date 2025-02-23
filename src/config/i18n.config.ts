@@ -1,12 +1,14 @@
 import { HeaderResolver, I18nModule, I18nOptions } from 'nestjs-i18n';
 import * as path from 'path';
 
+
 const I18nModuleConfig = () => {
   const options: I18nOptions = {
     fallbackLanguage: 'es',
     loaderOptions: {
       path: path.join(process.cwd(), 'src/i18n'),
       watch: true,
+      includeSubfolders: true,
     },
     resolvers: [{ use: HeaderResolver, options: ['lang'] }],
   };

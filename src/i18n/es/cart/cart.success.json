@@ -1,9 +1,0 @@
-{
-    "success": {
-      "ITEM_UPDATED": "Artículo actualizado en el carrito.",
-      "ITEM_ADDED": "Artículo agregado al carrito.",
-      "CART_CHECKOUT": "Compra realizada con éxito.",
-      "CART_CANCELED": "Carrito cancelado con éxito.",
-      "CART_RETRIEVED": "Carrito recuperado con éxito."
-    }
-}
