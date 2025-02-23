@@ -19,13 +19,14 @@ import { FilterProductDto } from './dto/filters-product.dto';
 import { FileInterceptor, FilesInterceptor } from '@nestjs/platform-express';
 import { memoryStorage } from 'multer';
 import { ApiConsumes, ApiOperation, ApiResponse } from '@nestjs/swagger';
+import { PaginationArgs } from 'src/utils/pagination/pagination.dto';
 
 @Controller('product')
 export class ProductsController {
   constructor(private readonly productsService: ProductsService) {}
 
   @Get('/all')
-  findAll(@Query() filters: FilterProductDto) {
+  findAll(@Query() filters: FilterProductDto & PaginationArgs) {
     return this.productsService.findAll(filters);
   }
 
