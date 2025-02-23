@@ -10,7 +10,6 @@ import {
   BadRequestException,
   Patch,
   UploadedFiles,
-  Delete,
 } from '@nestjs/common';
 import { ProductsService } from './products.service';
 import { CreateProductDto } from './dto/create-product.dto';
@@ -77,7 +76,7 @@ export class ProductsController {
   }
 
   //Eliminado logico del producto
-  @Delete('/delete/:id')
+  @Patch('/soft-delete/:id')
   remove(@Param('id') id: string) {
     return this.productsService.removeProduct(id);
   }

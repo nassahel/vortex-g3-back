@@ -35,8 +35,8 @@ export class ProductsService {
       if (name) where.name = { contains: name, mode: 'insensitive' };
       if (minPrice || maxPrice) {
         where.price = {};
-        if (minPrice) where.price.gte = minPrice;
-        if (maxPrice) where.price.lte = maxPrice;
+        if (minPrice) where.price.gte = Number(minPrice);
+        if (maxPrice) where.price.lte = Number(maxPrice);
       }
       if (categoryId) {
         where.categories = {

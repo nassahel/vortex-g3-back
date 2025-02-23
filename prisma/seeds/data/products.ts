@@ -10,14 +10,10 @@ const seedProducts = async () => {
     const { categories: categoryNames, ...productData } = product;
 
     // Buscar IDs de categorías
-    const categoryIds = await Promise.all(
-      categoryNames.map(async (name) => {
-        const category = await prisma.category.findFirst({
-          where: { name },
-        });
-        return category?.id;
-      }),
-    );
+    const categoryIds = await prisma.category.findMany({
+      where: { name: { in: categoryNames } },
+      select: { id: true },
+    });
 
     // Crear producto con sus categorías
     await prisma.product.create({
@@ -25,7 +21,7 @@ const seedProducts = async () => {
         ...productData,
         categories: {
           create: categoryIds.map((categoryId) => ({
-            categoryId: categoryId!,
+            categoryId: categoryId.id,
           })),
         },
       },
