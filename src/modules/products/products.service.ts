@@ -137,7 +137,12 @@ export class ProductsService {
           throw new BadRequestException('El producto ya existe.');
         }
         //verifica que todas las categorías existan, retorna true si todas las categorías existen
-        await this.validateCategories(categories);
+        const areValidCategories = await this.validateCategories(categories);
+        if (!areValidCategories) {
+          throw new BadRequestException(
+            'Algunas categorías no existen o fueron eliminadas',
+          );
+        }
 
         const createdProduct = await tx.product.create({
           data: {
@@ -252,8 +257,22 @@ export class ProductsService {
             ),
           ),
         ];
+
+        //obtener los ids de las categorías
+        const categoryIds = await this.prisma.category.findMany({
+          where: { name: { in: allCategories } },
+          select: { id: true },
+        });
+
         //valida que todas las categorías existan
-        await this.validateCategories(allCategories);
+        const areValidCategories = await this.validateCategories(
+          categoryIds.map((c) => c.id),
+        );
+        if (!areValidCategories) {
+          throw new BadRequestException(
+            'Algunas categorías no existen o fueron eliminadas',
+          );
+        }
 
         const createdProducts = [];
         for (const producto of productosSinDuplicar) {
@@ -266,14 +285,26 @@ export class ProductsService {
               description: producto.description,
             },
           });
-          const categoryIds = await this.validateCategories(
-            producto.categories.split(',').map((c) => c.trim()),
-          );
+          const categoryNames = producto.categories
+            .split(',')
+            .map((c) => c.trim());
+
+          //obtener los ids de las categorías
+          const categoryIds = await tx.category.findMany({
+            where: {
+              name: {
+                in: categoryNames,
+                mode: 'insensitive',
+              },
+            },
+            select: { id: true },
+          });
+
           //asignar categorías al producto
           await tx.productCategory.createMany({
             data: categoryIds.map((categoryId) => ({
               productId: createdProduct.id,
-              categoryId,
+              categoryId: categoryId.id,
             })),
           });
 
@@ -320,7 +351,12 @@ export class ProductsService {
 
         // Si hay categorías, validarlas y reemplazarlas correctamente
         if (categories?.length) {
-          const categoryIds = await this.validateCategories(categories);
+          const areValidCategories = await this.validateCategories(categories);
+          if (!areValidCategories) {
+            throw new BadRequestException(
+              'Algunas categorías no existen o fueron eliminadas',
+            );
+          }
 
           // Eliminar las categorías actuales
           await tx.productCategory.deleteMany({
@@ -329,7 +365,7 @@ export class ProductsService {
 
           // Asociar nuevas categorías usando `createMany()`
           await tx.productCategory.createMany({
-            data: categoryIds.map((categoryId) => ({
+            data: categories.map((categoryId) => ({
               productId: id,
               categoryId: categoryId,
             })),
@@ -427,18 +463,17 @@ export class ProductsService {
       select: { id: true },
     });
 
-    const foundCategoryNames = existingCategories.map((c) => c.id);
+    //compara los ids de las categorías existentes con los ids de las categorías que se están creando
+    const foundCategoryIds = existingCategories.map((c) => c.id);
     const missingCategories = categoryId.filter(
-      (id) => !foundCategoryNames.includes(id),
+      (id) => !foundCategoryIds.includes(id),
     );
 
     if (missingCategories.length > 0) {
-      throw new BadRequestException(
-        `Las siguientes categorías no existen o fueron eliminadas: ${missingCategories.join(', ')}`,
-      );
+      return false;
     }
 
-    return existingCategories.map((c) => c.id);
+    return true;
   }
 
   //asociar categorías a un producto
