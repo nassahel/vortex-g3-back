@@ -6,7 +6,6 @@ import { Response } from 'express';
 export class ChartController {
   constructor(private readonly chartService: ChartService) {}
 
-
   @Get()
   async getChart(@Query('type') type: string, @Res() res: Response) {
     try {

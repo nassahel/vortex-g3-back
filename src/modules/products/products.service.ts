@@ -9,6 +9,8 @@ import { PrismaService } from '../prisma/prisma.service';
 import { FilterProductDto } from './dto/filters-product.dto';
 import { ExcelService } from '../excel/excel.service';
 import { AwsService } from 'src/aws/aws.service';
+import { PaginationArgs } from 'src/utils/pagination/pagination.dto';
+import { Paginate } from 'src/utils/pagination/parsing';
 
 @Injectable()
 export class ProductsService {
@@ -18,50 +20,52 @@ export class ProductsService {
     private readonly aws: AwsService,
   ) {}
 
-  async findAll(filters: FilterProductDto) {
+  async findAll(filters: FilterProductDto & PaginationArgs) {
     try {
       const where: any = { isDeleted: false };
+      const {
+        page = 1,
+        limit = 10,
+        name,
+        minPrice,
+        maxPrice,
+        categoryId,
+      } = filters;
 
-      const { name, minPrice, maxPrice, categoryId, minStock, maxStock } =
-        filters;
-
-      //filtro por nombre
       if (name) where.name = { contains: name, mode: 'insensitive' };
-      //filtro por precio
       if (minPrice || maxPrice) {
         where.price = {};
         if (minPrice) where.price.gte = minPrice;
         if (maxPrice) where.price.lte = maxPrice;
       }
-      // Filtro por stock
-      if (minStock || maxStock) {
-        where.stock = {};
-        if (minStock) where.stock.gte = minStock;
-        if (maxStock) where.stock.lte = maxStock;
-      }
-      //filtro por categoria
       if (categoryId) {
         where.categories = {
-          some: {
-            categoryId: categoryId,
-          },
+          some: { categoryId },
         };
       }
-      const products = await this.prisma.product.findMany({
-        where,
-        include: {
-          images: {
-            select: { url: true },
-          },
-          categories: {
-            select: {
-              category: {
-                select: { name: true },
+
+      const [total, products] = await this.prisma.$transaction([
+        this.prisma.product.count({ where }),
+        this.prisma.product.findMany({
+          where,
+          include: {
+            images: {
+              select: { url: true },
+            },
+            categories: {
+              select: {
+                category: {
+                  select: { name: true },
+                },
               },
             },
           },
-        },
-      });
+          skip: (page - 1) * limit,
+          take: limit,
+          orderBy: { name: 'desc' },
+        }),
+      ]);
+
       const formattedProducts = products.map((product) => ({
         id: product.id,
         name: product.name,
@@ -71,7 +75,8 @@ export class ProductsService {
         images: product.images,
         categories: product.categories.map((pc) => pc.category.name),
       }));
-      return formattedProducts;
+
+      return Paginate(formattedProducts, total, { page, limit });
     } catch (error) {
       console.log(error);
       throw new BadRequestException('Error al obtener los productos: ', error);
