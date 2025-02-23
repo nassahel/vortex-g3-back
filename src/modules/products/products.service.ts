@@ -164,6 +164,7 @@ export class ProductsService {
 
         //subir imagenes a s3
         if (images && images.length > 0) {
+          console.log(images);
           const imagePromises = images.map(async (image) => {
             const imageUrl = await this.aws.uploadImage(
               image,
@@ -178,14 +179,12 @@ export class ProductsService {
           });
           await Promise.all(imagePromises);
         }
+        return createdProduct;
       });
       return { message: 'Producto creado correctamente', newProduct };
     } catch (error) {
       console.log(error);
-      throw new BadRequestException(
-        'Error al crear el producto:',
-        error.response?.message,
-      );
+      throw new BadRequestException('Error al crear el producto:', error);
     }
   }
 
