@@ -50,7 +50,7 @@ export class ProductsService {
           where,
           include: {
             images: {
-              select: { url: true },
+              select: { id: true, url: true, isPrincipal: true },
             },
             categories: {
               select: {
