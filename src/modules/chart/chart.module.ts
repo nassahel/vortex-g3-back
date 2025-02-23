@@ -1,10 +1,11 @@
 import { Module } from '@nestjs/common';
-import { ChartController } from './chart.controller';
+import { ReportsController } from './reports.controller';
+import { ReportsService } from './reports.service';
 import { ChartService } from './chart.service';
 
 @Module({
-  controllers: [ChartController],
-  providers: [ChartService],
-  exports: [ChartService], 
+  controllers: [ReportsController],
+  providers: [ReportsService, ChartService],
+  exports: [ReportsService, ChartService], 
 })
 export class ChartModule {}

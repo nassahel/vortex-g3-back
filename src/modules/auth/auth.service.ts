@@ -24,7 +24,7 @@ export class AuthService {
     private readonly prisma: PrismaService,
     private readonly jwt: JwtService,
     private messageService: MessageService,
-  ) {}
+  ) { }
   async register(createRegisterDto: CreateRegisterDto) {
     const { email, name, password, repeatPassword } = createRegisterDto;
 
@@ -58,23 +58,27 @@ export class AuthService {
         throw new BadRequestException('No se pudo registrar al usuario');
       }
 
-      const link = `https://luxshop.com/`;
-      let emailBody = registrationTmplate;
-      emailBody = emailBody.replace(/{{name}}/g, name);
-      emailBody = emailBody.replace(/{{link}}/g, link);
 
-      await this.messageService.sendRegisterUserEmail({
-        from: messagingConfig.emailSender,
-        to: email,
-        subject: 'LuxShop - Registro exitoso!',
-        emailBody,
-      });
+      //Envia email a gnte cuando alguien se registra.
+      //Está comentado para que no le envie emails a gente desconocida mientras lo pruebo
+
+      // const link = `https://luxshop.com/`;
+      // let emailBody = registrationTmplate;
+      // emailBody = emailBody.replace(/{{name}}/g, name);
+      // emailBody = emailBody.replace(/{{link}}/g, link);
+
+      // await this.messageService.sendRegisterUserEmail({
+      //   from: messagingConfig.emailSender,
+      //   to: email,
+      //   subject: 'LuxShop - Registro exitoso!',
+      //   emailBody,
+      // });
 
       return {
         message: 'Usuario registrado con éxito!',
         newUser: {
           name,
-          emailLower: formattedEmail,
+          email: formattedEmail,
         },
       };
     } catch (error) {
@@ -88,7 +92,8 @@ export class AuthService {
     const { password, email } = createLoginDto;
     const formattedEmail = email.toLowerCase();
     const userExist = await this.prisma.user.findUnique({
-      where: { email: formattedEmail },
+      //Para filtrar a los usuarios inactivos y con borrado logico.
+      where: { email: formattedEmail, isActive: true, isDeleted: false },
     });
 
     if (!userExist) {
