@@ -9,11 +9,13 @@ import {
   UploadedFile,
   Patch,
   Delete,
+  Query,
 } from '@nestjs/common';
 import { CategoriesService } from './categories.service';
 import { CreateCategoryDto } from './dto/create-category.dto';
 import { UpdateCategoryDto } from './dto/update-category.dto';
 import { FileInterceptor } from '@nestjs/platform-express';
+import { PaginationArgs } from 'src/utils/pagination/pagination.dto';
 
 @Controller('category')
 export class CategoriesController {
@@ -31,8 +33,8 @@ export class CategoriesController {
   }
 
   @Get('/all')
-  findAll() {
-    return this.categoriesService.findAll();
+  findAll(@Query() filters: PaginationArgs) {
+    return this.categoriesService.findAll(filters);
   }
 
   @Get('/:id')

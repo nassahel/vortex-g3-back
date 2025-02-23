@@ -7,6 +7,8 @@ import { PrismaService } from '../prisma/prisma.service';
 import { CreateCategoryDto } from './dto/create-category.dto';
 import { UpdateCategoryDto } from './dto/update-category.dto';
 import { ExcelService } from '../excel/excel.service';
+import { PaginationArgs } from 'src/utils/pagination/pagination.dto';
+import { Paginate } from 'src/utils/pagination/parsing';
 
 @Injectable()
 export class CategoriesService {
@@ -15,13 +17,20 @@ export class CategoriesService {
     private readonly excel: ExcelService,
   ) {}
 
-  async findAll() {
+  async findAll(filters: PaginationArgs) {
     try {
-      const categories = await this.prisma.category.findMany({
-        where: { isDeleted: false },
-        orderBy: { name: 'asc' },
-      });
-      return categories;
+      const { page, limit } = filters;
+      const [total, categories] = await this.prisma.$transaction([
+        this.prisma.category.count({ where: { isDeleted: false } }),
+        this.prisma.category.findMany({
+          where: { isDeleted: false },
+          orderBy: { name: 'asc' },
+          skip: (page - 1) * limit,
+          take: limit,
+        }),
+      ]);
+
+      return Paginate(categories, total, { page, limit });
     } catch (error) {
       console.error(error);
       throw new BadRequestException('Error al obtener las categorías: ', error);

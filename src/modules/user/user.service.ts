@@ -8,6 +8,8 @@ import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { PrismaService } from '../prisma/prisma.service';
 import * as bcrypt from 'bcrypt';
+import { PaginationArgs } from 'src/utils/pagination/pagination.dto';
+import { Paginate } from 'src/utils/pagination/parsing';
 
 @Injectable()
 export class UserService {
@@ -53,59 +55,87 @@ export class UserService {
   }
 
   // Obtiene todos los usuario, excepto los que tienen borrado logico
-  async findAll() {
+  async findAll(filters: PaginationArgs) {
     try {
-      const allUsers = await this.prisma.user.findMany({
-        where: { isDeleted: false },
-      });
+      const { page, limit } = filters;
+      const [total, users] = await this.prisma.$transaction([
+        this.prisma.user.count({ where: { isDeleted: false } }),
+        this.prisma.user.findMany({
+          where: { isDeleted: false },
+          skip: (page - 1) * limit,
+          take: limit,
+        }),
+      ]);
 
-      if (allUsers.length === 0) {
+      if (users.length === 0) {
         return { message: 'No hay usuarios.' };
       }
 
-      return allUsers;
+      return Paginate(users, total, { page, limit });
     } catch (error) {
-      throw new InternalServerErrorException('Error al obtener los usuarios.');
+      throw new InternalServerErrorException(
+        'Error al obtener los usuarios.',
+        error,
+      );
     }
   }
 
   // Obtiene todos los usuarios activos
-  async findAllActive() {
+  async findAllActive(filters: PaginationArgs) {
     try {
-      const allActiveUsers = await this.prisma.user.findMany({
-        where: { isActive: true },
-      });
+      const { page, limit } = filters;
+      const [total, activeUsers] = await this.prisma.$transaction([
+        this.prisma.user.count({ where: { isActive: true } }),
+        this.prisma.user.findMany({
+          where: { isActive: true },
+          skip: (page - 1) * limit,
+          take: limit,
+        }),
+      ]);
 
-      if (allActiveUsers.length === 0) {
+      if (activeUsers.length === 0) {
         return { message: 'No hay usuarios activos.' };
       }
 
-      return allActiveUsers;
+      return Paginate(activeUsers, total, { page, limit });
     } catch (error) {
       throw new InternalServerErrorException(
         'Error al obtener los usuarios activos.',
+        error,
       );
     }
   }
 
   // Obtiene todos los usuarios con rol USER
-  async findAllUsers() {
+  async findAllUsers(filters: PaginationArgs) {
     try {
-      const allUsers = await this.prisma.user.findMany({
-        where: {
-          isActive: true,
-          rol: 'USER',
-        },
-      });
+      const { page, limit } = filters;
+      const [total, users] = await this.prisma.$transaction([
+        this.prisma.user.count({
+          where: {
+            isActive: true,
+            rol: 'USER',
+          },
+        }),
+        this.prisma.user.findMany({
+          where: {
+            isActive: true,
+            rol: 'USER',
+          },
+          skip: (page - 1) * limit,
+          take: limit,
+        }),
+      ]);
 
-      if (allUsers.length === 0) {
+      if (users.length === 0) {
         return { message: 'No hay usuarios activos.' };
       }
 
-      return allUsers;
+      return Paginate(users, total, { page, limit });
     } catch (error) {
       throw new InternalServerErrorException(
         'Error al obtener los usuarios activos.',
+        error,
       );
     }
   }

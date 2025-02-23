@@ -7,6 +7,7 @@ import {
   Param,
   Delete,
   UseGuards,
+  Query,
 } from '@nestjs/common';
 import { UserService } from './user.service';
 import { CreateUserDto } from './dto/create-user.dto';
@@ -15,6 +16,7 @@ import { JwtAuthGuard } from '../auth/guards/jwt.guard';
 import { RolesGuard } from '../auth/guards/roles.guard';
 import { Roles } from 'src/common/decorators/roles.decorator';
 import { RoleEnum } from 'src/common/constants';
+import { PaginationArgs } from 'src/utils/pagination/pagination.dto';
 
 @Controller('users')
 export class UserController {
@@ -31,20 +33,20 @@ export class UserController {
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(RoleEnum.ADMIN)
   @Get()
-  findAll() {
-    return this.userService.findAll();
+  findAll(@Query() filters: PaginationArgs) {
+    return this.userService.findAll(filters);
   }
 
   // obtiene solo los usuarios sin borrado logico y que esten activos
   @Get('get-all-active')
-  findAllActive() {
-    return this.userService.findAllActive();
+  findAllActive(@Query() filters: PaginationArgs) {
+    return this.userService.findAllActive(filters);
   }
 
   // Obtiene todos los usuarios con rol USER
   @Get('get-all-users')
-  findAllUsers() {
-    return this.userService.findAllUsers();
+  findAllUsers(@Query() filters: PaginationArgs) {
+    return this.userService.findAllUsers(filters);
   }
 
   // Obtiene un usuario por id
