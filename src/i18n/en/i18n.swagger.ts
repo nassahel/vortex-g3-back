@@ -12,6 +12,8 @@ export const SWAGGER_TRANSLATIONS = {
   //CART
   CART_GET_OR_CREATE: 'Get or create active cart for a user',
   CART_RETRIEVED: 'Cart retrieved successfully',
+  CART_GET_ALL: 'Get all carts',
+  CART_GET_ALL_SUCCESS: 'Get all carts in status Pending and Completed',
   CART_ADD_OR_UPDATE: 'Add or update an item in the cart',
   CART_ADD_OR_UPDATE_SUCCESS: 'Item added or updated successfully',
   CART_PRODUCT_NOT_FOUND: 'Product not found',

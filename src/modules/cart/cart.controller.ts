@@ -7,6 +7,7 @@ import {
   Delete,
   BadRequestException,
   NotFoundException,
+  UseGuards,
 } from '@nestjs/common';
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { CartService } from './cart.service';
@@ -14,6 +15,10 @@ import { UpsertCartItemDto } from './dto/upsert.cart.item.dto';
 import { CheckoutCartDto } from './dto/checkout.cart.dto';
 import { I18nService } from 'nestjs-i18n';
 import { SWAGGER_TRANSLATIONS } from 'src/i18n/en/i18n.swagger';
+import { Roles } from 'src/common/decorators/roles.decorator';
+import { JwtAuthGuard } from '../auth/guards/jwt.guard';
+import { RolesGuard } from '../auth/guards/roles.guard';
+import { RoleEnum } from 'src/common/constants';
 
 @ApiTags('cart')
 @Controller('cart')
@@ -33,6 +38,15 @@ export class CartController {
 
     const cart = await this.cartService.getActiveCart(userId);
     return { message: (await this.i18n.translate('success.CART_RETRIEVED')), data: cart };
+  }
+
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(RoleEnum.ADMIN)
+  @Get('/all/carts')
+  @ApiOperation({ summary: SWAGGER_TRANSLATIONS.CART_GET_ALL })
+  @ApiResponse({ status: 200, description: SWAGGER_TRANSLATIONS.CART_GET_ALL_SUCCESS })
+  findAll() {
+    return this.cartService.getAllCarts();
   }
 
   @Post('item/:userId')
