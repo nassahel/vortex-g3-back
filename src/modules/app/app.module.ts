@@ -11,7 +11,7 @@ import { ProductsModule } from '../products/products.module';
 import { CategoriesModule } from '../categories/categories.module';
 import { ImagesModule } from '../images/images.module';
 import { CartModule } from '../cart/cart.module';
-import { ChartModule } from '../chart/chart.module';
+import { ReportsModule } from '../chart/reports.module';
 import I18nModuleConfig from 'src/config/i18n.config';
 
 @Module({
@@ -26,11 +26,11 @@ import I18nModuleConfig from 'src/config/i18n.config';
     AuthModule,
     UserModule,
     ProfileModule,
-    ChartModule,
     ProductsModule,
     CategoriesModule,
     ImagesModule,
     CartModule,
+    ReportsModule,
   ],
   controllers: [AppController],
   providers: [AppService],

@@ -26,7 +26,7 @@ export class AuthService {
     private readonly jwt: JwtService,
     private messageService: MessageService,
     private readonly i18n: I18nService,
-  ) {}
+  ) { }
   async register(createRegisterDto: CreateRegisterDto) {
     const { email, name, password, repeatPassword } = createRegisterDto;
 
@@ -37,13 +37,13 @@ export class AuthService {
 
     if (userExist) {
       throw new ConflictException(
-        await this.i18n.translate('error.USER_ALREADY_EXISTS')
+         this.i18n.translate('error.USER_ALREADY_EXISTS')
       );
     }
 
     if (password !== repeatPassword) {
       throw new ConflictException(
-        await this.i18n.translate('error.PASSWORDS_DO_NOT_MATCH')
+         this.i18n.translate('error.PASSWORDS_DO_NOT_MATCH')
       );
     }
 
@@ -59,26 +59,30 @@ export class AuthService {
       });
 
       if (!registeredUser) {
-        throw new InternalServerErrorException(await this.i18n.translate('error.USER_REGISTRATION_FAILED'));
+        throw new BadRequestException('No se pudo registrar al usuario');
       }
 
-      const link = `https://luxshop.com/`;
-      let emailBody = registrationTmplate;
-      emailBody = emailBody.replace(/{{name}}/g, name);
-      emailBody = emailBody.replace(/{{link}}/g, link);
 
-      await this.messageService.sendRegisterUserEmail({
-        from: messagingConfig.emailSender,
-        to: email,
-        subject: await this.i18n.translate('success.USER_REGISTERED'),
-        emailBody,
-      });
+      //Envia email a gnte cuando alguien se registra.
+      //Está comentado para que no le envie emails a gente desconocida mientras lo pruebo
+
+      // const link = `https://luxshop.com/`;
+      // let emailBody = registrationTmplate;
+      // emailBody = emailBody.replace(/{{name}}/g, name);
+      // emailBody = emailBody.replace(/{{link}}/g, link);
+
+      // await this.messageService.sendRegisterUserEmail({
+      //   from: messagingConfig.emailSender,
+      //   to: email,
+      //   subject: 'LuxShop - Registro exitoso!',
+      //   emailBody,
+      // });
 
       return {
         message: await this.i18n.translate('success.USER_REGISTERED'),
         newUser: {
           name,
-          emailLower: formattedEmail,
+          email: formattedEmail,
         },
       };
     } catch (error) {
@@ -92,7 +96,8 @@ export class AuthService {
     const { password, email } = createLoginDto;
     const formattedEmail = email.toLowerCase();
     const userExist = await this.prisma.user.findUnique({
-      where: { email: formattedEmail },
+      //Para filtrar a los usuarios inactivos y con borrado logico.
+      where: { email: formattedEmail, isActive: true, isDeleted: false },
     });
 
     if (!userExist) {

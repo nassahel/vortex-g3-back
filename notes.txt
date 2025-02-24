@@ -1,0 +1,2 @@
+- Ponerle en plural a todos los endpoints.
+- Modulo cart  - completar el CRUD, get all.
