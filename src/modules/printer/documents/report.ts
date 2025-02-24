@@ -33,11 +33,6 @@ export const generatePDF = async (
         style: 'header',
         margin: [0, 0, 0, 20],
       },
-      // {
-      //   text: 'Reporte de los productos mas vendidos:',
-      //   style: 'subheader',
-      //   margin: [0, 0, 0, 10],
-      // },
       {
         image: chartImage,
         width: 500,

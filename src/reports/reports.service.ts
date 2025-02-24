@@ -30,7 +30,7 @@ export class ReportsService {
       };
     }
 
-    const purchases = await this.prisma.order.findMany({
+    const purchases = await this.prisma.cart.findMany({
       where: filterConditions,
       include: { items: true },
     });
@@ -94,7 +94,7 @@ export class ReportsService {
   }
 
   async getPurchasesGraph(id: string) {
-    const purchase = await this.prisma.order.findUnique({
+    const purchase = await this.prisma.cart.findUnique({
       where: { id },
       include: { items: true }
     })
