@@ -12,6 +12,8 @@ export const SWAGGER_TRANSLATIONS = {
   //CART
   CART_GET_OR_CREATE: 'Get or create active cart for a user',
   CART_RETRIEVED: 'Cart retrieved successfully',
+  CART_GET_ALL: 'Get all carts',
+  CART_GET_ALL_SUCCESS: 'Get all carts in status Pending and Completed',
   CART_ADD_OR_UPDATE: 'Add or update an item in the cart',
   CART_ADD_OR_UPDATE_SUCCESS: 'Item added or updated successfully',
   CART_PRODUCT_NOT_FOUND: 'Product not found',
@@ -73,6 +75,8 @@ export const SWAGGER_TRANSLATIONS = {
   //PROFILE
   PROFILE_CREATE: 'Create a user profile',
   PROFILE_CREATE_SUCCESS: 'Profile successfully created',
+  PROFILE_GET_ALL: 'Get profiles',
+  PROFILE_GET_ALL_SUCCESS: 'Get all profiles',
   PROFILE_UPLOAD: 'Upload profile image',
   PROFILE_UPLOAD_SUCCESS: 'Image successfully uploaded',
   PROFILE_DELETE: 'Delete profile image',

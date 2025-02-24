@@ -14,7 +14,7 @@ enum Rol {
   USER
 }
 
-enum OrderStatus {
+enum CartStatus {
   PENDING
   INPROCESS
   COMPLETED
@@ -29,7 +29,7 @@ model User {
   password  String
   isActive  Boolean @default(true)
   isDeleted Boolean @default(false)
-  orders    Order[]
+  carts    Cart[]
 
   profile   Profile? 
 }
@@ -60,7 +60,7 @@ model Product {
   stock       Int
   price       Float
   isDeleted   Boolean  @default(false)
-  orderItems  OrderItem[]
+  cartItems  CartItem[]
   images      Image[]
   categories  ProductCategory[]
 }
@@ -86,22 +86,22 @@ model Image {
 }
 
 
-model Order {
+model Cart {
   id        String      @id @unique @default(cuid())
-  items     OrderItem[]   //no deberia tener un product?
-  status    OrderStatus @default(PENDING)
+  items     CartItem[]   //no deberia tener un product?
+  status    CartStatus  @default(PENDING)
   price     Decimal     @default(0.00)
   user      User        @relation(fields: [userId], references: [id])
   userId    String
   createdAt DateTime    @default(now())
 }
 
-model OrderItem {
+model CartItem {
   id        String   @id @unique @default(cuid())
   product   Product? @relation(fields: [productId], references: [id])
   quantity  Int      @default(0)
   price     Decimal  @default(0.00)
-  order     Order?   @relation(fields: [orderId], references: [id])
+  cart     Cart?   @relation(fields: [cartId], references: [id])
   productId String?
-  orderId   String
+  cartId   String
 }
