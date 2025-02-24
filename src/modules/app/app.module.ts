@@ -11,8 +11,7 @@ import { ProductsModule } from '../products/products.module';
 import { CategoriesModule } from '../categories/categories.module';
 import { ImagesModule } from '../images/images.module';
 import { CartModule } from '../cart/cart.module';
-import { ChartModule } from '../chart/chart.module';
-import { PdfmakeModule } from '../pdfmake/pdfmake.module';
+import { ReportsModule } from '../chart/reports.module';
 
 @Module({
   imports: [
@@ -29,8 +28,7 @@ import { PdfmakeModule } from '../pdfmake/pdfmake.module';
     CategoriesModule,
     ImagesModule,
     CartModule,
-    ChartModule,
-    PdfmakeModule
+    ReportsModule,
   ],
   controllers: [AppController],
   providers: [AppService],

@@ -1,12 +1,17 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { ChartService } from './chart.service';
-import { ChartQueryDto } from './dto/report-query-dto';
+import { ChartQueryDto } from './dto/report-query.dto';
 import { PrismaService } from '../prisma/prisma.service';
+import { PrinterService } from '../printer/printer.service';
+import { generatePDF } from '../printer/documents/sample.report';
+import { generateInvoice } from '../printer/documents/invoice';
 
 @Injectable()
 export class ReportsService {
-  constructor(private readonly chartService: ChartService,
-    private readonly prisma: PrismaService
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly chartService: ChartService,
+    private readonly printerService: PrinterService,
   ) { }
 
 
@@ -83,25 +88,45 @@ export class ReportsService {
       ],
     };
 
- // Generar el gráfico
- const chartBuffer = await this.chartService.generateChart('bar', mockData);
- return chartBuffer;
+    // Generar el gráfico
+    const chartBuffer = await this.chartService.generateChart('bar', mockData);
+    const pdfDefinition = await generatePDF(chartBuffer);
+
+    const pdfDoc = await this.printerService.createPdf(pdfDefinition);
+
+    return new Promise((resolve, reject) => {
+      const chunks: Uint8Array[] = [];
+      pdfDoc.on('data', (chunk) => chunks.push(chunk));
+      pdfDoc.on('end', () => resolve(Buffer.concat(chunks)));
+      pdfDoc.on('error', reject);
+      pdfDoc.end();
+    });
 
   }
 
 
-  async generatePurchasesGraph(query: ChartQueryDto): Promise<Buffer> {
-    const mockData = {
-      labels: ['Enero', 'Febrero', 'Marzo'],
-      datasets: [
-        {
-          label: 'Compras',
-          data: [500, 600, 400],
-          backgroundColor: ['purple', 'orange', 'yellow'],
-        },
-      ],
-    };
+  async getPurchasesGraph(id: string) {
+    const purchase = await this.prisma.order.findUnique({
+      where: { id },
+      include: { items: true }
+    })
 
-    return this.chartService.generateChart('bar', mockData);
+
+
+
+    if (!purchase) {
+      throw new NotFoundException('No se encontro la compra')
+    }
+
+    const pdfDefinition = await generateInvoice(purchase);
+    const pdfDoc = await this.printerService.createInvoice(pdfDefinition);
+
+    return new Promise((resolve, reject) => {
+      const chunks: Uint8Array[] = [];
+      pdfDoc.on('data', (chunk) => chunks.push(chunk));
+      pdfDoc.on('end', () => resolve(Buffer.concat(chunks)));
+      pdfDoc.on('error', reject);
+      pdfDoc.end();
+    });
   }
 }
