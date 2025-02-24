@@ -9,12 +9,14 @@ import { UpdateCategoryDto } from './dto/update-category.dto';
 import { ExcelService } from '../excel/excel.service';
 import { PaginationArgs } from 'src/utils/pagination/pagination.dto';
 import { Paginate } from 'src/utils/pagination/parsing';
+import { I18nService } from 'nestjs-i18n';
 
 @Injectable()
 export class CategoriesService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly excel: ExcelService,
+    private readonly i18n: I18nService,
   ) {}
 
   async findAll(filters: PaginationArgs) {
@@ -33,7 +35,10 @@ export class CategoriesService {
       return Paginate(categories, total, { page, limit });
     } catch (error) {
       console.error(error);
-      throw new BadRequestException('Error al obtener las categorías: ', error);
+      throw new BadRequestException(
+        await this.i18n.translate('error.CATEGORY_NOT_FOUND'),
+        error,
+      );
     }
   }
 
@@ -65,13 +70,17 @@ export class CategoriesService {
         },
       });
       if (!category) {
-        throw new NotFoundException(`Categoría con id ${id} no encontrada.`);
+        throw new NotFoundException(
+          await this.i18n.translate('error.CATEGORY_ID_NOT_FOUND', {
+            args: { id },
+          }),
+        );
       }
       return category;
     } catch (error) {
       console.error(error);
       throw new BadRequestException(
-        'Error al obtener la categoría: ',
+        await this.i18n.translate('error.CATEGORY_NOT_FOUND'),
         error.response.message,
       );
     }
@@ -85,17 +94,22 @@ export class CategoriesService {
           where: { name },
         });
         if (categoryExists) {
-          throw new BadRequestException('La categoría ya existe.');
+          throw new BadRequestException(
+            await this.i18n.translate('error.CATEGORY_ALREADY_EXISTS'),
+          );
         }
         return tx.category.create({
           data: { name },
         });
       });
-      return { message: 'Categoría creada correctamente', newCategory };
+      return {
+        message: await this.i18n.translate('success.CATEGORY_CREATED'),
+        newCategory,
+      };
     } catch (error) {
       console.error(error);
       throw new BadRequestException(
-        'Error al crear la categoría: ',
+        await this.i18n.translate('error.CATEGORY_CREATION_FAILED'),
         error.response.message,
       );
     }
@@ -121,12 +135,13 @@ export class CategoriesService {
       });
 
       return {
-        message: 'Categorías importadas correctamente',
+        message: await this.i18n.translate('success.CATEGORY_IMPORTED'),
         cantidad: categories.length,
       };
     } catch (error) {
       throw new BadRequestException(
-        'Error al importar las categorías: ' + error.message,
+        (await this.i18n.translate('error.CATRGORY_IMPORTED_FAILED')) +
+          error.message,
       );
     }
   }
@@ -138,14 +153,20 @@ export class CategoriesService {
         where: { id, isDeleted: false },
       });
       if (!categoryExists) {
-        throw new NotFoundException(`Categoría con id ${id} no encontrada.`);
+        throw new NotFoundException(
+          await this.i18n.translate('error.CATEGORY_ID_NOT_FOUND', {
+            args: { id },
+          }),
+        );
       }
       //verifica que el nombre de la categoria no exista
       const categoryNameExist = await this.prisma.category.findFirst({
         where: { name: updateCategoryDto.name, isDeleted: false },
       });
       if (categoryNameExist) {
-        throw new BadRequestException('El nombre de la categoría ya existe.');
+        throw new BadRequestException(
+          await this.i18n.translate('error.CATEGORY_ALREADY_EXISTS'),
+        );
       }
       //actualiza la categoria
       const updatedCategory = await this.prisma.category.update({
@@ -155,13 +176,13 @@ export class CategoriesService {
         },
       });
       return {
-        message: 'Categoría actualizada correctamente.',
+        message: await this.i18n.translate('success.CATEGORY_UPDATED'),
         updatedCategory,
       };
     } catch (error) {
       console.error(error);
       throw new BadRequestException(
-        'Error al actualizar la categoría: ',
+        await this.i18n.translate('error.CATEGORY_UPDATE_FAILED'),
         error.response.message,
       );
     }
@@ -173,20 +194,22 @@ export class CategoriesService {
         where: { id, isDeleted: false },
       });
       if (!categoryExists) {
-        throw new NotFoundException(`La categoria no existe o fue eliminada.`);
+        throw new NotFoundException(
+          await this.i18n.translate('error.CATEGORY_NOT_FOUND'),
+        );
       }
       const deletedCategory = await this.prisma.category.update({
         where: { id },
         data: { isDeleted: true },
       });
       return {
-        message: 'Categoría eliminada correctamente.',
+        message: await this.i18n.translate('success.CATEGORY_DELETED'),
         category: deletedCategory,
       };
     } catch (error) {
       console.error(error);
       throw new BadRequestException(
-        'Error al eliminar la categoría: ',
+        await this.i18n.translate('error.CATEGORY_DELETE_FAILED'),
         error.response.message,
       );
     }
@@ -198,23 +221,27 @@ export class CategoriesService {
         where: { id },
       });
       if (!categoryExists) {
-        throw new NotFoundException(`La categoria no existe.`);
+        throw new NotFoundException(
+          await this.i18n.translate('error.CATEGORY_NOT_FOUND'),
+        );
       }
       if (!categoryExists.isDeleted) {
-        throw new BadRequestException('La categoría está activa.');
+        throw new BadRequestException(
+          await this.i18n.translate('error.CATEGORY_NOT_DELETED'),
+        );
       }
       const restoredCategory = await this.prisma.category.update({
         where: { id },
         data: { isDeleted: false },
       });
       return {
-        message: 'Categoría restaurada correctamente.',
+        message: await this.i18n.translate('success.CATEGORY_RESTORED'),
         restoredCategory,
       };
     } catch (error) {
       console.error(error);
       throw new BadRequestException(
-        'Error al restaurar la categoría: ',
+        await this.i18n.translate('error.CATEGORY_RESTORE_FAILED'),
         error.response.message,
       );
     }

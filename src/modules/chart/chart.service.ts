@@ -33,15 +33,18 @@ export class ChartService {
   async generateChart(
     type: ChartType,
     data: { labels: string[]; datasets: any[] },
-    options: ChartConfiguration['options'] = {},
+    options: ChartConfiguration['options'] = {
+      scales: {
+        y: {
+          ticks: {
+            precision: 0,
+          },
+        },
+      },
+    },
   ): Promise<Buffer> {
     try {
-      const configuration: ChartConfiguration = {
-        type,
-        data,
-        options,
-      };
-
+      const configuration: ChartConfiguration = { type, data, options };
       return await this.chartJSNodeCanvas.renderToBuffer(configuration);
     } catch (error) {
       throw new Error(`Error al generar el gráfico: ${error.message}`);

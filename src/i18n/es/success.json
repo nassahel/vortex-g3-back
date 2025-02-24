@@ -1,0 +1,40 @@
+{
+  "USER_REGISTERED": "LuxShop - ¡Usuario registrado con éxito!",
+  "LOGGED_IN": "Usuario autenticado con éxito.",
+  "PASSWORD_CHANGED": "Contraseña cambiada con éxito.",
+  "RECOVERY_LINK_SENT": "Enlace de recuperación de contraseña generado.",
+  "PASSWORD_RECOVERY": "LuxShop - Recuperación de contraseña",
+
+  "ITEM_UPDATED": "Artículo actualizado en el carrito.",
+  "ITEM_ADDED": "Artículo agregado al carrito.",
+  "CART_CHECKOUT": "Compra realizada con éxito.",
+  "CART_CANCELED": "Carrito cancelado con éxito.",
+  "CART_RETRIEVED": "Carrito recuperado con éxito.",
+
+  "CATEGORY_CREATED": "Categoría creada con éxito.",
+  "CATEGORY_RETRIEVED": "Categoría recuperada con éxito.",
+  "CATEGORY_IMPORTED": "Categoría importada con éxito.",
+  "CATEGORY_UPDATED": "Categoría actualizada con éxito.",
+  "CATEGORY_DELETED": "Categoría eliminada con éxito.",
+  "CATEGORY_RESTORED": "Categoría restaurada con éxito.",
+
+  "UPLOADING_IMAGE": "Imagen subida con éxito.",
+  "DELETED_SUCCESS": "Imagen eliminada con éxito.",
+
+  "CREATED_PRODUCT": "Producto creado con éxito.",
+  "PRODUCTS_IMPORTED": "Productos importados con éxito.",
+  "UPDATED_PRODUCT": "Producto actualizado con éxito.",
+  "DELETED_PRODUCT": "Producto eliminado con éxito.",
+  "PRODUCT_RESTORED": "Producto restaurado con éxito.",
+
+  "CREATED_PROFILE": "Perfil creado con éxito.",
+  "PROFILE_IMAGE_UPLOADED": "Imagen de perfil subida con éxito.",
+  "IMAGE_DELETED": "Imagen eliminada con éxito.",
+  "IMAGE_UPLOADED": "Imagen subida con éxito.",
+  "PROFILE_UPDATED": "Perfil actualizado con éxito.",
+
+  "USER_REGISTER_SUCCESS": "Usuario registrado con éxito.",
+  "UPDATED_USER_SUCCESS": "Usuario actualizado con éxito.",
+  "DELETED_USER_SUCCESS": "Usuario eliminado con éxito."
+}
+  

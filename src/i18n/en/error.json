@@ -1,0 +1,70 @@
+{
+    "USER_ALREADY_EXISTS": "A user is already registered with this email.",
+    "PASSWORDS_DO_NOT_MATCH": "Passwords do not match.",
+    "USER_REGISTRATION_FAILED": "User registration failed.",
+    "INVALID_CREDENTIALS": "Invalid credentials.",
+    "USER_NOT_FOUND": "User not found.",
+    "TOKEN_INVALID": "Invalid token payload.",
+    "TOKEN_EXPIRED": "Invalid or expired token.",
+    "PASSWORD_CHANGE_SUCCESS": "Password changed successfully.",
+    "RECOVERY_LINK_FAILED": "Failed to send password recovery link.",
+
+    "PRODUCT_NOT_FOUND": "Product not found.",
+    "ITEM_REMOVED": "Item removed from cart.",
+    "ITEM_NOT_FOUND": "Item not found in cart.",
+    "CART_EMPTY": "Cart is empty.",
+    "CART_NOT_FOUND": "Cart not found.",
+    "ITEM_NOT_REMOVED": "Failed to remove item from cart.",
+
+    "CATEGORY_NOT_FOUND": "Category not found",
+    "CATEGORY_ID_NOT_FOUND": "Category with id: {id} not found",
+    "CATEGORY_ALREADY_EXISTS": "Category already exists",
+    "CATEGORY_CREATION_FAILED": "Category creation failed",
+    "CATEGORY_IMPORTED_FAILED": "Category import failed",
+    "CATEGORY_UPDATE_FAILED": "Category update failed",
+    "CATEGORY_DELETE_FAILED": "Category delete failed",
+    "CATEGORY_NOT_DELETED": "Category is active and cannot be deleted",
+    "CATEGORY_RESTORE_FAILED": "Category restore failed",
+
+    "EXCEL_EMPTY": "The Excel file is empty",
+    "EXCEL_MISSING_ROW": "There are missing rows on the file",
+
+    "PRODUCT_ID_NOT_FOUND": "Product with id: {id} not found",
+    "UPLOADING_IMAGE": "Image uploading successfully",
+    "UPLOADING_IMAGE_ERROR": "Error uploading image",
+    "IMAGE_ERROR": "Failed to obtain image",
+    "IMAGE_NOT_FOUND": "Image not found",
+    "IMAGE_ID_NOT_FOUND": "Image with id: {id} not found",
+    "INVALID_URL": "Invalid URL",
+    "DELETED_ERROR": "Error deleting image",
+    
+
+    "EMAIL_SENT": "The email was sent successfully to {to}.",
+    "EMAIL_FAILED": "Error sending email",
+    "MAILJET_ERROR": "Mailjet error: ",
+
+    "PRODUCT_EXISTS": "Product already exists",
+    "PRODUCT_CREATION_FAILED": "Product creation failed",
+    "NO_VALID_PRODUCT": "No valid product",
+    "PRODUCTS_IMPORT_FAILED": "Products import failed",
+    "PRODUCT_UPDATE_FAILED": "Product update failed",
+    "PRODUCT_DELETION_FAILED": "Product deletion failed",
+    "ACTIVE_PRODUCT": "Product is active",
+    "PRODUCT_RESTORED_FAILED": "Failed in restauring product",
+    "MISSING_CATEGORIES": "The following categories are missing: ",
+    "CATEGORY_ASSOCIATION_FAILED": "Failed in associating category",
+    "REQUIRED_DATA": "Required data is missing",
+
+    "NO_REGISTERED_USER": "No registered user",
+    "NO_FILE": "No file provided",
+    "MIMETYPE": "Only JPEG and PNG files are allowed",
+    "PROFILE_NOT_FOUND": "Profile not found for userId {userId}",
+    "ERROR_DELETING_IMAGE": "Error deleting image",
+    "ERROR_UPLOADING_IMAGE": "Error uploading image",
+    "USER_ID_REQUIRED": "User id is required",
+
+    "USER_REGISTER_FAILED": "User registration failed",
+    "UPDATED_ERROR": "Error updating user",
+    "DELETE_USER_FAILED": "Failed when deleting user"
+
+}
