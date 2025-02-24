@@ -12,9 +12,7 @@ export class ReportsService {
     private readonly prisma: PrismaService,
     private readonly chartService: ChartService,
     private readonly printerService: PrinterService,
-  ) { }
-
-
+  ) {}
 
   async generateMostBoughtProductsGraph(body: ChartQueryDto) {
     const { startDate, endDate, numberProduct } = body;
@@ -38,17 +36,19 @@ export class ReportsService {
     });
 
     if (!purchases || purchases.length === 0) {
-      throw new NotFoundException('No se encontraron productos.')
+      throw new NotFoundException('No se encontraron productos.');
     }
 
     const products = [];
 
     for (const purchase of purchases) {
       for (const item of purchase.items) {
-        const prod = await this.prisma.product.findUnique({ where: { id: item.productId } });
+        const prod = await this.prisma.product.findUnique({
+          where: { id: item.productId },
+        });
 
         if (prod) {
-          const existingProduct = products.find(p => p.name === prod.name);
+          const existingProduct = products.find((p) => p.name === prod.name);
 
           if (existingProduct) {
             existingProduct.quantity += item.quantity;
@@ -93,7 +93,6 @@ export class ReportsService {
     });
   }
 
-
   async getPurchasesGraph(id: string) {
     const purchase = await this.prisma.order.findUnique({
       where: { id },
@@ -101,7 +100,7 @@ export class ReportsService {
     })
 
     if (!purchase) {
-      throw new NotFoundException('No se encontro la compra')
+      throw new NotFoundException('No se encontro la compra');
     }
 
     const pdfDefinition = await generateInvoice(purchase);

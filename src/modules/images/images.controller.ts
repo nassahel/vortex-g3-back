@@ -8,6 +8,7 @@ import {
   UploadedFile,
   UseInterceptors,
   BadRequestException,
+  Patch,
 } from '@nestjs/common';
 import { ImagesService } from './images.service';
 import { FileInterceptor } from '@nestjs/platform-express';
@@ -70,5 +71,13 @@ export class ImagesController {
   @ApiResponse({ status: 200, description: SWAGGER_TRANSLATIONS.IMAGES_DELETE_SUCCESS })
   remove(@Param('id') id: string) {
     return this.imagesService.deleteImage(id);
+  }
+
+  @Patch('/set-principal/:id')
+  async setPrincipalImage(
+    @Param('id') id: string,
+    @Body('productId') productId: string,
+  ) {
+    return this.imagesService.setPrincipalImage(id, productId);
   }
 }

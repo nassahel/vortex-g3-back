@@ -12,6 +12,8 @@ export const SWAGGER_TRANSLATIONS = {
     // CARRITO DE COMPRAS (CART)
     CART_GET_OR_CREATE: 'Obtener o crear un carrito activo para un usuario',
     CART_RETRIEVED: 'Carrito recuperado con éxito',
+    CART_GET_ALL: 'Obtiene todos los carritos',
+    CART_GET_ALL_SUCCESS: 'Obtiene todos los carritos en status Pending y Completed',
     CART_ADD_OR_UPDATE: 'Agregar o actualizar un artículo en el carrito',
     CART_ADD_OR_UPDATE_SUCCESS: 'Artículo agregado o actualizado con éxito',
     CART_PRODUCT_NOT_FOUND: 'Producto no encontrado',
@@ -72,6 +74,8 @@ export const SWAGGER_TRANSLATIONS = {
     // PERFIL DE USUARIO (PROFILE)
     PROFILE_CREATE: 'Crear un perfil de usuario',
     PROFILE_CREATE_SUCCESS: 'Perfil creado con éxito',
+    PROFILE_GET_ALL: 'Obtener perfiles',
+    PROFILE_GET_ALL_SUCCESS: 'Obtener todos los perfiles',
     PROFILE_UPLOAD: 'Subir imagen de perfil',
     PROFILE_UPLOAD_SUCCESS: 'Imagen subida con éxito',
     PROFILE_DELETE: 'Eliminar imagen de perfil',
