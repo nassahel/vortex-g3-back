@@ -11,8 +11,8 @@ import { ProductsModule } from '../products/products.module';
 import { CategoriesModule } from '../categories/categories.module';
 import { ImagesModule } from '../images/images.module';
 import { CartModule } from '../cart/cart.module';
-import { ReportsModule } from '../chart/reports.module';
 import I18nModuleConfig from 'src/config/i18n.config';
+import { ReportsModule } from 'src/reports/reports.module';
 
 @Module({
   imports: [
