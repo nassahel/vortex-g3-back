@@ -1,6 +1,7 @@
 import {
   Controller,
   Post,
+  Get,
   Body,
   Param,
   Delete,
@@ -9,6 +10,7 @@ import {
   BadRequestException,
   Put,
   ValidationPipe,
+  UseGuards,
 } from '@nestjs/common';
 import {
   ApiOperation,
@@ -23,6 +25,10 @@ import { UpdateProfileDto } from './dto/update.profile.dto';
 import { AuthService } from '../auth/auth.service';
 import { I18nService } from 'nestjs-i18n';
 import { SWAGGER_TRANSLATIONS } from 'src/i18n/en/i18n.swagger';
+import { JwtAuthGuard } from '../auth/guards/jwt.guard';
+import { RolesGuard } from '../auth/guards/roles.guard';
+import { Roles } from 'src/common/decorators/roles.decorator';
+import { RoleEnum } from 'src/common/constants';
 
 @ApiTags('Profile')
 @Controller('profile')
@@ -32,6 +38,15 @@ export class ProfileController {
     private readonly authService: AuthService,
     private readonly i18n: I18nService,
   ) {}
+
+  @Get('/all/profiles')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(RoleEnum.ADMIN)
+  @ApiOperation({ summary: SWAGGER_TRANSLATIONS.CART_GET_ALL })
+  @ApiResponse({ status: 200, description: SWAGGER_TRANSLATIONS.CART_GET_ALL_SUCCESS })
+  findAll() {
+    return this.profileService.getAllProfiles();
+  }
 
   @Post('create/:userId')
   @ApiOperation({ summary: SWAGGER_TRANSLATIONS.PROFILE_CREATE }) //Para documentacion de Swagger

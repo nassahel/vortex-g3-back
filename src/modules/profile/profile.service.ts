@@ -14,6 +14,17 @@ export class ProfileService {
     private readonly i18n: I18nService,
   ) {}
 
+  async getAllProfiles() {
+    try {
+      const allProfiles = await this.prisma.profile.findMany({
+        where: { user: { isActive: true } }
+      });
+      return allProfiles;
+    } catch (error) {
+      throw new BadRequestException(await this.i18n.translate('error.PROFILE_NOT_FOUND'), error);
+    }
+  }
+
   async createProfile(
     userId: string,
     updateProfileDto: UpdateProfileDto,
