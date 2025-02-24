@@ -1,18 +1,5 @@
 //El comando para migrar la base de datos es: npx prisma migrate dev --name init
 
-
-// datos basicos del archivo .env
-// #Servidor----------------------------
-// NODE_ENV=development
-// PORT=8000
-
-
-
-// #Base de datos--------------------------
-
-// # Aqui donde dice "postgres" hay que poner el nombre de su base de datos y donde dice "root" su contraseña.
-// DATABASE_URL="postgresql://postgres:root@localhost:5432/vortex-g3-back"
-
 generator client {
   provider = "prisma-client-js"
 }
@@ -22,58 +9,99 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-
-
-model Product {
-  id          String    @id @unique @default(cuid())
-  Name        String?
-  Description String?
-  Stock       Int?
-  Price       Float?
-  Categories  Category @relation(fields: [CategoryId], references: [id])
-  CategoryId  String
-  isDeleted   Boolean?
-  OrderItem   OrderItem[]
-}
-
-model Category {
-  id        String   @id @unique @default(cuid())
-  Name      String?
-  isDeleted Boolean?
-  Products  Product[]
-}
-
-model User {
-  id        String   @id @unique @default(cuid())
-  Name      String?
-  email     String?
-  rol       Rol?    
-  password  String?
-  isActive  Boolean?
-  isDeleted Boolean?
-  Orders  Order[]
-}
-
-model Order {
-  id          String     @id @unique @default(cuid())
-  Items       OrderItem[] 
-  TotalAmount Float?
-  User User @relation(fields: [UserId], references: [id])
-  UserId String
-}
-
-model OrderItem {
-  id            String   @id @unique @default(cuid())
-  Product       Product? @relation(fields: [productId], references: [id])
-  Quantity      Int?
-  PartialAmount Float?
-  Order         Order?   @relation(fields: [orderId], references: [id])
-  productId     String?
-  orderId       String?
-}
-
 enum Rol {
   ADMIN
   USER
 }
 
+enum OrderStatus {
+  PENDING
+  INPROCESS
+  COMPLETED
+  CANCELED
+}
+
+model User {
+  id        String  @id @unique @default(cuid())
+  name      String
+  email     String  @unique
+  rol       Rol     @default(USER)
+  password  String
+  isActive  Boolean @default(true)
+  isDeleted Boolean @default(false)
+  orders    Order[]
+
+  profile   Profile? 
+}
+
+model Profile {
+  id            String   @id @unique @default(cuid())
+  address       String?
+  dni           String?   @unique
+  birthday      DateTime?  
+  phone         String?
+  user          User     @relation(fields: [userId], references: [id])
+  userId        String   @unique
+  profileImage  String? 
+}
+
+
+model Category {
+  id        String   @id @unique @default(cuid())
+  name      String
+  isDeleted Boolean  @default(false)
+  products  ProductCategory[]
+}
+
+model Product {
+  id          String   @id @unique @default(cuid())
+  name        String
+  description String?
+  stock       Int
+  price       Float
+  isDeleted   Boolean  @default(false)
+  orderItems  OrderItem[]
+  images      Image[]
+  categories  ProductCategory[]
+}
+
+// Tabla intermedia para la relacion entre productos y categorias
+model ProductCategory {
+  product   Product  @relation(fields: [productId], references: [id])
+  productId String
+
+  category   Category @relation(fields: [categoryId], references: [id])
+  categoryId String
+
+  @@id([productId, categoryId])
+}
+
+
+model Image {
+  id        String  @id @unique @default(cuid())
+  url       String
+  altText   String?
+  product   Product @relation(fields: [productId], references: [id])
+  productId String
+}
+
+
+model Order {
+  id        String      @id @unique @default(cuid())
+  items     OrderItem[]   //no deberia tener un product?
+  status    OrderStatus @default(PENDING)
+  price     Decimal     @default(0.00)
+  user      User        @relation(fields: [userId], references: [id])
+  userId    String
+  createdAt DateTime    @default(now())
+}
+
+model OrderItem {
+  id        String   @id @unique @default(cuid())
+  product   Product? @relation(fields: [productId], references: [id])
+  quantity  Int      @default(0)
+  price     Decimal  @default(0.00)
+  order     Order?   @relation(fields: [orderId], references: [id])
+  productId String?
+  orderId   String
+}
