@@ -9,9 +9,8 @@ export class ChartController {
   @Get()
   async getChart(@Query('type') type: string, @Res() res: Response) {
     try {
-      // Datos de ejemplo para un gráfico de barras
       const chartBuffer = await this.chartService.generateChart(
-        type as any, // Convierte el parámetro de la query en un tipo de gráfico
+        type as any,
         {
           labels: ['Enero', 'Febrero', 'Marzo'],
           datasets: [
@@ -23,7 +22,7 @@ export class ChartController {
           ],
         },
         {
-          responsive: false, // Evita problemas de tamaño en el servidor
+          responsive: false,
         },
       );
 
