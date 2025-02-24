@@ -8,6 +8,8 @@ import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { PrismaService } from '../prisma/prisma.service';
 import * as bcrypt from 'bcrypt';
+import { PaginationArgs } from 'src/utils/pagination/pagination.dto';
+import { Paginate } from 'src/utils/pagination/parsing';
 import { I18nService } from 'nestjs-i18n';
 
 @Injectable()
@@ -52,39 +54,55 @@ export class UserService {
         },
       };
     } catch (error) {
-      throw new InternalServerErrorException(await this.i18n.t('error.USER_REGISTER_FAILED'));
+      throw new InternalServerErrorException(
+        await this.i18n.t('error.USER_REGISTER_FAILED'),
+      );
     }
   }
 
   // Obtiene todos los usuario, excepto los que tienen borrado logico
-  async findAll() {
+  async findAll(filters: PaginationArgs) {
     try {
-      const allUsers = await this.prisma.user.findMany({
-        where: { isDeleted: false },
-      });
+      const { page, limit } = filters;
+      const [total, users] = await this.prisma.$transaction([
+        this.prisma.user.count({ where: { isDeleted: false } }),
+        this.prisma.user.findMany({
+          where: { isDeleted: false },
+          skip: (page - 1) * limit,
+          take: limit,
+        }),
+      ]);
 
-      if (allUsers.length === 0) {
+      if (users.length === 0) {
         return { message: await this.i18n.t('error.USER_NOT_FOUND') };
       }
 
-      return allUsers;
+      return Paginate(users, total, { page, limit });
     } catch (error) {
-      throw new InternalServerErrorException(await this.i18n.t('error.USER_NOT_FOUND'));
+      throw new InternalServerErrorException(
+        await this.i18n.t('error.USER_NOT_FOUND'),
+      );
     }
   }
 
   // Obtiene todos los usuarios activos
-  async findAllActive() {
+  async findAllActive(filters: PaginationArgs) {
     try {
-      const allActiveUsers = await this.prisma.user.findMany({
-        where: { isActive: true },
-      });
+      const { page, limit } = filters;
+      const [total, activeUsers] = await this.prisma.$transaction([
+        this.prisma.user.count({ where: { isActive: true } }),
+        this.prisma.user.findMany({
+          where: { isActive: true },
+          skip: (page - 1) * limit,
+          take: limit,
+        }),
+      ]);
 
-      if (allActiveUsers.length === 0) {
+      if (activeUsers.length === 0) {
         return { message: await this.i18n.t('error.USER_NOT_FOUND') };
       }
 
-      return allActiveUsers;
+      return Paginate(activeUsers, total, { page, limit });
     } catch (error) {
       throw new InternalServerErrorException(
         await this.i18n.t('error.USER_NOT_FOUND'),
@@ -93,20 +111,31 @@ export class UserService {
   }
 
   // Obtiene todos los usuarios con rol USER
-  async findAllUsers() {
+  async findAllUsers(filters: PaginationArgs) {
     try {
-      const allUsers = await this.prisma.user.findMany({
-        where: {
-          isActive: true,
-          rol: 'USER',
-        },
-      });
+      const { page, limit } = filters;
+      const [total, users] = await this.prisma.$transaction([
+        this.prisma.user.count({
+          where: {
+            isActive: true,
+            rol: 'USER',
+          },
+        }),
+        this.prisma.user.findMany({
+          where: {
+            isActive: true,
+            rol: 'USER',
+          },
+          skip: (page - 1) * limit,
+          take: limit,
+        }),
+      ]);
 
-      if (allUsers.length === 0) {
+      if (users.length === 0) {
         return { message: await this.i18n.t('error.USER_NOT_FOUND') };
       }
 
-      return allUsers;
+      return Paginate(users, total, { page, limit });
     } catch (error) {
       throw new InternalServerErrorException(
         await this.i18n.t('error.USER_NOT_FOUND'),
@@ -131,7 +160,9 @@ export class UserService {
         isActive: foundUser.isActive,
       };
     } catch (error) {
-      throw new InternalServerErrorException(await this.i18n.t('error.USER_NOT_FOUND'));
+      throw new InternalServerErrorException(
+        await this.i18n.t('error.USER_NOT_FOUND'),
+      );
     }
   }
 
@@ -147,7 +178,9 @@ export class UserService {
         message: await this.i18n.t('success.UPDATED_USER_SUCCESS'),
       };
     } catch (error) {
-      throw new InternalServerErrorException(await this.i18n.t('error.UPDATED_ERROR'));
+      throw new InternalServerErrorException(
+        await this.i18n.t('error.UPDATED_ERROR'),
+      );
     }
   }
 
@@ -156,9 +189,7 @@ export class UserService {
       const foundUser = await this.prisma.user.findUnique({ where: { id } });
 
       if (!foundUser) {
-        throw new NotFoundException(
-          await this.i18n.t('error.USER_NOT_FOUND'),
-        );
+        throw new NotFoundException(await this.i18n.t('error.USER_NOT_FOUND'));
       }
 
       await this.prisma.user.update({
@@ -170,7 +201,9 @@ export class UserService {
         message: await this.i18n.t('success.DELETED_USER_SUCCESS'),
       };
     } catch (error) {
-      throw new InternalServerErrorException(await this.i18n.t('error.DELETE_USER_FAILED'));
+      throw new InternalServerErrorException(
+        await this.i18n.t('error.DELETE_USER_FAILED'),
+      );
     }
   }
 
@@ -187,7 +220,9 @@ export class UserService {
 
       return { message: await this.i18n.t('success.DELETED_USER_SUCCESS') };
     } catch (error) {
-      throw new InternalServerErrorException(await this.i18n.t('error.DELETE_USER_FAILED'));
+      throw new InternalServerErrorException(
+        await this.i18n.t('error.DELETE_USER_FAILED'),
+      );
     }
   }
 }

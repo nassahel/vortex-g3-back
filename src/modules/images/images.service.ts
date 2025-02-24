@@ -101,4 +101,44 @@ export class ImagesService {
       );
     }
   }
+
+  async setPrincipalImage(
+    id: string,
+    productId: string,
+  ): Promise<{ message: string }> {
+    try {
+      // Verifica que la imagen exista
+      const image = await this.prisma.image.findUnique({
+        where: { id },
+        include: { product: true },
+      });
+
+      if (!image) {
+        throw new NotFoundException(`Imagen con id ${id} no encontrada.`);
+      }
+
+      await this.prisma.$transaction(async (tx) => {
+        // Se establecen todas las imágenes del producto como no principales
+        await tx.image.updateMany({
+          where: { productId },
+          data: { isPrincipal: false },
+        });
+
+        // Se establece la imagen seleccionada como principal
+        await tx.image.update({
+          where: { id },
+          data: { isPrincipal: true },
+        });
+      });
+
+      return {
+        message: 'Imagen principal actualizada correctamente.',
+      };
+    } catch (error) {
+      throw new BadRequestException(
+        'Error al actualizar la imagen principal:',
+        error,
+      );
+    }
+  }
 }

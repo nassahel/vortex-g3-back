@@ -12,9 +12,7 @@ export class ReportsService {
     private readonly prisma: PrismaService,
     private readonly chartService: ChartService,
     private readonly printerService: PrinterService,
-  ) { }
-
-
+  ) {}
 
   async generateMostBoughtProductsGraph(body: ChartQueryDto) {
     const { startDate, endDate, numberProduct } = body;
@@ -34,24 +32,25 @@ export class ReportsService {
     }
 
     // Obtener las órdenes con las condiciones de fechas (si existen)
-    const purchases = await this.prisma.order.findMany({
+    const purchases = await this.prisma.cart.findMany({
       where: filterConditions, // Aplicamos el filtro de fechas aquí
       include: { items: true },
     });
 
-
     if (!purchases || purchases.length === 0) {
-      throw new NotFoundException('No se encontraron productos.')
+      throw new NotFoundException('No se encontraron productos.');
     }
 
     const products = [];
 
     for (const purchase of purchases) {
       for (const item of purchase.items) {
-        const prod = await this.prisma.product.findUnique({ where: { id: item.productId } });
+        const prod = await this.prisma.product.findUnique({
+          where: { id: item.productId },
+        });
 
         if (prod) {
-          const existingProduct = products.find(p => p.name === prod.name);
+          const existingProduct = products.find((p) => p.name === prod.name);
 
           if (existingProduct) {
             existingProduct.quantity += item.quantity;
@@ -70,12 +69,15 @@ export class ReportsService {
     products.sort((a, b) => b.quantity - a.quantity);
 
     // Limitar los productos a los más vendidos según `numberProduct`
-    const topN = numberProduct && !isNaN(Number(numberProduct)) ? Number(numberProduct) : 5;
+    const topN =
+      numberProduct && !isNaN(Number(numberProduct))
+        ? Number(numberProduct)
+        : 5;
     const topProducts = products.slice(0, topN);
 
     // Preparar los datos para el gráfico
-    const labelsData = topProducts.map(product => product.name);
-    const dataOfData = topProducts.map(product => product.quantity);
+    const labelsData = topProducts.map((product) => product.name);
+    const dataOfData = topProducts.map((product) => product.quantity);
 
     const mockData = {
       labels: labelsData,
@@ -101,21 +103,16 @@ export class ReportsService {
       pdfDoc.on('error', reject);
       pdfDoc.end();
     });
-
   }
 
-
   async getPurchasesGraph(id: string) {
-    const purchase = await this.prisma.order.findUnique({
+    const purchase = await this.prisma.cart.findUnique({
       where: { id },
-      include: { items: true }
-    })
-
-
-
+      include: { items: true },
+    });
 
     if (!purchase) {
-      throw new NotFoundException('No se encontro la compra')
+      throw new NotFoundException('No se encontro la compra');
     }
 
     const pdfDefinition = await generateInvoice(purchase);
