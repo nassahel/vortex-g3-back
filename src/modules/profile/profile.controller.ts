@@ -42,8 +42,8 @@ export class ProfileController {
   @Get('/all/profiles')
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(RoleEnum.ADMIN)
-  @ApiOperation({ summary: SWAGGER_TRANSLATIONS.CART_GET_ALL })
-  @ApiResponse({ status: 200, description: SWAGGER_TRANSLATIONS.CART_GET_ALL_SUCCESS })
+  @ApiOperation({ summary: SWAGGER_TRANSLATIONS.PROFILE_GET_ALL })
+  @ApiResponse({ status: 200, description: SWAGGER_TRANSLATIONS.PROFILE_GET_ALL_SUCCESS })
   findAll() {
     return this.profileService.getAllProfiles();
   }

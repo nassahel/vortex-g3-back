@@ -74,6 +74,8 @@ export const SWAGGER_TRANSLATIONS = {
     // PERFIL DE USUARIO (PROFILE)
     PROFILE_CREATE: 'Crear un perfil de usuario',
     PROFILE_CREATE_SUCCESS: 'Perfil creado con éxito',
+    PROFILE_GET_ALL: 'Obtener perfiles',
+    PROFILE_GET_ALL_SUCCESS: 'Obtener todos los perfiles',
     PROFILE_UPLOAD: 'Subir imagen de perfil',
     PROFILE_UPLOAD_SUCCESS: 'Imagen subida con éxito',
     PROFILE_DELETE: 'Eliminar imagen de perfil',
