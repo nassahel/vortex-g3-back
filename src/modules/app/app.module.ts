@@ -12,7 +12,7 @@ import { CategoriesModule } from '../categories/categories.module';
 import { ImagesModule } from '../images/images.module';
 import { CartModule } from '../cart/cart.module';
 import I18nModuleConfig from 'src/config/i18n.config';
-import { ReportsModule } from 'src/reports/reports.module';
+import { ReportsModule } from '../reports/reports.module';
 
 @Module({
   imports: [
