@@ -10,7 +10,7 @@ const styles: StyleDictionary = {
   totalRow: { bold: true, fontSize: 12, alignment: 'right' },
 };
 
-export const generateInvoice = async (purchase): Promise<TDocumentDefinitions> => {
+export const invoicePDF = async (purchase): Promise<TDocumentDefinitions> => {
   const prisma = new PrismaService();
 
   //datos del comprador
