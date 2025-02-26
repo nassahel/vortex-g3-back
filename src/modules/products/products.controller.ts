@@ -28,7 +28,7 @@ export class ProductsController {
   constructor(
     private readonly productsService: ProductsService,
     private readonly i18n: I18nService,
-  ) {}
+  ) { }
 
   @Post('/create-product')
   @ApiOperation({ summary: SWAGGER_TRANSLATIONS.PRODUCTS_CREATE })
@@ -85,6 +85,11 @@ export class ProductsController {
     return this.productsService.findAll(filters);
   }
 
+  @Get('most-bought-products')
+  async mostBoughtProducts(@Query('limit') limit: number) {
+    return await this.productsService.mostBoughtProducts(limit);
+  }
+
   @Get('/:id')
   @ApiOperation({ summary: SWAGGER_TRANSLATIONS.PRODUCTS_GET_ONE })
   @ApiResponse({
@@ -126,4 +131,7 @@ export class ProductsController {
   restore(@Param('id') id: string) {
     return this.productsService.restoreProduct(id);
   }
+
+
+  
 }
