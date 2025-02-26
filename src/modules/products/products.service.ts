@@ -519,8 +519,7 @@ export class ProductsService {
       );
     }
   }
-
-
+  
   async mostBoughtProducts(limit?: number) {
     const purchases = await this.prisma.cart.findMany({
       where: { status: 'COMPLETED' },
@@ -537,7 +536,12 @@ export class ProductsService {
       for (const item of purchase.items) {
         const prod = await this.prisma.product.findUnique({
           where: { id: item.productId },
-          include: { images: true },
+          include: {
+            images: {
+              where: { isPrincipal: true },
+              take: 1
+            }
+          },
         });
 
         if (prod) {
