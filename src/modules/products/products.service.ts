@@ -9,6 +9,8 @@ import { PrismaService } from '../prisma/prisma.service';
 import { FilterProductDto } from './dto/filters-product.dto';
 import { ExcelService } from '../excel/excel.service';
 import { AwsService } from 'src/aws/aws.service';
+import { PaginationArgs } from 'src/utils/pagination/pagination.dto';
+import { Paginate } from 'src/utils/pagination/parsing';
 import { I18nService } from 'nestjs-i18n';
 
 @Injectable()
@@ -18,52 +20,54 @@ export class ProductsService {
     private readonly excel: ExcelService,
     private readonly aws: AwsService,
     private readonly i18n: I18nService,
-  ) {}
+  ) { }
 
-  async findAll(filters: FilterProductDto) {
+  async findAll(filters: FilterProductDto & PaginationArgs) {
     try {
       const where: any = { isDeleted: false };
+      const {
+        page = 1,
+        limit = 10,
+        name,
+        minPrice,
+        maxPrice,
+        categoryId,
+      } = filters;
 
-      const { name, minPrice, maxPrice, categoryId, minStock, maxStock } =
-        filters;
-
-      //filtro por nombre
       if (name) where.name = { contains: name, mode: 'insensitive' };
-      //filtro por precio
       if (minPrice || maxPrice) {
         where.price = {};
-        if (minPrice) where.price.gte = minPrice;
-        if (maxPrice) where.price.lte = maxPrice;
+        if (minPrice) where.price.gte = Number(minPrice);
+        if (maxPrice) where.price.lte = Number(maxPrice);
       }
-      // Filtro por stock
-      if (minStock || maxStock) {
-        where.stock = {};
-        if (minStock) where.stock.gte = minStock;
-        if (maxStock) where.stock.lte = maxStock;
-      }
-      //filtro por categoria
       if (categoryId) {
         where.categories = {
-          some: {
-            categoryId: categoryId,
-          },
+          some: { categoryId },
         };
       }
-      const products = await this.prisma.product.findMany({
-        where,
-        include: {
-          images: {
-            select: { url: true },
-          },
-          categories: {
-            select: {
-              category: {
-                select: { name: true },
+
+      const [total, products] = await this.prisma.$transaction([
+        this.prisma.product.count({ where }),
+        this.prisma.product.findMany({
+          where,
+          include: {
+            images: {
+              select: { id: true, url: true, isPrincipal: true },
+            },
+            categories: {
+              select: {
+                category: {
+                  select: { name: true },
+                },
               },
             },
           },
-        },
-      });
+          skip: (page - 1) * limit,
+          take: limit,
+          orderBy: { name: 'desc' },
+        }),
+      ]);
+
       const formattedProducts = products.map((product) => ({
         id: product.id,
         name: product.name,
@@ -73,10 +77,14 @@ export class ProductsService {
         images: product.images,
         categories: product.categories.map((pc) => pc.category.name),
       }));
-      return formattedProducts;
+
+      return Paginate(formattedProducts, total, { page, limit });
     } catch (error) {
       console.log(error);
-      throw new BadRequestException(await this.i18n.t('error.PRODUCT_NOT_FOUND'), error);
+      throw new BadRequestException(
+        await this.i18n.t('error.PRODUCT_NOT_FOUND'),
+        error,
+      );
     }
   }
 
@@ -106,7 +114,9 @@ export class ProductsService {
       });
 
       if (!product) {
-        throw new NotFoundException(await this.i18n.t('error.PRODUCT_ID_NOT_FOUND'));
+        throw new NotFoundException(
+          await this.i18n.t('error.PRODUCT_ID_NOT_FOUND'),
+        );
       }
       return product;
     } catch (error) {
@@ -131,10 +141,17 @@ export class ProductsService {
           where: { name: { equals: name, mode: 'insensitive' } },
         });
         if (productExists) {
-          throw new BadRequestException(await this.i18n.t('error.PRODUCT_EXISTS'));
+          throw new BadRequestException(
+            await this.i18n.t('error.PRODUCT_EXISTS'),
+          );
         }
         //verifica que todas las categorías existan, retorna true si todas las categorías existen
-        await this.validateCategories(categories);
+        const areValidCategories = await this.validateCategories(categories);
+        if (!areValidCategories) {
+          throw new BadRequestException(
+            'Algunas categorías no existen o fueron eliminadas',
+          );
+        }
 
         const createdProduct = await tx.product.create({
           data: {
@@ -156,6 +173,7 @@ export class ProductsService {
 
         //subir imagenes a s3
         if (images && images.length > 0) {
+          console.log(images);
           const imagePromises = images.map(async (image) => {
             const imageUrl = await this.aws.uploadImage(
               image,
@@ -170,8 +188,12 @@ export class ProductsService {
           });
           await Promise.all(imagePromises);
         }
+        return createdProduct;
       });
-      return { message: await this.i18n.t('success.CREATED_PRODUCT'), newProduct };
+      return {
+        message: await this.i18n.t('success.CREATED_PRODUCT'),
+        newProduct,
+      };
     } catch (error) {
       console.log(error);
       throw new BadRequestException(
@@ -212,7 +234,9 @@ export class ProductsService {
         .filter((product) => product !== null); //se filtra los productos que no son correctos
 
       if (!products.length) {
-        throw new BadRequestException(await this.i18n.t('error.NO_VALID_PRODUCT'));
+        throw new BadRequestException(
+          await this.i18n.t('error.NO_VALID_PRODUCT'),
+        );
       }
       //se eliminan los productos importados duplicados
       const productosSinDuplicar = products.filter(
@@ -237,7 +261,9 @@ export class ProductsService {
 
         if (existingNames.length > 0) {
           throw new BadRequestException(
-            await this.i18n.t('error.PRODUCT_EXISTS', { args: { names: existingNames.map((p) => p.name).join(', ') } }),
+            await this.i18n.t('error.PRODUCT_EXISTS', {
+              args: { names: existingNames.map((p) => p.name).join(', ') },
+            }),
           );
         }
 
@@ -249,8 +275,22 @@ export class ProductsService {
             ),
           ),
         ];
+
+        //obtener los ids de las categorías
+        const categoryIds = await this.prisma.category.findMany({
+          where: { name: { in: allCategories } },
+          select: { id: true },
+        });
+
         //valida que todas las categorías existan
-        await this.validateCategories(allCategories);
+        const areValidCategories = await this.validateCategories(
+          categoryIds.map((c) => c.id),
+        );
+        if (!areValidCategories) {
+          throw new BadRequestException(
+            'Algunas categorías no existen o fueron eliminadas',
+          );
+        }
 
         const createdProducts = [];
         for (const producto of productosSinDuplicar) {
@@ -263,14 +303,26 @@ export class ProductsService {
               description: producto.description,
             },
           });
-          const categoryIds = await this.validateCategories(
-            producto.categories.split(',').map((c) => c.trim()),
-          );
+          const categoryNames = producto.categories
+            .split(',')
+            .map((c) => c.trim());
+
+          //obtener los ids de las categorías
+          const categoryIds = await tx.category.findMany({
+            where: {
+              name: {
+                in: categoryNames,
+                mode: 'insensitive',
+              },
+            },
+            select: { id: true },
+          });
+
           //asignar categorías al producto
           await tx.productCategory.createMany({
             data: categoryIds.map((categoryId) => ({
               productId: createdProduct.id,
-              categoryId,
+              categoryId: categoryId.id,
             })),
           });
 
@@ -287,7 +339,7 @@ export class ProductsService {
     } catch (error) {
       console.log(error);
       throw new BadRequestException(
-        await this.i18n.t('error.PRODUCTS_IMPORT_FAILED') + error.message,
+        (await this.i18n.t('error.PRODUCTS_IMPORT_FAILED')) + error.message,
       );
     }
   }
@@ -304,7 +356,9 @@ export class ProductsService {
         });
 
         if (!productExists) {
-          throw new NotFoundException(await this.i18n.t('error.PRODUCT_ID_NOT_FOUND', { args: { id } }));
+          throw new NotFoundException(
+            await this.i18n.t('error.PRODUCT_ID_NOT_FOUND', { args: { id } }),
+          );
         }
 
         // Preparar los datos de actualización
@@ -317,7 +371,12 @@ export class ProductsService {
 
         // Si hay categorías, validarlas y reemplazarlas correctamente
         if (categories?.length) {
-          const categoryIds = await this.validateCategories(categories);
+          const areValidCategories = await this.validateCategories(categories);
+          if (!areValidCategories) {
+            throw new BadRequestException(
+              'Algunas categorías no existen o fueron eliminadas',
+            );
+          }
 
           // Eliminar las categorías actuales
           await tx.productCategory.deleteMany({
@@ -326,7 +385,7 @@ export class ProductsService {
 
           // Asociar nuevas categorías usando `createMany()`
           await tx.productCategory.createMany({
-            data: categoryIds.map((categoryId) => ({
+            data: categories.map((categoryId) => ({
               productId: id,
               categoryId: categoryId,
             })),
@@ -395,10 +454,14 @@ export class ProductsService {
         where: { id },
       });
       if (!productExists) {
-        throw new NotFoundException(await this.i18n.t('error.PRODUCT_NOT_FOUND'));
+        throw new NotFoundException(
+          await this.i18n.t('error.PRODUCT_NOT_FOUND'),
+        );
       }
       if (!productExists.isDeleted) {
-        throw new BadRequestException(await this.i18n.t('error.ACTIVE_PRODUCT'));
+        throw new BadRequestException(
+          await this.i18n.t('error.ACTIVE_PRODUCT'),
+        );
       }
       const restoredProduct = await this.prisma.product.update({
         where: { id },
@@ -424,18 +487,17 @@ export class ProductsService {
       select: { id: true },
     });
 
-    const foundCategoryNames = existingCategories.map((c) => c.id);
+    //compara los ids de las categorías existentes con los ids de las categorías que se están creando
+    const foundCategoryIds = existingCategories.map((c) => c.id);
     const missingCategories = categoryId.filter(
-      (id) => !foundCategoryNames.includes(id),
+      (id) => !foundCategoryIds.includes(id),
     );
 
     if (missingCategories.length > 0) {
-      throw new BadRequestException(
-        await this.i18n.t('error.MISSING_CATEGORIES', { args: { missingCategories: missingCategories.join(', ') } }),
-      );
+      return false;
     }
 
-    return existingCategories.map((c) => c.id);
+    return true;
   }
 
   //asociar categorías a un producto
@@ -457,4 +519,51 @@ export class ProductsService {
       );
     }
   }
+  
+  async mostBoughtProducts(limit?: number) {
+    const purchases = await this.prisma.cart.findMany({
+      where: { status: 'COMPLETED' },
+      include: { items: true },
+    });
+
+    if (!purchases.length) {
+      throw new NotFoundException('No se encontraron productos.');
+    }
+
+    const products: { id: string, name: string, price: number, quantity: number, images: any[] }[] = [];
+
+    for (const purchase of purchases) {
+      for (const item of purchase.items) {
+        const prod = await this.prisma.product.findUnique({
+          where: { id: item.productId },
+          include: {
+            images: {
+              where: { isPrincipal: true },
+              take: 1
+            }
+          },
+        });
+
+        if (prod) {
+          const existingProduct = products.find((p) => p.id === prod.id);
+
+          if (existingProduct) {
+            existingProduct.quantity += item.quantity;
+          } else {
+            products.push({
+              id: prod.id,
+              name: prod.name,
+              price: prod.price,
+              images: prod.images,
+              quantity: item.quantity,
+            });
+          }
+        }
+      }
+    }
+
+    products.sort((a, b) => b.quantity - a.quantity);
+    return limit && Number(limit) > 0 ? products.slice(0, Number(limit)) : products;
+  };
+
 }

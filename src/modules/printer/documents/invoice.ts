@@ -10,15 +10,13 @@ const styles: StyleDictionary = {
   totalRow: { bold: true, fontSize: 12, alignment: 'right' },
 };
 
-export const generateInvoice = async (purchase): Promise<TDocumentDefinitions> => {
+export const invoicePDF = async (purchase): Promise<TDocumentDefinitions> => {
   const prisma = new PrismaService();
 
   //datos del comprador
   const buyer = await prisma.user.findUnique({
     where: { id: purchase.userId }
   })
-
-
 
   let tableBody = [];
 
@@ -28,34 +26,13 @@ export const generateInvoice = async (purchase): Promise<TDocumentDefinitions> =
     })
 
 
-   tableBody.push( [
+    tableBody.push([
       { text: product.name || 'Desconocido', style: 'tableCell' },
       { text: item.quantity.toString(), style: 'tableCell', alignment: 'center' },
       { text: `$${product.price}`, style: 'tableCell', alignment: 'right' },
       { text: `$${(item.quantity * product.price)}`, style: 'tableCell', alignment: 'right' },
     ])
   }
-
-
-
-
-  // const itemIds = purchase.items.map(item => item.id);
-
-  // Obtener productos desde la base de datos
-  // const itemsFromDB = await prisma.product.findMany({
-  //   where: { id: { in: itemIds } },
-  //   select: { id: true, name: true, price: true },
-  // });
-
-  // const itemMap = new Map(itemsFromDB.map(item => [item.id, { name: item.name, price: item.price }]));
-
-  // Construcción de la tabla
-  // const tableBody = purchase.items.map((item) => [
-  //   { text: itemMap.get(item.id)?.name || 'Desconocido', style: 'tableCell' },
-  //   { text: item.quantity.toString(), style: 'tableCell', alignment: 'center' },
-  //   { text: `$${itemMap.get(item.id)?.price.toFixed(2)}`, style: 'tableCell', alignment: 'right' },
-  //   { text: `$${(item.quantity * itemMap.get(item.id)?.price).toFixed(2)}`, style: 'tableCell', alignment: 'right' },
-  // ]);
 
   tableBody.push([
     { text: 'Total', colSpan: 3, style: 'totalRow' }, {}, {},
@@ -67,7 +44,7 @@ export const generateInvoice = async (purchase): Promise<TDocumentDefinitions> =
     pageSize: 'A4',
     pageMargins: [40, 30, 40, 30],
     content: [
-      // Encabezado con datos del vendedor y factura
+      
       {
         text: `LuxShop`,
         style: 'subheader1',
@@ -88,15 +65,11 @@ export const generateInvoice = async (purchase): Promise<TDocumentDefinitions> =
         ],
         margin: [0, 0, 0, 20],
       },
-
-      // Datos del comprador
       {
         text: `Cliente: ${buyer.name}\nDNI: ${'-'}\nDirección: ${'-'}\nMétodo de Pago: ${'-'}`,
         style: 'subheader',
         margin: [0, 0, 0, 20],
       },
-
-      // Tabla de productos
       {
         table: {
           widths: ['*', 'auto', 'auto', 'auto'],

@@ -1,8 +1,8 @@
 import { Module } from '@nestjs/common';
 import { ReportsController } from './reports.controller';
 import { ReportsService } from './reports.service';
-import { PrinterModule } from '../printer/printer.module';
-import { ChartModule } from './chart.module';
+import { PrinterModule } from 'src/modules/printer/printer.module';
+import { ChartModule } from 'src/modules/chart/chart.module';
 
 @Module({
   imports:[ChartModule, PrinterModule],

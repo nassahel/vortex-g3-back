@@ -7,6 +7,8 @@ import { PrismaService } from '../prisma/prisma.service';
 import { CreateCategoryDto } from './dto/create-category.dto';
 import { UpdateCategoryDto } from './dto/update-category.dto';
 import { ExcelService } from '../excel/excel.service';
+import { PaginationArgs } from 'src/utils/pagination/pagination.dto';
+import { Paginate } from 'src/utils/pagination/parsing';
 import { I18nService } from 'nestjs-i18n';
 
 @Injectable()
@@ -17,16 +19,26 @@ export class CategoriesService {
     private readonly i18n: I18nService,
   ) {}
 
-  async findAll() {
+  async findAll(filters: PaginationArgs) {
     try {
-      const categories = await this.prisma.category.findMany({
-        where: { isDeleted: false },
-        orderBy: { name: 'asc' },
-      });
-      return categories;
+      const { page, limit } = filters;
+      const [total, categories] = await this.prisma.$transaction([
+        this.prisma.category.count({ where: { isDeleted: false } }),
+        this.prisma.category.findMany({
+          where: { isDeleted: false },
+          orderBy: { name: 'asc' },
+          skip: (page - 1) * limit,
+          take: limit,
+        }),
+      ]);
+
+      return Paginate(categories, total, { page, limit });
     } catch (error) {
       console.error(error);
-      throw new BadRequestException(await this.i18n.translate('error.CATEGORY_NOT_FOUND'), error);
+      throw new BadRequestException(
+        await this.i18n.translate('error.CATEGORY_NOT_FOUND'),
+        error,
+      );
     }
   }
 
@@ -58,7 +70,11 @@ export class CategoriesService {
         },
       });
       if (!category) {
-        throw new NotFoundException(await this.i18n.translate('error.CATEGORY_ID_NOT_FOUND', { args: { id } }));
+        throw new NotFoundException(
+          await this.i18n.translate('error.CATEGORY_ID_NOT_FOUND', {
+            args: { id },
+          }),
+        );
       }
       return category;
     } catch (error) {
@@ -78,13 +94,18 @@ export class CategoriesService {
           where: { name },
         });
         if (categoryExists) {
-          throw new BadRequestException(await this.i18n.translate('error.CATEGORY_ALREADY_EXISTS'));
+          throw new BadRequestException(
+            await this.i18n.translate('error.CATEGORY_ALREADY_EXISTS'),
+          );
         }
         return tx.category.create({
           data: { name },
         });
       });
-      return { message: await this.i18n.translate('success.CATEGORY_CREATED'), newCategory };
+      return {
+        message: await this.i18n.translate('success.CATEGORY_CREATED'),
+        newCategory,
+      };
     } catch (error) {
       console.error(error);
       throw new BadRequestException(
@@ -119,7 +140,8 @@ export class CategoriesService {
       };
     } catch (error) {
       throw new BadRequestException(
-        await this.i18n.translate('error.CATRGORY_IMPORTED_FAILED') + error.message,
+        (await this.i18n.translate('error.CATRGORY_IMPORTED_FAILED')) +
+          error.message,
       );
     }
   }
@@ -131,14 +153,20 @@ export class CategoriesService {
         where: { id, isDeleted: false },
       });
       if (!categoryExists) {
-        throw new NotFoundException(await this.i18n.translate('error.CATEGORY_ID_NOT_FOUND', { args: { id } }));
+        throw new NotFoundException(
+          await this.i18n.translate('error.CATEGORY_ID_NOT_FOUND', {
+            args: { id },
+          }),
+        );
       }
       //verifica que el nombre de la categoria no exista
       const categoryNameExist = await this.prisma.category.findFirst({
         where: { name: updateCategoryDto.name, isDeleted: false },
       });
       if (categoryNameExist) {
-        throw new BadRequestException(await this.i18n.translate('error.CATEGORY_ALREADY_EXISTS'));
+        throw new BadRequestException(
+          await this.i18n.translate('error.CATEGORY_ALREADY_EXISTS'),
+        );
       }
       //actualiza la categoria
       const updatedCategory = await this.prisma.category.update({
@@ -166,7 +194,9 @@ export class CategoriesService {
         where: { id, isDeleted: false },
       });
       if (!categoryExists) {
-        throw new NotFoundException(await this.i18n.translate('error.CATEGORY_NOT_FOUND'));
+        throw new NotFoundException(
+          await this.i18n.translate('error.CATEGORY_NOT_FOUND'),
+        );
       }
       const deletedCategory = await this.prisma.category.update({
         where: { id },
@@ -191,10 +221,14 @@ export class CategoriesService {
         where: { id },
       });
       if (!categoryExists) {
-        throw new NotFoundException(await this.i18n.translate('error.CATEGORY_NOT_FOUND'));
+        throw new NotFoundException(
+          await this.i18n.translate('error.CATEGORY_NOT_FOUND'),
+        );
       }
       if (!categoryExists.isDeleted) {
-        throw new BadRequestException(await this.i18n.translate('error.CATEGORY_NOT_DELETED'));
+        throw new BadRequestException(
+          await this.i18n.translate('error.CATEGORY_NOT_DELETED'),
+        );
       }
       const restoredCategory = await this.prisma.category.update({
         where: { id },
