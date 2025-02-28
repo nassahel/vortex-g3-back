@@ -26,6 +26,7 @@
   "dependencies": {
     "@nestjs/cache-manager": "^3.0.0",
     "@nestjs/common": "^11.0.8",
+    "@nestjs/cli": "^11.0.0",
     "@nestjs/config": "^4.0.0",
     "@nestjs/core": "^11.0.8",
     "@nestjs/jwt": "^11.0.0",
@@ -60,8 +61,7 @@
     "xlsx": "^0.18.5"
   },
   "devDependencies": {
-    "@aws-sdk/client-s3": "^3.743.0",
-    "@nestjs/cli": "^11.0.0",
+    "@aws-sdk/client-s3": "^3.743.0",    
     "@nestjs/schematics": "^10.0.0",
     "@nestjs/testing": "^11.0.8",
     "@types/aws-sdk": "^0.0.42",
