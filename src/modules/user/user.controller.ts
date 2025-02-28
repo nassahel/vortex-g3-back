@@ -31,7 +31,7 @@ export class UserController {
   // crea un usuario
   @UseGuards(JwtAuthGuard)
   @Post()
-  @ApiOperation({ summary: SWAGGER_TRANSLATIONS.USER_CREATE }) //Para documentacion de Swagger
+  @ApiOperation({ summary: SWAGGER_TRANSLATIONS.USER_CREATE }) 
   @ApiResponse({
     status: 201,
     description: SWAGGER_TRANSLATIONS.USER_CREATE_SUCCESS,
@@ -44,7 +44,7 @@ export class UserController {
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(RoleEnum.ADMIN)
   @Get()
-  @ApiOperation({ summary: SWAGGER_TRANSLATIONS.USER_GET_ALL }) //Para documentacion de Swagger
+  @ApiOperation({ summary: SWAGGER_TRANSLATIONS.USER_GET_ALL })
   @ApiResponse({
     status: 201,
     description: SWAGGER_TRANSLATIONS.USER_GET_ALL_SUCCESS,
@@ -55,7 +55,7 @@ export class UserController {
 
   // obtiene solo los usuarios sin borrado logico y que esten activos
   @Get('get-all-active')
-  @ApiOperation({ summary: SWAGGER_TRANSLATIONS.USER_GET_ALL }) //Para documentacion de Swagger
+  @ApiOperation({ summary: SWAGGER_TRANSLATIONS.USER_GET_ALL }) 
   @ApiResponse({
     status: 201,
     description: SWAGGER_TRANSLATIONS.USER_GET_ALL_SUCCESS,
@@ -66,7 +66,7 @@ export class UserController {
 
   // Obtiene todos los usuarios con rol USER
   @Get('get-all-users')
-  @ApiOperation({ summary: SWAGGER_TRANSLATIONS.USER_GET_ALL }) //Para documentacion de Swagger
+  @ApiOperation({ summary: SWAGGER_TRANSLATIONS.USER_GET_ALL }) 
   @ApiResponse({
     status: 201,
     description: SWAGGER_TRANSLATIONS.USER_GET_ALL_SUCCESS,
@@ -76,8 +76,9 @@ export class UserController {
   }
 
   // Obtiene un usuario por id
+  @UseGuards(JwtAuthGuard)
   @Get(':id')
-  @ApiOperation({ summary: SWAGGER_TRANSLATIONS.USER_GET_ONE }) //Para documentacion de Swagger
+  @ApiOperation({ summary: SWAGGER_TRANSLATIONS.USER_GET_ONE }) 
   @ApiResponse({
     status: 201,
     description: SWAGGER_TRANSLATIONS.USER_GET_ONE_SUCCESS,
@@ -89,7 +90,7 @@ export class UserController {
   // Actualiza un usuario por id
   @UseGuards(JwtAuthGuard)
   @Patch(':id')
-  @ApiOperation({ summary: SWAGGER_TRANSLATIONS.USER_UPDATE }) //Para documentacion de Swagger
+  @ApiOperation({ summary: SWAGGER_TRANSLATIONS.USER_UPDATE })
   @ApiResponse({
     status: 201,
     description: SWAGGER_TRANSLATIONS.USER_UPDATE_SUCCESS,
@@ -101,7 +102,7 @@ export class UserController {
   //Borrado logico de un usuario por id
   @UseGuards(JwtAuthGuard)
   @Patch('delete/:id')
-  @ApiOperation({ summary: SWAGGER_TRANSLATIONS.USER_DELETE }) //Para documentacion de Swagger
+  @ApiOperation({ summary: SWAGGER_TRANSLATIONS.USER_DELETE }) 
   @ApiResponse({
     status: 201,
     description: SWAGGER_TRANSLATIONS.USER_DELETE_SUCCESS,
@@ -115,7 +116,7 @@ export class UserController {
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(RoleEnum.ADMIN)
   @Delete('delete/:id')
-  @ApiOperation({ summary: SWAGGER_TRANSLATIONS.USER_DELETE }) //Para documentacion de Swagger
+  @ApiOperation({ summary: SWAGGER_TRANSLATIONS.USER_DELETE })
   @ApiResponse({
     status: 201,
     description: SWAGGER_TRANSLATIONS.USER_DELETE_SUCCESS,
