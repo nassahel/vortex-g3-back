@@ -60,13 +60,14 @@
     "rxjs": "^7.8.1",
     "swagger-jsdoc": "^6.2.8",
     "swagger-ui-express": "^5.0.1",
+    "@types/aws-sdk": "^0.0.42",
+    "@aws-sdk/client-s3": "^3.743.0",   
     "xlsx": "^0.18.5"
   },
   "devDependencies": {
-    "@aws-sdk/client-s3": "^3.743.0",    
+   
     "@nestjs/schematics": "^10.0.0",
-    "@nestjs/testing": "^11.0.8",
-    "@types/aws-sdk": "^0.0.42",
+    "@nestjs/testing": "^11.0.8",    
     "@types/bcrypt": "^5.0.2",
     "@types/cache-manager": "^4.0.6",    
     "@types/jest": "^29.5.2",
