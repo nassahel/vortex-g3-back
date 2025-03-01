@@ -8,16 +8,13 @@ async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
   app.enableCors({
-    origin: '*', // Abrilo completo para que no falle por CORS
-    methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Authorization'],
+    origin: '*',
   });
 
-
+  //Configuracion de las rutas generales. ahora a todas las rutas hay quie ponerle eso de api/v1 antes de lo que corresponda.
   app.setGlobalPrefix('api/v1', {
     exclude: ['api-docs'],
-  });
-
+});
   app.useGlobalPipes(
     new ValidationPipe({
       transform: true,
@@ -29,16 +26,16 @@ async function bootstrap() {
 
   setupSwagger(app);
 
-  const PORT = process.env.PORT || 3000;  
-  const NODE_ENV = process.env.NODE_ENV || 'development';
+  const configService = app.get(ConfigService);
+  const PORT = process.env.PORT || configService.get<number>('PORT') || 3000;
+  const NODE_ENV = configService.get<string>('NODE_ENV');
 
-  Logger.log(`🚀 Starting app in ${NODE_ENV} mode`, 'Bootstrap');
-  Logger.log(`🚀 Listening on port ${PORT}`, 'Bootstrap');
-
-  await app.listen(PORT);
-
-  Logger.log(`🚀 App ready and listening on port ${PORT}`, 'Bootstrap');
+  await app.listen(PORT, () => {
+    Logger.log(
+      `Application running the port: http://localhost:${PORT}`,
+      NestApplication.name,
+    );
+    Logger.log(`Current enviroment: ${NODE_ENV}`, NestApplication.name);
+  });
 }
-bootstrap();
-
 bootstrap();
