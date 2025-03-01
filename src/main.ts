@@ -29,7 +29,7 @@ async function bootstrap() {
   setupSwagger(app);
 
   const configService = app.get(ConfigService);
-  const PORT = process.env.PORT || configService.get<number>('PORT') || 3000;
+  const PORT = process.env.PORT || configService.get<number>('PORT') || 10000;
   const NODE_ENV = configService.get<string>('NODE_ENV');
 
   await app.listen(PORT, () => {
