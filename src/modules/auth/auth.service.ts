@@ -101,9 +101,10 @@ export class AuthService {
     const payload = {
       userId: userExist.id,
       userRol: userExist.rol,
+      userName: userExist.name
     };
 
-    const token = this.jwt.sign(payload, { expiresIn: '24h' });
+    const token = await this.jwt.signAsync(payload, { expiresIn: '24h' });
 
     //CAMBIAR POR OTRO MENSAJE DESPUES
     if(!token){
