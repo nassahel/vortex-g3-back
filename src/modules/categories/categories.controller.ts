@@ -10,6 +10,7 @@ import {
   Patch,
   Delete,
   Query,
+  UseGuards,
 } from '@nestjs/common';
 import { CategoriesService } from './categories.service';
 import { CreateCategoryDto } from './dto/create-category.dto';
@@ -19,14 +20,19 @@ import { PaginationArgs } from 'src/utils/pagination/pagination.dto';
 import { ApiOperation, ApiResponse } from '@nestjs/swagger';
 import { I18nService } from 'nestjs-i18n';
 import { SWAGGER_TRANSLATIONS } from 'src/i18n/en/i18n.swagger';
+import { JwtAuthGuard } from '../auth/guards/jwt.guard';
+import { Roles } from 'src/common/decorators/roles.decorator';
+import { RoleEnum } from 'src/common/constants';
 
 @Controller('category')
 export class CategoriesController {
   constructor(
     private readonly categoriesService: CategoriesService,
     private readonly i18n: I18nService,
-  ) {}
+  ) { }
 
+  @UseGuards(JwtAuthGuard)
+  @Roles(RoleEnum.ADMIN)
   @Post('/new')
   @ApiOperation({ summary: SWAGGER_TRANSLATIONS.CATEGORIES_CREATE })
   @ApiResponse({
@@ -37,6 +43,8 @@ export class CategoriesController {
     return this.categoriesService.createCategory(createCategoryDto);
   }
 
+  @UseGuards(JwtAuthGuard)
+  @Roles(RoleEnum.ADMIN)
   @Post('/upload-categories')
   @ApiOperation({ summary: SWAGGER_TRANSLATIONS.CATEGORIES_UPLOAD })
   @ApiResponse({
@@ -48,6 +56,8 @@ export class CategoriesController {
     return this.categoriesService.uploadCategory(file);
   }
 
+  @UseGuards(JwtAuthGuard)
+  @Roles(RoleEnum.ADMIN)
   @Get('/all')
   @ApiOperation({ summary: SWAGGER_TRANSLATIONS.CATEGORIES_GET_ALL })
   @ApiResponse({
@@ -58,6 +68,8 @@ export class CategoriesController {
     return this.categoriesService.findAll(filters);
   }
 
+  @UseGuards(JwtAuthGuard)
+  @Roles(RoleEnum.ADMIN)
   @Get('/:id')
   @ApiOperation({ summary: SWAGGER_TRANSLATIONS.CATEGORIES_GET_ONE })
   @ApiResponse({
@@ -68,6 +80,8 @@ export class CategoriesController {
     return this.categoriesService.findOne(id);
   }
 
+  @UseGuards(JwtAuthGuard)
+  @Roles(RoleEnum.ADMIN)
   @Put('/update/:id')
   @ApiOperation({ summary: SWAGGER_TRANSLATIONS.CATEGORIES_UPDATE })
   @ApiResponse({
@@ -81,6 +95,8 @@ export class CategoriesController {
     return this.categoriesService.updateCategory(id, updateCategoryDto);
   }
 
+  @UseGuards(JwtAuthGuard)
+  @Roles(RoleEnum.ADMIN)
   @Delete('/delete/:id')
   @ApiOperation({ summary: SWAGGER_TRANSLATIONS.CATEGORIES_DELETE })
   @ApiResponse({
@@ -91,6 +107,8 @@ export class CategoriesController {
     return this.categoriesService.removeCategory(id);
   }
 
+  @UseGuards(JwtAuthGuard)
+  @Roles(RoleEnum.ADMIN)
   @Patch('/restore/:id')
   @ApiOperation({ summary: SWAGGER_TRANSLATIONS.CATEGORIES_RESTORE })
   @ApiResponse({

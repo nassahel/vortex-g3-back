@@ -11,6 +11,7 @@ import {
   Patch,
   UploadedFiles,
   Delete,
+  UseGuards,
 } from '@nestjs/common';
 import { ProductsService } from './products.service';
 import { CreateProductDto } from './dto/create-product.dto';
@@ -22,6 +23,9 @@ import { ApiConsumes, ApiOperation, ApiResponse } from '@nestjs/swagger';
 import { PaginationArgs } from 'src/utils/pagination/pagination.dto';
 import { I18nService } from 'nestjs-i18n';
 import { SWAGGER_TRANSLATIONS } from 'src/i18n/en/i18n.swagger';
+import { JwtAuthGuard } from '../auth/guards/jwt.guard';
+import { Roles } from 'src/common/decorators/roles.decorator';
+import { RoleEnum } from 'src/common/constants';
 
 @Controller('product')
 export class ProductsController {
@@ -30,6 +34,8 @@ export class ProductsController {
     private readonly i18n: I18nService,
   ) { }
 
+  @UseGuards(JwtAuthGuard)
+  @Roles(RoleEnum.ADMIN)
   @Post('/create-product')
   @ApiOperation({ summary: SWAGGER_TRANSLATIONS.PRODUCTS_CREATE })
   @ApiResponse({
@@ -133,5 +139,5 @@ export class ProductsController {
   }
 
 
-  
+
 }

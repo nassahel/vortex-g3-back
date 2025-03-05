@@ -30,6 +30,7 @@ export class UserController {
 
   // crea un usuario
   @UseGuards(JwtAuthGuard)
+  @Roles(RoleEnum.ADMIN)
   @Post()
   @ApiOperation({ summary: SWAGGER_TRANSLATIONS.USER_CREATE }) 
   @ApiResponse({
@@ -101,6 +102,7 @@ export class UserController {
 
   //Borrado logico de un usuario por id
   @UseGuards(JwtAuthGuard)
+  @Roles(RoleEnum.ADMIN)
   @Patch('delete/:id')
   @ApiOperation({ summary: SWAGGER_TRANSLATIONS.USER_DELETE }) 
   @ApiResponse({

@@ -4,7 +4,6 @@ import {
   IsString,
   MaxLength,
   MinLength,
-  minLength,
 } from 'class-validator';
 
 export class CreateRegisterDto {
