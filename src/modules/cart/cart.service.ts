@@ -51,6 +51,7 @@ export class CartService {
     upsertCartItemDto: UpsertCartItemDto,
   ): Promise<{ message: string }> {
     const { productId, quantity } = upsertCartItemDto;
+    
 
     const product = await this.prisma.product.findUnique({
       where: { id: productId },

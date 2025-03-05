@@ -57,7 +57,7 @@ export class CategoriesController {
     return this.categoriesService.uploadCategory(file);
   }
 
-  @UseGuards(JwtAuthGuard)
+  @UseGuards()
   @Get('/all')
   @ApiOperation({ summary: SWAGGER_TRANSLATIONS.CATEGORIES_GET_ALL })
   @ApiResponse({
