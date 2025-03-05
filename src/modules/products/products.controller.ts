@@ -28,7 +28,7 @@ export class ProductsController {
   constructor(
     private readonly productsService: ProductsService,
     private readonly i18n: I18nService,
-  ) { }
+  ) {}
 
   @Post('/create-product')
   @ApiOperation({ summary: SWAGGER_TRANSLATIONS.PRODUCTS_CREATE })
@@ -131,7 +131,4 @@ export class ProductsController {
   restore(@Param('id') id: string) {
     return this.productsService.restoreProduct(id);
   }
-
-
-  
 }
