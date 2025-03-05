@@ -39,6 +39,8 @@ export class ProfileController {
     private readonly i18n: I18nService,
   ) {}
 
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(RoleEnum.ADMIN)
   @Get('/all/profiles')
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(RoleEnum.ADMIN)
@@ -47,7 +49,8 @@ export class ProfileController {
   findAll() {
     return this.profileService.getAllProfiles();
   }
-
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(RoleEnum.ADMIN)
   @Post('create/:userId')
   @ApiOperation({ summary: SWAGGER_TRANSLATIONS.PROFILE_CREATE }) //Para documentacion de Swagger
   @ApiResponse({ status: 201, description: SWAGGER_TRANSLATIONS.PROFILE_CREATE_SUCCESS })
@@ -75,6 +78,7 @@ export class ProfileController {
   }
 
   //Ruta para subir la imagen
+  @UseGuards(JwtAuthGuard)
   @Post('upload')
   @ApiOperation({ summary: SWAGGER_TRANSLATIONS.PROFILE_UPLOAD }) //Para documentacion de Swagger
   @ApiResponse({ status: 201, description: SWAGGER_TRANSLATIONS.PROFILE_UPLOAD_SUCCESS }) //Pra que responda con un 201 en el caso de que se suba con exito
@@ -105,6 +109,7 @@ export class ProfileController {
   }
 
   //Ruta para eliminar la imagen
+  @UseGuards(JwtAuthGuard)
   @Delete('delete/:userId')
   @ApiOperation({ summary: SWAGGER_TRANSLATIONS.PROFILE_DELETE }) //Para documentacion de Swagger
   @ApiResponse({ status: 200, description: SWAGGER_TRANSLATIONS.PROFILE_DELETE_SUCCESS }) //Para que responda con un 200 en el caso de que se elimine con exito
@@ -115,6 +120,7 @@ export class ProfileController {
   }
 
   //Actualizar la info del usuario
+  @UseGuards(JwtAuthGuard)
   @Put('update/:userId')
   @ApiOperation({ summary: SWAGGER_TRANSLATIONS.PROFILE_UPDATE })
   @ApiResponse({ status: 200, description: SWAGGER_TRANSLATIONS.PROFILE_UPDATE_SUCCESS })

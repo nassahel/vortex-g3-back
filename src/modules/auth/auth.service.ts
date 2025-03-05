@@ -49,7 +49,7 @@ export class AuthService {
       });
 
       if (!registeredUser) {
-        throw new BadRequestException('No se pudo registrar al usuario');
+        throw new BadRequestException(this.i18n.translate('error.USER_REGISTRATION_FAILED'));
       }
 
 

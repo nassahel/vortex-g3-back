@@ -1,0 +1,33 @@
+{
+  "validation": {
+    "name": {
+      "isString": "El nombre debe ser una cadena de texto.",
+      "isNotEmpty": "El nombre es obligatorio.",
+      "maxLength": "El nombre no debe exceder los 100 caracteres."
+    },
+    "email": {
+      "isString": "El correo electrónico debe ser una cadena de texto.",
+      "isEmail": "El correo electrónico debe ser una dirección válida.",
+      "isNotEmpty": "El correo electrónico es obligatorio.",
+      "maxLength": "El correo electrónico no debe exceder los 50 caracteres."
+    },
+    "password": {
+      "isString": "La contraseña debe ser una cadena de texto.",
+      "isNotEmpty": "La contraseña es obligatoria.",
+      "minLength": "La contraseña debe tener al menos 8 caracteres.",
+      "maxLength": "La contraseña no debe exceder los 100 caracteres."
+    },
+    "repeatPassword": {
+      "isString": "La repetición de la contraseña debe ser una cadena de texto.",
+      "isNotEmpty": "La repetición de la contraseña es obligatoria.",
+      "minLength": "La repetición de la contraseña debe tener al menos 8 caracteres.",
+      "maxLength": "La repetición de la contraseña no debe exceder los 100 caracteres."
+    },
+    "newPassword": {
+      "isString": "La nueva contraseña debe ser una cadena de texto."
+    },
+    "token": {
+      "isString": "El token debe ser una cadena de texto."
+    }
+  }
+}

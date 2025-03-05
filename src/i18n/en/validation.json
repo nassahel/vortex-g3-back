@@ -1,0 +1,33 @@
+{
+  "validation": {
+    "name": {
+      "isString": "Name must be a string.",
+      "isNotEmpty": "Name is required.",
+      "maxLength": "Name must not exceed 100 characters."
+    },
+    "email": {
+      "isString": "Email must be a string.",
+      "isEmail": "Email must be a valid email address.",
+      "isNotEmpty": "Email is required.",
+      "maxLength": "Email must not exceed 50 characters."
+    },
+    "password": {
+      "isString": "Password must be a string.",
+      "isNotEmpty": "Password is required.",
+      "minLength": "Password must be at least 8 characters long.",
+      "maxLength": "Password must not exceed 100 characters."
+    },
+    "repeatPassword": {
+      "isString": "Repeat password must be a string.",
+      "isNotEmpty": "Repeat password is required.",
+      "minLength": "Repeat password must be at least 8 characters long.",
+      "maxLength": "Repeat password must not exceed 100 characters."
+    },
+    "newPassword": {
+      "isString": "New password must be a string."
+    },
+    "token": {
+      "isString": "Token must be a string."
+    }
+  }
+}
