@@ -17,7 +17,7 @@ export class UserService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly i18n: I18nService,
-  ) {}
+  ) { }
 
   // Crear un usuario
   async create(createUserDto: CreateUserDto) {
@@ -30,7 +30,7 @@ export class UserService {
       });
       if (userExist) {
         throw new ConflictException(
-          await this.i18n.t('error.USER_ALREADY_EXISTS'),
+          this.i18n.t('error.USER_ALREADY_EXISTS'),
         );
       }
 
@@ -42,11 +42,25 @@ export class UserService {
           email: formattedEmail,
           password: hashedPassword,
           rol,
-        },
+        }
       });
 
+      if (newUser) {
+        this.prisma.profile.create({
+          data: {
+            userId: newUser.id,
+            profileImage: '',
+            address: '',
+            dni: '',
+            phone: '',
+
+
+          }
+        })
+      }
+
       return {
-        message: await this.i18n.t('success.USER_REGISTERED'),
+        message: this.i18n.t('success.USER_REGISTERED'),
         newUser: {
           name: newUser.name,
           email: newUser.email,
@@ -146,7 +160,10 @@ export class UserService {
   // Obtiene un usuario por su id
   async findOne(id: string) {
     try {
-      const foundUser = await this.prisma.user.findUnique({ where: { id } });
+      const foundUser = await this.prisma.user.findUnique({
+        where: { id },
+        include: { profile: true, carts: { include: { items: { include: { product: true } } } } }
+      });
 
       if (!foundUser) {
         throw new NotFoundException(await this.i18n.t('error.USER_NOT_FOUND'));
@@ -158,6 +175,8 @@ export class UserService {
         email: foundUser.email,
         rol: foundUser.rol,
         isActive: foundUser.isActive,
+        profile: foundUser.profile,
+        cart: foundUser.carts
       };
     } catch (error) {
       throw new InternalServerErrorException(

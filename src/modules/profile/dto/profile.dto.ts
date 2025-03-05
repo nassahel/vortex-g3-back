@@ -11,14 +11,16 @@ import { ApiPropertyOptional } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
 // import { DateTime } from "aws-sdk/clients/devicefarm";
 
-export class UpdateProfileDto {
+export class ProfileDto {
   @ApiPropertyOptional({ description: 'User name' })
   @IsString()
+  @IsOptional()
   @MinLength(1, { message: 'Name must not be empty' })
   name: string;
 
   @ApiPropertyOptional({ description: 'User email' })
   @IsEmail({}, { message: 'Must be a valid email address' })
+  @IsOptional()
   email: string;
 
   @ApiPropertyOptional({ description: 'User address' })
