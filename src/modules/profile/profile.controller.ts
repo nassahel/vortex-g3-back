@@ -39,7 +39,7 @@ export class ProfileController {
     private readonly i18n: I18nService,
   ) {}
 
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(RoleEnum.ADMIN)
   @Get('/all/profiles')
   @UseGuards(JwtAuthGuard, RolesGuard)
@@ -49,7 +49,7 @@ export class ProfileController {
   findAll() {
     return this.profileService.getAllProfiles();
   }
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(RoleEnum.ADMIN)
   @Post('create/:userId')
   @ApiOperation({ summary: SWAGGER_TRANSLATIONS.PROFILE_CREATE }) //Para documentacion de Swagger

@@ -5,6 +5,7 @@ import { ChartQueryDto } from './dto/report-query.dto';
 import { JwtAuthGuard } from '../auth/guards/jwt.guard';
 import { Roles } from 'src/common/decorators/roles.decorator';
 import { RoleEnum } from 'src/common/constants';
+import { RolesGuard } from '../auth/guards/roles.guard';
 
 @Controller('report')
 export class ReportsController {
@@ -43,7 +44,7 @@ export class ReportsController {
     }
   }
 
-  @UseGuards(JwtAuthGuard)
+@UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(RoleEnum.ADMIN)
   @Post('purchases-per-day')
   async purchasesPerDay(@Body() body: ChartQueryDto, @Res() res: Response) {
