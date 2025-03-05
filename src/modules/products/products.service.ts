@@ -519,16 +519,12 @@ export class ProductsService {
       );
     }
   }
-  
+
   async mostBoughtProducts(limit?: number) {
     const purchases = await this.prisma.cart.findMany({
       where: { status: 'COMPLETED' },
       include: { items: true },
     });
-
-    if (!purchases.length) {
-      throw new NotFoundException('No se encontraron productos.');
-    }
 
     const products: { id: string, name: string, price: number, quantity: number, images: any[] }[] = [];
 

@@ -52,6 +52,19 @@ export class AuthService {
         throw new BadRequestException('No se pudo registrar al usuario');
       }
 
+
+      await this.prisma.profile.create({
+        data: {
+          userId: registeredUser.id,
+          profileImage: null,
+          address: null,
+          dni: null,
+          phone: null,
+
+        }
+      })
+
+
       //Envia email a gnte cuando alguien se registra.
       //Está comentado para que no le envie emails a gente desconocida mientras lo pruebo
 
@@ -67,6 +80,8 @@ export class AuthService {
       //   emailBody,
       // });
 
+
+
       return {
         message: this.i18n.translate('success.USER_REGISTERED'),
         newUser: {
@@ -75,6 +90,7 @@ export class AuthService {
         },
       };
     } catch (error) {
+      console.log(error)
       throw new InternalServerErrorException(this.i18n.translate('error.USER_REGISTRATION_FAILED'));
     }
   }
@@ -101,12 +117,13 @@ export class AuthService {
     const payload = {
       userId: userExist.id,
       userRol: userExist.rol,
+      userName: userExist.name
     };
 
-    const token = this.jwt.sign(payload, { expiresIn: '24h' });
+    const token = await this.jwt.signAsync(payload, { expiresIn: '24h' });
 
     //CAMBIAR POR OTRO MENSAJE DESPUES
-    if(!token){
+    if (!token) {
       throw new ConflictException(this.i18n.translate('error.INVALID_CREDENTIALS'))
     }
 

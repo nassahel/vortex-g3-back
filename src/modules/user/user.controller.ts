@@ -43,7 +43,7 @@ export class UserController {
   // obtiene todos los usuarios sin borrado logico
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(RoleEnum.ADMIN)
-  @Get()
+  @Get('/admin/all')
   @ApiOperation({ summary: SWAGGER_TRANSLATIONS.USER_GET_ALL })
   @ApiResponse({
     status: 201,

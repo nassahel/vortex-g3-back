@@ -8,7 +8,7 @@ async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
   app.enableCors({
-    origin: 'http://localhost:3000',
+    origin: '*',
   });
 
   //Configuracion de las rutas generales. ahora a todas las rutas hay quie ponerle eso de api/v1 antes de lo que corresponda.
