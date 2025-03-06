@@ -8,7 +8,7 @@ export class MailjetService implements EmailService {
   private logger = new Logger(MailjetService.name);
   private client: Client;
 
-  constructor(    private readonly i18n: I18nService,) {
+  constructor(private readonly i18n: I18nService,) {
     this.client = new Client({
       apiKey: messagingConfig.apiKey,
       apiSecret: messagingConfig.secret,
@@ -30,11 +30,11 @@ export class MailjetService implements EmailService {
         ],
       })
       .then(async () => {
-        this.logger.debug(await this.i18n.t('error.EMAIL_SENT', { args: { to } }));
+        this.logger.debug(`Email enviado a ${to}`);
       })
       .catch(async (error) => {
-        this.logger.error(await this.i18n.t('error.EMAIL_FAILED', error.stack));
-        console.error(await this.i18n.t('error.MAILJET_ERROR', error));
+        this.logger.error('No se pudo enviar el email');
+        console.error( error);
       });
   }
 }

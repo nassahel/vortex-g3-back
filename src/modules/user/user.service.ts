@@ -48,11 +48,9 @@ export class UserService {
           data: {
             userId: newUser.id,
             profileImage: '',
-            address: '',
-            dni: '',
-            phone: '',
-
-
+            address: 'Sin asignar',
+            dni: 'Sin asignar',
+            phone: 'Sin asignar',
           }
         })
       }

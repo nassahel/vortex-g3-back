@@ -15,8 +15,12 @@ export const invoicePDF = async (purchase): Promise<TDocumentDefinitions> => {
 
   //datos del comprador
   const buyer = await prisma.user.findUnique({
-    where: { id: purchase.userId }
+    where: { id: purchase.userId },
+    include: { profile: true }
   })
+
+  const { address, dni, phone } = buyer.profile;
+
 
   let tableBody = [];
 
@@ -25,12 +29,11 @@ export const invoicePDF = async (purchase): Promise<TDocumentDefinitions> => {
       where: { id: item.productId }
     })
 
-
     tableBody.push([
       { text: product.name || 'Desconocido', style: 'tableCell' },
       { text: item.quantity.toString(), style: 'tableCell', alignment: 'center' },
       { text: `$${product.price}`, style: 'tableCell', alignment: 'right' },
-      { text: `$${(item.quantity * product.price)}`, style: 'tableCell', alignment: 'right' },
+      { text: `$${(item.quantity * product.price).toFixed(2)}`, style: 'tableCell', alignment: 'right' },
     ])
   }
 
@@ -44,7 +47,7 @@ export const invoicePDF = async (purchase): Promise<TDocumentDefinitions> => {
     pageSize: 'A4',
     pageMargins: [40, 30, 40, 30],
     content: [
-      
+
       {
         text: `LuxShop`,
         style: 'subheader1',
@@ -53,7 +56,7 @@ export const invoicePDF = async (purchase): Promise<TDocumentDefinitions> => {
       {
         columns: [
           {
-            text: 'Dirección: Nombre Calle 123, Ciudad\nTeléfono: +54 381 123-4567',
+            text: address,
             style: 'subheader',
             alignment: 'left',
           },
@@ -66,7 +69,7 @@ export const invoicePDF = async (purchase): Promise<TDocumentDefinitions> => {
         margin: [0, 0, 0, 20],
       },
       {
-        text: `Cliente: ${buyer.name}\nDNI: ${'-'}\nDirección: ${'-'}\nMétodo de Pago: ${'-'}`,
+        text: `Cliente: ${buyer.name}\nDNI: ${dni}\nDirección: ${address}\nMétodo de Pago: ${'Mercado Pago'}`,
         style: 'subheader',
         margin: [0, 0, 0, 20],
       },
