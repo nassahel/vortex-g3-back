@@ -112,7 +112,7 @@ export class UserController {
     return this.userService.logicDelete(id);
   }
 
-  //Borra definitivamente un suuario de la base de datos.
+  //Borra definitivamente un usuario de la base de datos.
 
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(RoleEnum.ADMIN)
