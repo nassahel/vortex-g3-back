@@ -4,6 +4,7 @@ export const SWAGGER_TRANSLATIONS = {
   AUTH_REGISTER_SUCCESS: 'User Successfully registered',
   AUTH_LOGIN: 'Login a User',
   AUTH_LOGIN_SUCCESS: 'User Successfully logged in',
+  AUTH_LOGIN_ERROR: 'Denied Access - Invalid Credentials',
   AUTH_REQUEST_RECOVERY_PASSWORD: 'Request password recovery',
   AUTH_REQUEST_RECOVERY_PASSWORD_SUCCESS: 'Recovery email sent successfully',
   AUTH_RECOVERY_PASSWORD: 'Recover password',

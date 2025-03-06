@@ -19,7 +19,7 @@ import { UpdateProductDto } from './dto/update-product.dto';
 import { FilterProductDto } from './dto/filters-product.dto';
 import { FileInterceptor, FilesInterceptor } from '@nestjs/platform-express';
 import { memoryStorage } from 'multer';
-import { ApiConsumes, ApiOperation, ApiResponse } from '@nestjs/swagger';
+import { ApiConsumes, ApiOperation, ApiResponse, ApiParam, ApiBody } from '@nestjs/swagger';
 import { PaginationArgs } from 'src/utils/pagination/pagination.dto';
 import { I18nService } from 'nestjs-i18n';
 import { SWAGGER_TRANSLATIONS } from 'src/i18n/en/i18n.swagger';
@@ -39,6 +39,7 @@ export class ProductsController {
   @Roles(RoleEnum.ADMIN)
   @Post('/create-product')
   @ApiOperation({ summary: SWAGGER_TRANSLATIONS.PRODUCTS_CREATE })
+  @ApiBody({ type: CreateProductDto }) // Define el request body
   @ApiResponse({
     status: 201,
     description: SWAGGER_TRANSLATIONS.PRODUCTS_CREATE_SUCCESS,
@@ -99,6 +100,7 @@ export class ProductsController {
 
   @Get('/:id')
   @ApiOperation({ summary: SWAGGER_TRANSLATIONS.PRODUCTS_GET_ONE })
+  @ApiParam({ name: 'id', example: '123', description: 'ID del producto' })
   @ApiResponse({
     status: 201,
     description: SWAGGER_TRANSLATIONS.PRODUCTS_GET_ONE_SUCCESS,
@@ -111,6 +113,8 @@ export class ProductsController {
   @Roles(RoleEnum.ADMIN)
   @Patch('/update/:id')
   @ApiOperation({ summary: SWAGGER_TRANSLATIONS.PRODUCTS_UPDATE })
+  @ApiParam({ name: 'id', example: '123', description: 'ID del producto' })
+  @ApiBody({ type: UpdateProductDto }) // Define el request body
   @ApiResponse({
     status: 201,
     description: SWAGGER_TRANSLATIONS.PRODUCTS_UPDATE_SUCCESS,
@@ -124,6 +128,7 @@ export class ProductsController {
   @Roles(RoleEnum.ADMIN)
   @Delete('/delete/:id')
   @ApiOperation({ summary: SWAGGER_TRANSLATIONS.PRODUCTS_DELETE })
+  @ApiParam({ name: 'id', example: '123', description: 'ID del producto' })
   @ApiResponse({
     status: 201,
     description: SWAGGER_TRANSLATIONS.PRODUCTS_DELETE_SUCCESS,
@@ -137,6 +142,7 @@ export class ProductsController {
   @Roles(RoleEnum.ADMIN)
   @Patch('/restore/:id')
   @ApiOperation({ summary: SWAGGER_TRANSLATIONS.PRODUCTS_RESTORE })
+  @ApiParam({ name: 'id', example: '123', description: 'ID del producto' })
   @ApiResponse({
     status: 201,
     description: SWAGGER_TRANSLATIONS.PRODUCTS_RESTORE_SUCCESS,
