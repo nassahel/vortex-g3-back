@@ -14,28 +14,28 @@ export enum Rol {
 }
 
 export class CreateUserDto {
-  @IsString()
-  @IsOptional()
-  @MaxLength(200)
+  @IsString({ message: 'Image must be a string.' })
+  @IsOptional({ message: 'Image is optional.' })
+  @MaxLength(200, { message: 'Image cannot be longer than 200 characters.' })
   image: string;
 
-  @IsString()
-  @MinLength(3)
-  @MaxLength(100)
+  @IsString({ message: 'Name must be a string.' })
+  @MinLength(3, { message: 'Name must be at least 3 characters long.' })
+  @MaxLength(100, { message: 'Name cannot be longer than 100 characters.' })
   name: string;
 
-  @IsString()
-  @MaxLength(50)
-  @IsEmail()
+  @IsString({ message: 'Email must be a string.' })
+  @MaxLength(50, { message: 'Email cannot be longer than 50 characters.' })
+  @IsEmail({}, { message: 'Email must be a valid email address.' })
   email: string;
 
-  @IsEnum(Rol)
-  @IsOptional()
+  @IsEnum(Rol, { message: 'Role must be either ADMIN or USER.' })
+  @IsOptional({ message: 'Role is optional.' })
   rol: Rol;
 
-  @IsString()
-  @IsNotEmpty()
-  @MinLength(8)
-  @MaxLength(100)
+  @IsString({ message: 'Password must be a string.' })
+  @IsNotEmpty({ message: 'Password cannot be empty.' })
+  @MinLength(8, { message: 'Password must be at least 8 characters long.' })
+  @MaxLength(100, { message: 'Password cannot be longer than 100 characters.' })
   password: string;
 }
