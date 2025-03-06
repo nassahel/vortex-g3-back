@@ -33,7 +33,7 @@ export class ProductsController {
   constructor(
     private readonly productsService: ProductsService,
     private readonly i18n: I18nService,
-  ) { }
+  ) {}
 
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(RoleEnum.ADMIN)
@@ -144,7 +144,4 @@ export class ProductsController {
   restore(@Param('id') id: string) {
     return this.productsService.restoreProduct(id);
   }
-
-
-
 }

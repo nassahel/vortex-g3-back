@@ -28,3 +28,8 @@ export const messagingConfig = {
     backoffice: env.BACKOFFICE_RESET_PASSWORD_URL,
   },
 };
+
+export const mercadopagoConfig = {
+  accessToken: env.MP_ACCESS_TOKEN,
+  webhookUrl: env.MP_WEBHOOK_URL,
+};
