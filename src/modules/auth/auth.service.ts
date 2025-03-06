@@ -97,7 +97,7 @@ export class AuthService {
 
   async login(
     createLoginDto: CreateLoginDto,
-  ): Promise<{ message: string; token: string; user: any }> {
+  ): Promise<{ message: string; token: string }> {
     const { password, email } = createLoginDto;
     const formattedEmail = email.toLowerCase();
     const userExist = await this.prisma.user.findUnique({
@@ -129,13 +129,7 @@ export class AuthService {
 
     return {
       message: await this.i18n.translate('success.LOGGED_IN'),
-      token,
-      user: {
-        id: userExist.id,
-        name: userExist.name,
-        email: userExist.email,
-        rol: userExist.rol
-    }
+      token
     };
   }
 
