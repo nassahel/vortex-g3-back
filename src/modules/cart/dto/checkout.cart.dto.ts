@@ -1,10 +1,9 @@
-import { ApiPropertyOptional } from '@nestjs/swagger';
+import { ApiProperty } from '@nestjs/swagger';
 import { IsOptional, IsString } from 'class-validator';
 
 export class CheckoutCartDto {
-  @ApiPropertyOptional({
-    description: 'Address where the order will be delivered',
-  })
+  
+  @ApiProperty({ example: 'Domicilio', description: 'Método de entrega del pedido' })
   @IsOptional()
   @IsString()
   shippingAddress?: string;

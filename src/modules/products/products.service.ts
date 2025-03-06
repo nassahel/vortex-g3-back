@@ -20,7 +20,7 @@ export class ProductsService {
     private readonly excel: ExcelService,
     private readonly aws: AwsService,
     private readonly i18n: I18nService,
-  ) { }
+  ) {}
 
   async findAll(filters: FilterProductDto & PaginationArgs) {
     try {
@@ -526,7 +526,17 @@ export class ProductsService {
       include: { items: true },
     });
 
-    const products: { id: string, name: string, price: number, quantity: number, images: any[] }[] = [];
+    if (!purchases.length) {
+      throw new NotFoundException('No se encontraron productos.');
+    }
+
+    const products: {
+      id: string;
+      name: string;
+      price: number;
+      quantity: number;
+      images: any[];
+    }[] = [];
 
     for (const purchase of purchases) {
       for (const item of purchase.items) {
@@ -535,8 +545,8 @@ export class ProductsService {
           include: {
             images: {
               where: { isPrincipal: true },
-              take: 1
-            }
+              take: 1,
+            },
           },
         });
 
@@ -559,7 +569,8 @@ export class ProductsService {
     }
 
     products.sort((a, b) => b.quantity - a.quantity);
-    return limit && Number(limit) > 0 ? products.slice(0, Number(limit)) : products;
-  };
-
+    return limit && Number(limit) > 0
+      ? products.slice(0, Number(limit))
+      : products;
+  }
 }

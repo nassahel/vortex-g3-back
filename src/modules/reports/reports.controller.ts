@@ -6,12 +6,21 @@ import { JwtAuthGuard } from '../auth/guards/jwt.guard';
 import { Roles } from 'src/common/decorators/roles.decorator';
 import { RoleEnum } from 'src/common/constants';
 import { RolesGuard } from '../auth/guards/roles.guard';
+import { ApiBody, ApiConsumes, ApiOperation, ApiParam, ApiResponse } from '@nestjs/swagger';
 
 @Controller('report')
 export class ReportsController {
   constructor(private readonly reportsService: ReportsService) { }
 
   @Post('most-bought-products')
+  @ApiOperation({ summary: 'Generar gráfico de productos más comprados' })
+  @ApiBody({ type: ChartQueryDto }) // Define el request body
+  @ApiResponse({
+    status: 200,
+    description: 'Archivo PDF con el gráfico de productos más comprados',
+    content: { 'application/pdf': {} },
+  })
+  @ApiConsumes('application/json')
   async getMostBoughtProductsGraph(@Body() body: ChartQueryDto, @Res() res: Response) {
     try {
       const pdfBuffer = await this.reportsService.generateMostBoughtProductsGraph(body);
@@ -28,6 +37,13 @@ export class ReportsController {
   }
 
   @UseGuards(JwtAuthGuard)
+  @ApiOperation({ summary: 'Generar factura de compra en PDF' })
+  @ApiParam({ name: 'id', example: '123', description: 'ID de la compra' })
+  @ApiResponse({
+    status: 200,
+    description: 'Archivo PDF con la factura de compra',
+    content: { 'application/pdf': {} },
+  })
   @Get('generate-invoice/:id')
   async generateInvoice(@Param('id') id: string, @Res() res: Response) {
     try {
@@ -47,6 +63,14 @@ export class ReportsController {
 @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(RoleEnum.ADMIN)
   @Post('purchases-per-day')
+  @ApiOperation({ summary: 'Generar informe de compras por día en PDF' })
+  @ApiBody({ type: ChartQueryDto }) // Define el request body
+  @ApiResponse({
+    status: 200,
+    description: 'Archivo PDF con el informe de compras por día',
+    content: { 'application/pdf': {} },
+  })
+  @ApiConsumes('application/json')
   async purchasesPerDay(@Body() body: ChartQueryDto, @Res() res: Response) {
     try {
       const pdfBuffer = await this.reportsService.purchasesPerDay(body);

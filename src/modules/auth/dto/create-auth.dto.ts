@@ -1,3 +1,4 @@
+import { ApiProperty } from '@nestjs/swagger';
 import {
   IsEmail,
   IsNotEmpty,
@@ -7,23 +8,27 @@ import {
 } from 'class-validator';
 
 export class CreateRegisterDto {
+  @ApiProperty({ example: 'usuario123', description: 'Nombre de usuario' })
   @IsString()
   @IsNotEmpty()
   @MaxLength(100)
   name: string;
 
+  @ApiProperty({ example: 'usuario@example.com', description: 'Correo electrónico' })
   @IsString()
   @IsEmail()
   @IsNotEmpty()
   @MaxLength(50)
   email: string;
 
+  @ApiProperty({ example: 'ContraseñaSegura123', description: 'Contraseña' })
   @IsString()
   @IsNotEmpty()
   @MinLength(8)
   @MaxLength(100)
   password: string;
 
+  @ApiProperty({ example: 'ContraseñaSegura123', description: 'Contraseña' })
   @IsString()
   @IsNotEmpty()
   @MinLength(8)
@@ -32,12 +37,14 @@ export class CreateRegisterDto {
 }
 
 export class CreateLoginDto {
+  @ApiProperty({ example: 'usuario@example.com', description: 'Correo electrónico' })
   @IsString()
   @IsEmail()
   @IsNotEmpty()
   @MaxLength(50)
   email: string;
 
+  @ApiProperty({ example: 'ContraseñaSegura123', description: 'Contraseña' })
   @IsString()
   @IsNotEmpty()
   @MaxLength(100)
@@ -45,9 +52,11 @@ export class CreateLoginDto {
 }
 
 export class RecoveryPasswordDto {
+  @ApiProperty({ example: 'usuario@example.com', description: 'Correo electrónico' })
   @IsString()
   newPassword: string;
 
+  @ApiProperty({ example: 'NuevaContraseña123', description: 'Nueva contraseña' })
   @IsString()
   token: string;
 }

@@ -1,5 +1,15 @@
-import { BadRequestException, ConflictException, Injectable, InternalServerErrorException, NotFoundException, } from '@nestjs/common';
-import { CreateLoginDto, CreateRegisterDto, RecoveryPasswordDto, } from './dto/create-auth.dto';
+import {
+  BadRequestException,
+  ConflictException,
+  Injectable,
+  InternalServerErrorException,
+  NotFoundException,
+} from '@nestjs/common';
+import {
+  CreateLoginDto,
+  CreateRegisterDto,
+  RecoveryPasswordDto,
+} from './dto/create-auth.dto';
 import { PrismaService } from '../prisma/prisma.service';
 import { JwtService } from '@nestjs/jwt';
 import { MessageService } from '../messages/messages.service';
@@ -16,8 +26,7 @@ export class AuthService {
     private readonly jwt: JwtService,
     private messageService: MessageService,
     private readonly i18n: I18nService,
-  ) { }
-
+  ) {}
 
   async register(createRegisterDto: CreateRegisterDto) {
     const { email, name, password, repeatPassword } = createRegisterDto;
@@ -28,13 +37,13 @@ export class AuthService {
 
     if (userExist) {
       throw new ConflictException(
-        await this.i18n.translate('error.USER_ALREADY_EXISTS')
+        this.i18n.translate('error.USER_ALREADY_EXISTS'),
       );
     }
 
     if (password !== repeatPassword) {
       throw new ConflictException(
-        await this.i18n.translate('error.PASSWORDS_DO_NOT_MATCH')
+        this.i18n.translate('error.PASSWORDS_DO_NOT_MATCH'),
       );
     }
 
@@ -50,20 +59,20 @@ export class AuthService {
       });
 
       if (!registeredUser) {
-        throw new BadRequestException(await this.i18n.translate('errors.USER_REGISTRATION_FAILED'));
+        throw new BadRequestException(
+          this.i18n.translate('error.USER_REGISTRATION_FAILED'),
+        );
       }
-
 
       await this.prisma.profile.create({
         data: {
           userId: registeredUser.id,
-          profileImage: '',
-          address: 'Sin asignar',
-          dni: 'Sin asignar',
-          phone: 'Sin asignar',
-        }
-      })
-
+          profileImage: null,
+          address: null,
+          dni: null,
+          phone: null,
+        },
+      });
 
       //Envia email a gnte cuando alguien se registra.
       //Está comentado para que no le envie emails a gente desconocida mientras lo pruebo
@@ -73,14 +82,12 @@ export class AuthService {
       emailBody = emailBody.replace(/{{name}}/g, name);
       emailBody = emailBody.replace(/{{link}}/g, link);
 
-      await this.messageService.sendRegisterUserEmail({
-        from: messagingConfig.emailSender,
-        to: email,
-        subject: 'LuxShop - Registro exitoso!',
-        emailBody,
-      });
-
-
+      // await this.messageService.sendRegisterUserEmail({
+      //   from: messagingConfig.emailSender,
+      //   to: email,
+      //   subject: 'LuxShop - Registro exitoso!',
+      //   emailBody,
+      // });
 
       return {
         message: await this.i18n.translate('success.USER_REGISTERED'),
@@ -90,14 +97,16 @@ export class AuthService {
         },
       };
     } catch (error) {
-      console.log(error)
-      throw new InternalServerErrorException(await this.i18n.translate('error.USER_REGISTRATION_FAILED'));
+      console.log(error);
+      throw new InternalServerErrorException(
+        this.i18n.translate('error.USER_REGISTRATION_FAILED'),
+      );
     }
   }
 
   async login(
     createLoginDto: CreateLoginDto,
-  ): Promise<{ message: string; token: string }> {
+  ): Promise<{ message: string; token: string; user: any }> {
     const { password, email } = createLoginDto;
     const formattedEmail = email.toLowerCase();
     const userExist = await this.prisma.user.findUnique({
@@ -106,30 +115,42 @@ export class AuthService {
     });
 
     if (!userExist) {
-      throw new BadRequestException(await this.i18n.translate('error.INVALID_CREDENTIALS'));
+      throw new BadRequestException(
+        this.i18n.translate('error.INVALID_CREDENTIALS'),
+      );
     }
 
     const passwordsMatch = await bcrypt.compare(password, userExist.password);
     if (!passwordsMatch) {
-      throw new BadRequestException(await this.i18n.translate('error.INVALID_CREDENTIALS'));
+      throw new BadRequestException(
+        this.i18n.translate('error.INVALID_CREDENTIALS'),
+      );
     }
 
     const payload = {
       userId: userExist.id,
       userRol: userExist.rol,
-      userName: userExist.name
+      userName: userExist.name,
     };
 
     const token = await this.jwt.signAsync(payload, { expiresIn: '24h' });
 
     //CAMBIAR POR OTRO MENSAJE DESPUES
     if (!token) {
-      throw new ConflictException(await this.i18n.translate('error.INVALID_CREDENTIALS'))
+      throw new ConflictException(
+        this.i18n.translate('error.INVALID_CREDENTIALS'),
+      );
     }
 
     return {
       message: await this.i18n.translate('success.LOGGED_IN'),
       token,
+      user: {
+        id: userExist.id,
+        name: userExist.name,
+        email: userExist.email,
+        rol: userExist.rol,
+      },
     };
   }
 
@@ -140,7 +161,9 @@ export class AuthService {
       where: { email: formattedEmail },
     });
     if (!foundUser) {
-      throw new BadRequestException(await this.i18n.translate('error.USER_NOT_FOUND'));
+      throw new BadRequestException(
+        this.i18n.translate('error.USER_NOT_FOUND'),
+      );
     }
 
 
@@ -163,11 +186,11 @@ export class AuthService {
       });
 
       return {
-        message: await this.i18n.translate('success.RECOVERY_LINK_SENT')
+        message: this.i18n.translate('success.RECOVERY_LINK_SENT'),
       };
     } catch (error) {
-      console.log(error);
-      throw new InternalServerErrorException(await this.i18n.translate('error.LINK_RECOVERY_FAILED'),
+      throw new InternalServerErrorException(
+        this.i18n.translate('error.LINK_RECOVERY_FAILED'),
       );
     }
   }
@@ -178,7 +201,9 @@ export class AuthService {
       const payload = this.jwt.verify(token);
       const { id } = payload;
       if (!id) {
-        throw new BadRequestException(await this.i18n.translate('error.TOKEN_INVALID'));
+        throw new BadRequestException(
+          await this.i18n.translate('error.TOKEN_INVALID'),
+        );
       }
 
       const hashedPassword = await bcrypt.hash(newPassword, 15);

@@ -17,6 +17,8 @@ import {
   ApiResponse,
   ApiTags,
   ApiConsumes,
+  ApiParam,
+  ApiBody
 } from '@nestjs/swagger';
 import { memoryStorage } from 'multer';
 import { FileInterceptor } from '@nestjs/platform-express';
@@ -55,6 +57,17 @@ export class ProfileController {
   @ApiOperation({ summary: SWAGGER_TRANSLATIONS.PROFILE_CREATE }) //Para documentacion de Swagger
   @ApiResponse({ status: 201, description: SWAGGER_TRANSLATIONS.PROFILE_CREATE_SUCCESS })
   @ApiConsumes('multipart/form-data')
+  @ApiParam({ name: 'userId', example: '123', description: 'ID del usuario' })
+  @ApiBody({
+    schema: {
+      type: 'object',
+      properties: {
+        file: { type: 'string', format: 'binary', description: 'Imagen de perfil' },
+        name: { type: 'string', example: 'Juan Pérez', description: 'Nombre del usuario' },
+        bio: { type: 'string', example: 'Desarrollador de software', description: 'Biografía' },
+      },
+    },
+  })
   @UseInterceptors(
     FileInterceptor('file', {
       storage: memoryStorage(),
@@ -83,6 +96,15 @@ export class ProfileController {
   @ApiOperation({ summary: SWAGGER_TRANSLATIONS.PROFILE_UPLOAD }) //Para documentacion de Swagger
   @ApiResponse({ status: 201, description: SWAGGER_TRANSLATIONS.PROFILE_UPLOAD_SUCCESS }) //Pra que responda con un 201 en el caso de que se suba con exito
   @ApiConsumes('multipart/form-data') //La ruta consume datos en ese formato, que es el que se usa para cargar archivos
+  @ApiBody({
+    schema: {
+      type: 'object',
+      properties: {
+        file: { type: 'string', format: 'binary', description: 'Imagen de perfil' },
+        userId: { type: 'string', example: '123', description: 'ID del usuario' },
+      },
+    },
+  })
   @UseInterceptors(
     FileInterceptor('file', {
       //Configuro como manejar la carga de archivos
@@ -112,6 +134,7 @@ export class ProfileController {
   @UseGuards(JwtAuthGuard)
   @Delete('delete/:userId')
   @ApiOperation({ summary: SWAGGER_TRANSLATIONS.PROFILE_DELETE }) //Para documentacion de Swagger
+  @ApiParam({ name: 'userId', example: '123', description: 'ID del usuario' })
   @ApiResponse({ status: 200, description: SWAGGER_TRANSLATIONS.PROFILE_DELETE_SUCCESS }) //Para que responda con un 200 en el caso de que se elimine con exito
   async deleteProfileImage(@Param('userId') userId: string) {
     //Recibe userId como parametro
@@ -124,6 +147,8 @@ export class ProfileController {
   @Put('update/:userId')
   @ApiOperation({ summary: SWAGGER_TRANSLATIONS.PROFILE_UPDATE })
   @ApiResponse({ status: 200, description: SWAGGER_TRANSLATIONS.PROFILE_UPDATE_SUCCESS })
+  @ApiParam({ name: 'userId', example: '123', description: 'ID del usuario' })
+  @ApiBody({ type: ProfileDto })
   async updateProfile(
     @Param('userId') userId: string,
     @Body(new ValidationPipe({ transform: true }))

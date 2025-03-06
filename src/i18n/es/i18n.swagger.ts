@@ -4,6 +4,7 @@ export const SWAGGER_TRANSLATIONS = {
     AUTH_REGISTER_SUCCESS: 'Usuario registrado con éxito',
     AUTH_LOGIN: 'Iniciar sesión',
     AUTH_LOGIN_SUCCESS: 'Usuario autenticado con éxito',
+    AUTH_LOGIN_ERROR: 'No autorizado - Credenciales inválidas',
     AUTH_REQUEST_RECOVERY_PASSWORD: 'Solicitar recuperación de contraseña',
     AUTH_REQUEST_RECOVERY_PASSWORD_SUCCESS: 'Correo de recuperación enviado con éxito',
     AUTH_RECOVERY_PASSWORD: 'Recuperar contraseña',
@@ -94,5 +95,7 @@ export const SWAGGER_TRANSLATIONS = {
     USER_UPDATE_SUCCESS: 'Usuario actualizado con éxito',
     USER_DELETE: 'Eliminar un usuario',
     USER_DELETE_SUCCESS: 'Usuario eliminado con éxito',
+
+    
   };
   
