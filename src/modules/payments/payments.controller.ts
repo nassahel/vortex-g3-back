@@ -9,7 +9,7 @@ export class PaymentController {
   @Post('webhook')
   async handleWebhook(@Req() req: Request) {
     const event = req.body;
-    console.log(event);
+
     return this.paymentService.mercadopagoWebhook(event);
   }
 

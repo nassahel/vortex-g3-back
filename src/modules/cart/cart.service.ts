@@ -8,7 +8,6 @@ import { PrismaService } from '../prisma/prisma.service';
 import { Decimal } from '@prisma/client/runtime/library';
 import { CheckoutCartDto } from './dto/checkout.cart.dto';
 import { I18nService } from 'nestjs-i18n';
-import { date } from 'joi';
 import { MercadoPagoService } from '../mercadopago/mercadopago.service';
 
 @Injectable()
@@ -107,6 +106,7 @@ export class CartService {
       return { message: await this.i18n.translate('success.ITEM_ADDED') };
     }
   }
+
   private async recalculateCartTotal(cartId: string) {
     const items = await this.prisma.cartItem.findMany({
       //busca los productos
@@ -124,42 +124,62 @@ export class CartService {
       data: { price: total },
     });
   }
+
   async checkoutCart(
     userId: string,
     checkoutCartDto: CheckoutCartDto,
   ): Promise<{ message: string; link: string }> {
-    const cart = await this.prisma.cart.findFirst({
-      where: { userId, status: { in: ['PENDING', 'INPROCESS'] } }, // Permite checkout desde ambos estados
-      include: { items: true },
-    });
-    if (cart.items.length === 0) {
-      throw new NotFoundException(
-        await this.i18n.translate('error.CART_EMPTY'),
+    try {
+      //Obtener el carrito activo del usuario
+      const cart = await this.prisma.cart.findFirst({
+        where: { userId, status: { in: ['PENDING', 'INPROCESS'] } }, // Permite checkout desde ambos estados
+        include: { items: true },
+      });
+
+      if (!cart) {
+        throw new NotFoundException(
+          this.i18n.translate('error.CART_NOT_FOUND'),
+        );
+      }
+
+      if (cart.items.length === 0) {
+        throw new NotFoundException(this.i18n.translate('error.CART_EMPTY'));
+      }
+      //verificar si el link del pago ya existe
+      const paymentFound = await this.prisma.payment.findFirst({
+        where: { cartId: cart.id },
+      });
+      if (paymentFound) {
+        return { message: 'Payment already exists', link: paymentFound.link };
+      }
+      //generar pago en MP con datos del carrito
+      const mpPaymentGenerated = await this.mercadoPagoService.createPayment(
+        cart.id,
+        Number(cart.price),
+      );
+      //crear pago pendiente en la base de datos
+      const payment = await this.prisma.payment.create({
+        data: {
+          cartId: cart.id,
+          amount: Number(cart.price),
+          method: 'MercadoPago',
+          link: mpPaymentGenerated.init_point,
+          status: 'PENDING',
+        },
+      });
+      //incluir el servicio de mail una vez que se implemente
+      //retorno un mensaje de pago generado y el link del pago para redirigir al usuario
+      return {
+        message: 'Payment generated',
+        link: payment.link,
+      };
+    } catch (error) {
+      console.log(error);
+      throw new BadRequestException(
+        this.i18n.translate('error.CART_NOT_FOUND'),
+        error,
       );
     }
-
-    //GENERAR PAGO MP CON CART.ITEMS
-    const mpPaymentGenerated = await this.mercadoPagoService.createPayment(
-      cart.id,
-      Number(cart.price),
-    );
-    //CREAR PAGO EN LA BASE DE DATOS
-    const payment = await this.prisma.payment.create({
-      data: {
-        cartId: cart.id,
-        amount: Number(cart.price),
-        method: 'MercadoPago',
-        link: mpPaymentGenerated.init_point,
-        status: 'PENDING',
-      },
-    });
-
-    //incluir el servicio de mail una vez que se implemente
-    //retorno un mensaje de pago generado y el link del pago para redirigir al usuario
-    return {
-      message: 'Payment generated',
-      link: payment.link,
-    };
   }
 
   async cancelCart(userId: string): Promise<{ message: string }> {
@@ -200,5 +220,36 @@ export class CartService {
 
     await this.recalculateCartTotal(cart.id); //Recalcula el total del carrito
     return { message: await this.i18n.translate('error.ITEM_REMOVED') };
+  }
+
+  async updateStockFromCart(
+    cartId: string,
+  ): Promise<{ success: boolean; message: string }> {
+    try {
+      //obtener el carrito por id
+      const cart = await this.prisma.cart.findUnique({
+        where: { id: cartId, status: 'COMPLETED' },
+        include: { items: true },
+      });
+      if (!cart) {
+        throw new NotFoundException(
+          this.i18n.translate('error.CART_NOT_FOUND'),
+        );
+      }
+      //actualizar el stock de los items del carrito
+      for (const item of cart.items) {
+        await this.prisma.product.update({
+          where: { id: item.productId },
+          data: { stock: { decrement: item.quantity } },
+        });
+      }
+      return { success: true, message: 'Stock updated' };
+    } catch (error) {
+      console.error(error);
+      throw new BadRequestException(
+        this.i18n.translate('error.CART_NOT_FOUND'),
+        error,
+      );
+    }
   }
 }

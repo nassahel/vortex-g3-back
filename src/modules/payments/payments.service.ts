@@ -1,12 +1,14 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { MercadoPagoService } from '../mercadopago/mercadopago.service';
 import { PrismaService } from '../prisma/prisma.service';
+import { CartService } from '../cart/cart.service';
 
 @Injectable()
 export class PaymentService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly mercadopagoService: MercadoPagoService,
+    private readonly cartService: CartService,
   ) {}
 
   async mercadopagoWebhook(event: any) {
@@ -14,9 +16,9 @@ export class PaymentService {
       if (event.type === 'payment') {
         const paymentId = event.data.id;
         const payment = await this.mercadopagoService.getPayment(paymentId);
-        console.log('payment', payment);
+
         if (payment.status === 'approved') {
-          const cartId = payment.metadata.purchase_id;
+          const cartId = payment.metadata.order_id;
           const cartFounded = await this.prisma.cart.findFirst({
             where: {
               id: cartId,
@@ -24,7 +26,7 @@ export class PaymentService {
             },
             include: { payment: true },
           });
-          console.log('cartFounded', cartFounded);
+
           if (cartFounded) {
             //actualizar el pago a COMPLETED
             await this.prisma.payment.update({
@@ -36,7 +38,18 @@ export class PaymentService {
               where: { id: cartFounded.id },
               data: { status: 'COMPLETED' },
             });
-            return { message: 'Pago realizado correctamente' };
+            //enviar correo de pago realizado
+            //actualizar stock de productos
+            const result = await this.cartService.updateStockFromCart(
+              cartFounded.id,
+            );
+            if (result.success) {
+              return {
+                message: 'Pago realizado correctamente y stock actualizado',
+              };
+            } else {
+              throw new Error('Error al actualizar el stock');
+            }
           } else {
             throw new Error('Payment not found');
           }

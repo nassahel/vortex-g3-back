@@ -7,5 +7,6 @@ import { MercadoPagoModule } from '../mercadopago/mercadopago.module';
   imports: [MercadoPagoModule],
   controllers: [CartController],
   providers: [CartService],
+  exports: [CartService],
 })
 export class CartModule {}
