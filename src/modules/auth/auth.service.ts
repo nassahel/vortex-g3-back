@@ -26,7 +26,7 @@ export class AuthService {
     private readonly jwt: JwtService,
     private messageService: MessageService,
     private readonly i18n: I18nService,
-  ) {}
+  ) { }
 
   async register(createRegisterDto: CreateRegisterDto) {
     const { email, name, password, repeatPassword } = createRegisterDto;
@@ -67,11 +67,11 @@ export class AuthService {
       await this.prisma.profile.create({
         data: {
           userId: registeredUser.id,
-          profileImage: null,
-          address: null,
-          dni: null,
-          phone: null,
-        },
+          profileImage: '',
+          address: 'Sin asignar',
+          dni: 'Sin asignar',
+          phone: 'Sin asignar',
+        }
       });
 
       //Envia email a gnte cuando alguien se registra.
@@ -82,12 +82,12 @@ export class AuthService {
       emailBody = emailBody.replace(/{{name}}/g, name);
       emailBody = emailBody.replace(/{{link}}/g, link);
 
-      // await this.messageService.sendRegisterUserEmail({
-      //   from: messagingConfig.emailSender,
-      //   to: email,
-      //   subject: 'LuxShop - Registro exitoso!',
-      //   emailBody,
-      // });
+      await this.messageService.sendRegisterUserEmail({
+        from: messagingConfig.emailSender,
+        to: email,
+        subject: 'LuxShop - Registro exitoso!',
+        emailBody,
+      });
 
       return {
         message: await this.i18n.translate('success.USER_REGISTERED'),

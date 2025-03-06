@@ -4,6 +4,7 @@ import { ConfigService } from '@nestjs/config';
 import { Logger, ValidationPipe } from '@nestjs/common';
 import { setupSwagger } from './swagger/swagger';
 import * as dotenv from 'dotenv';
+import { I18nValidationPipe } from 'nestjs-i18n';
 dotenv.config();
 
 async function bootstrap() {
