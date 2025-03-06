@@ -49,8 +49,21 @@ export class AuthService {
       });
 
       if (!registeredUser) {
-        throw new BadRequestException('No se pudo registrar al usuario');
+        throw new BadRequestException(this.i18n.translate('error.USER_REGISTRATION_FAILED'));
       }
+
+
+      await this.prisma.profile.create({
+        data: {
+          userId: registeredUser.id,
+          profileImage: null,
+          address: null,
+          dni: null,
+          phone: null,
+
+        }
+      })
+
 
       //Envia email a gnte cuando alguien se registra.
       //Está comentado para que no le envie emails a gente desconocida mientras lo pruebo
@@ -67,6 +80,8 @@ export class AuthService {
       //   emailBody,
       // });
 
+
+
       return {
         message: this.i18n.translate('success.USER_REGISTERED'),
         newUser: {
@@ -75,13 +90,14 @@ export class AuthService {
         },
       };
     } catch (error) {
+      console.log(error)
       throw new InternalServerErrorException(this.i18n.translate('error.USER_REGISTRATION_FAILED'));
     }
   }
 
   async login(
     createLoginDto: CreateLoginDto,
-  ): Promise<{ message: string; token: string }> {
+  ): Promise<{ message: string; token: string; user: any }> {
     const { password, email } = createLoginDto;
     const formattedEmail = email.toLowerCase();
     const userExist = await this.prisma.user.findUnique({
@@ -101,18 +117,25 @@ export class AuthService {
     const payload = {
       userId: userExist.id,
       userRol: userExist.rol,
+      userName: userExist.name
     };
 
-    const token = this.jwt.sign(payload, { expiresIn: '24h' });
+    const token = await this.jwt.signAsync(payload, { expiresIn: '24h' });
 
     //CAMBIAR POR OTRO MENSAJE DESPUES
-    if(!token){
+    if (!token) {
       throw new ConflictException(this.i18n.translate('error.INVALID_CREDENTIALS'))
     }
 
     return {
       message: await this.i18n.translate('success.LOGGED_IN'),
       token,
+      user: {
+        id: userExist.id,
+        name: userExist.name,
+        email: userExist.email,
+        rol: userExist.rol
+    }
     };
   }
 

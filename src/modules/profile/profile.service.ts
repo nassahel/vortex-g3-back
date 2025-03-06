@@ -1,9 +1,9 @@
 import { BadRequestException, Inject, Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { AwsService } from '../../aws/aws.service';
-import { UpdateProfileDto } from './dto/update.profile.dto';
 import { JwtService } from '@nestjs/jwt';
 import { I18nService } from 'nestjs-i18n';
+import { ProfileDto } from './dto/profile.dto';
 
 @Injectable()
 export class ProfileService {
@@ -12,7 +12,7 @@ export class ProfileService {
     private awsService: AwsService,
     private jwtService: JwtService,
     private readonly i18n: I18nService,
-  ) {}
+  ) { }
 
   async getAllProfiles() {
     try {
@@ -27,7 +27,7 @@ export class ProfileService {
 
   async createProfile(
     userId: string,
-    updateProfileDto: UpdateProfileDto,
+    updateProfileDto: ProfileDto,
     file: Express.Multer.File,
   ) {
     if (!userId) {
@@ -51,19 +51,19 @@ export class ProfileService {
     });
 
     return {
-      message: await this.i18n.t('success.CREATED_PROFILE'),
+      message: this.i18n.t('success.CREATED_PROFILE'),
       data: createdProfile,
     };
   }
 
   async uploadImage(file: Express.Multer.File, userId: string) {
     if (!file) {
-      throw new BadRequestException(await this.i18n.t('error.NO_FILE')); //en el caso de q no se suba ningun archivo
+      throw new BadRequestException(this.i18n.t('error.NO_FILE')); //en el caso de q no se suba ningun archivo
     }
 
     const allowedMimeTypes = ['image/png', 'image/jpeg'];
     if (!allowedMimeTypes.includes(file.mimetype)) {
-      throw new BadRequestException(await this.i18n.t('error.MIMETYPE'));
+      throw new BadRequestException(this.i18n.t('error.MIMETYPE'));
     }
 
     const existingProfile = await this.prisma.profile.findUnique({
@@ -71,7 +71,7 @@ export class ProfileService {
     });
 
     if (!existingProfile) {
-      throw new BadRequestException(await this.i18n.t('error.PROFILE_NOT_FOUND', { args: { userId } }));
+      throw new BadRequestException(this.i18n.t('error.PROFILE_NOT_FOUND', { args: { userId } }));
     }
 
     if (existingProfile.profileImage) {
@@ -97,7 +97,7 @@ export class ProfileService {
     });
 
     return {
-      message: await this.i18n.t('success.PROFILE_IMAGE_UPLOADED'),
+      message: this.i18n.t('success.PROFILE_IMAGE_UPLOADED'),
       data: updatedProfile,
     };
   }
@@ -127,7 +127,7 @@ export class ProfileService {
     return { message: await this.i18n.t('success.IMAGE_DELETED') };
   }
 
-  async updateProfile(userId: string, updateProfileDto: UpdateProfileDto) {
+  async updateProfile(userId: string, updateProfileDto: ProfileDto) {
     const updateUser = await this.prisma.profile.update({
       where: { userId },
       data: {
