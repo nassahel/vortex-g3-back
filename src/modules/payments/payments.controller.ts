@@ -1,4 +1,4 @@
-import { Controller, Post, Req } from '@nestjs/common';
+import { Controller, Get, Post, Req } from '@nestjs/common';
 import { Request } from 'express';
 import { PaymentService } from './payments.service';
 
@@ -11,5 +11,10 @@ export class PaymentController {
     const event = req.body;
     console.log(event);
     return this.paymentService.mercadopagoWebhook(event);
+  }
+
+  @Get('/all')
+  async getAllPayments() {
+    return this.paymentService.getAllPayments();
   }
 }

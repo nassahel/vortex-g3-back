@@ -26,9 +26,9 @@ export class MercadoPagoService {
         },
       ],
       back_urls: {
-        success: `${mercadopagoConfig.webhookUrl}`,
-        failure: `${mercadopagoConfig.webhookUrl}`,
-        pending: `${mercadopagoConfig.webhookUrl}`,
+        success: `${process.env.URL_FRONTEND}/success-payment`,
+        failure: `${process.env.URL_FRONTEND}/failure`,
+        pending: `${process.env.URL_FRONTEND}/pending`,
       },
       notification_url: mercadopagoConfig.webhookUrl,
       metadata: {

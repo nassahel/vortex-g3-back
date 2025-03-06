@@ -154,24 +154,12 @@ export class CartService {
       },
     });
 
-    //ACTUALIZAR EL CARRITO A 'PAYMENT_PENDING'
-    /* const completedCart = await this.prisma.cart.update({
-      //Actualiza el carrito a 'COMPLETED'
-      where: { id: cart.id },
-      data: { status: 'COMPLETED' },
-      include: { items: true },
-    }); */
-
     //incluir el servicio de mail una vez que se implemente
     //retorno un mensaje de pago generado y el link del pago para redirigir al usuario
     return {
       message: 'Payment generated',
       link: payment.link,
     };
-    /* return {
-      message: await this.i18n.translate('success.CART_CHECKOUT'),
-      cart: completedCart,
-    }; */
   }
 
   async cancelCart(userId: string): Promise<{ message: string }> {

@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { MercadoPagoService } from '../mercadopago/mercadopago.service';
 import { PrismaService } from '../prisma/prisma.service';
 
@@ -36,14 +36,26 @@ export class PaymentService {
               where: { id: cartFounded.id },
               data: { status: 'COMPLETED' },
             });
-            return { message: 'Compra actualizada correctamente' };
+            return { message: 'Pago realizado correctamente' };
           } else {
             throw new Error('Payment not found');
           }
         }
       }
     } catch (error) {
-      return { message: 'Error al crear la compra', error: error.message };
+      return { message: 'Error al procesar el pago', error: error.message };
+    }
+  }
+
+  async getAllPayments() {
+    try {
+      const payments = await this.prisma.payment.findMany({
+        include: { cart: true },
+      });
+      return payments;
+    } catch (error) {
+      console.log('error', error);
+      throw new BadRequestException('Error al obtener los pagos');
     }
   }
 }
