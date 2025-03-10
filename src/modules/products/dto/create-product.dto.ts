@@ -1,39 +1,39 @@
 import { Transform } from 'class-transformer';
-import {
-  IsNotEmpty,
-  IsString,
-  IsNumber,
-  IsOptional,
-  Min,
-  IsArray,
-} from 'class-validator';
+import { ApiProperty } from '@nestjs/swagger';
+import { IsNotEmpty, IsString, IsNumber, IsOptional, Min, IsArray } from 'class-validator';
+import { i18nValidationMessage } from 'nestjs-i18n';
 
 export class CreateProductDto {
-  @IsNotEmpty({ message: 'El nombre es requerido.' })
-  @IsString({ message: 'El nombre debe ser un string.' })
+  @ApiProperty({ example: 'Producto de ejemplo', description: 'Nombre del producto' })
+  @IsNotEmpty({ message: i18nValidationMessage('dto.isNotEmpty') })
+  @IsString({ message: i18nValidationMessage('dto.isString') })
   name: string;
 
+  @ApiProperty({ example: 'Descripción del producto', description: 'Descripción del producto', required: false })
   @IsOptional()
-  @IsString({ message: 'La descripción debe ser un string.' })
+  @IsString({ message: i18nValidationMessage('dto.isString') })
   description?: string;
 
-  @IsNotEmpty({ message: 'El precio es requerido.' })
+  @ApiProperty({ example: 99.99, description: 'Precio del producto' })
+  @IsNotEmpty({ message: i18nValidationMessage('dto.isNotEmpty') })
   @Transform(({ value }) => Number(value))
-  @IsNumber({}, { message: 'El precio debe ser un número.' })
-  @Min(0, { message: 'El precio debe ser mayor o igual a 0.' })
+  @IsNumber({}, { message: i18nValidationMessage('dto.isNumber') })
+  @Min(0, { message: i18nValidationMessage('dto.min') })
   price: number;
 
-  @IsNotEmpty({ message: 'La cantidad es requerida.' })
+  @ApiProperty({ example: 50, description: 'Cantidad en stock' })
+  @IsNotEmpty({ message: i18nValidationMessage('dto.isNotEmpty') })
   @Transform(({ value }) => Number(value))
-  @IsNumber({}, { message: 'La cantidad debe ser un número.' })
-  @Min(0, { message: 'La cantidad debe ser mayor o igual a 0.' })
+  @IsNumber({}, { message: i18nValidationMessage('dto.isNumber') })
+  @Min(0, { message: i18nValidationMessage('dto.min') })
   stock: number;
 
-  @IsNotEmpty({ message: 'La categoría es requerida.' })
+  @ApiProperty({ example: ['Electrónica', 'Hogar'], description: 'Categorías del producto' })
+  @IsNotEmpty({ message: i18nValidationMessage('dto.isNotEmpty') })
   @Transform(({ value }) => {
     if (typeof value === 'string') {
       try {
-        return JSON.parse(value); // Convierte el string en array
+        return JSON.parse(value);
       } catch {
         throw new Error('categories must be a valid JSON array');
       }
@@ -41,11 +41,12 @@ export class CreateProductDto {
     return value;
   })
   @IsArray()
-  @IsString({ each: true })
+  @IsString({ each: true, message: i18nValidationMessage('dto.isStringEach') })
   categories: string[];
 
+  @ApiProperty({ example: ['imagen1.jpg', 'imagen2.jpg'], description: 'URLs de imágenes', required: false })
   @IsOptional()
   @IsArray()
-  @IsString({ each: true })
+  @IsString({ each: true, message: i18nValidationMessage('dto.isStringEach') })
   images?: string[];
 }

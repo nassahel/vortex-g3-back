@@ -9,11 +9,11 @@ import {
 } from 'class-validator';
 import { ApiPropertyOptional } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
-// import { DateTime } from "aws-sdk/clients/devicefarm";
+import { i18nValidationMessage } from 'nestjs-i18n';
 
 export class ProfileDto {
   @ApiPropertyOptional({ description: 'User name' })
-  @IsString()
+  @IsString({ message: i18nValidationMessage('dto.isString') })
   @IsOptional()
   @MinLength(1, { message: 'Name must not be empty' })
   name: string;

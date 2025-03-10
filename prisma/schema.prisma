@@ -35,45 +35,44 @@ model User {
   password  String
   isActive  Boolean @default(true)
   isDeleted Boolean @default(false)
-  carts    Cart[]
+  carts     Cart[]
 
-  profile   Profile? 
+  profile Profile?
 }
 
 model Profile {
-  id            String   @id @unique @default(cuid())
-  address       String?
-  dni           String?   @unique
-  birthday      DateTime?  
-  phone         String?
-  user          User     @relation(fields: [userId], references: [id])
-  userId        String   @unique
-  profileImage  String? 
+  id           String    @id @unique @default(cuid())
+  address      String?
+  dni          String?
+  birthday     DateTime?
+  phone        String?
+  user         User      @relation(fields: [userId], references: [id])
+  userId       String    @unique
+  profileImage String?
 }
 
-
 model Category {
-  id        String   @id @unique @default(cuid())
+  id        String            @id @unique @default(cuid())
   name      String
-  isDeleted Boolean  @default(false)
+  isDeleted Boolean           @default(false)
   products  ProductCategory[]
 }
 
 model Product {
-  id          String   @id @unique @default(cuid())
+  id          String            @id @unique @default(cuid())
   name        String
   description String?
   stock       Int
   price       Float
-  isDeleted   Boolean  @default(false)
-  cartItems  CartItem[]
+  isDeleted   Boolean           @default(false)
+  cartItems   CartItem[]
   images      Image[]
   categories  ProductCategory[]
 }
 
 // Tabla intermedia para la relacion entre productos y categorias
 model ProductCategory {
-  product   Product  @relation(fields: [productId], references: [id])
+  product   Product @relation(fields: [productId], references: [id])
   productId String
 
   category   Category @relation(fields: [categoryId], references: [id])
@@ -82,25 +81,23 @@ model ProductCategory {
   @@id([productId, categoryId])
 }
 
-
 model Image {
-  id        String  @id @unique @default(cuid())
-  url       String
-  altText   String?
-  product   Product @relation(fields: [productId], references: [id])
-  productId String
+  id          String  @id @unique @default(cuid())
+  url         String
+  altText     String?
+  product     Product @relation(fields: [productId], references: [id])
+  productId   String
   isPrincipal Boolean @default(false)
 }
 
-
 model Cart {
-  id        String      @id @unique @default(cuid())
-  items     CartItem[]   //no deberia tener un product?
-  status    CartStatus  @default(PENDING)
-  price     Decimal     @default(0.00)
-  user      User        @relation(fields: [userId], references: [id])
+  id        String     @id @unique @default(cuid())
+  items     CartItem[] //no deberia tener un product?
+  status    CartStatus @default(PENDING)
+  price     Decimal    @default(0.00)
+  user      User       @relation(fields: [userId], references: [id])
   userId    String
-  createdAt DateTime    @default(now())
+  createdAt DateTime   @default(now())
   payment   Payment?
 }
 
@@ -109,20 +106,20 @@ model CartItem {
   product   Product? @relation(fields: [productId], references: [id])
   quantity  Int      @default(0)
   price     Decimal  @default(0.00)
-  cart     Cart?   @relation(fields: [cartId], references: [id])
+  cart      Cart?    @relation(fields: [cartId], references: [id])
   productId String?
-  cartId   String
+  cartId    String
 }
 
 model Payment {
-  id          String     @id @default(uuid())
-  cartId  String     @unique
-  cart    Cart   @relation(fields: [cartId], references: [id])
-  amount      Float
-  method      String
-  link        String?
-  paymentId   String?
-  status      PaymentStatus
-  createdAt   DateTime   @default(now())
-  updatedAt   DateTime   @updatedAt
+  id        String        @id @default(uuid())
+  cartId    String        @unique
+  cart      Cart          @relation(fields: [cartId], references: [id])
+  amount    Float
+  method    String
+  link      String?
+  paymentId String?
+  status    PaymentStatus
+  createdAt DateTime      @default(now())
+  updatedAt DateTime      @updatedAt
 }

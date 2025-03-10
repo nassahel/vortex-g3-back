@@ -39,13 +39,11 @@ export class ProfileController {
     private readonly profileService: ProfileService,
     private readonly authService: AuthService,
     private readonly i18n: I18nService,
-  ) {}
+  ) { }
 
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(RoleEnum.ADMIN)
   @Get('/all/profiles')
-  @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(RoleEnum.ADMIN)
   @ApiOperation({ summary: SWAGGER_TRANSLATIONS.PROFILE_GET_ALL })
   @ApiResponse({ status: 200, description: SWAGGER_TRANSLATIONS.PROFILE_GET_ALL_SUCCESS })
   findAll() {
@@ -80,7 +78,7 @@ export class ProfileController {
     @Body() updateProfileDto?: ProfileDto,
   ) {
     if (!userId) {
-      throw new BadRequestException( this.i18n.t('errors.USER_ID_REQUIRED'));
+      throw new BadRequestException(this.i18n.t('errors.USER_ID_REQUIRED'));
     }
     const createdProfile = await this.profileService.createProfile(
       userId,
@@ -90,12 +88,12 @@ export class ProfileController {
     return createdProfile;
   }
 
-  //Ruta para subir la imagen
+  // Ruta para subir la imagen
   @UseGuards(JwtAuthGuard)
-  @Post('upload')
-  @ApiOperation({ summary: SWAGGER_TRANSLATIONS.PROFILE_UPLOAD }) //Para documentacion de Swagger
-  @ApiResponse({ status: 201, description: SWAGGER_TRANSLATIONS.PROFILE_UPLOAD_SUCCESS }) //Pra que responda con un 201 en el caso de que se suba con exito
-  @ApiConsumes('multipart/form-data') //La ruta consume datos en ese formato, que es el que se usa para cargar archivos
+  @Post('upload-image')
+  @ApiOperation({ summary: SWAGGER_TRANSLATIONS.PROFILE_UPLOAD }) // Documentación de Swagger
+  @ApiResponse({ status: 201, description: SWAGGER_TRANSLATIONS.PROFILE_UPLOAD_SUCCESS }) // Respuesta 201 en caso de éxito
+  @ApiConsumes('multipart/form-data') // Indica que la ruta consume archivos
   @ApiBody({
     schema: {
       type: 'object',
@@ -107,27 +105,24 @@ export class ProfileController {
   })
   @UseInterceptors(
     FileInterceptor('file', {
-      //Configuro como manejar la carga de archivos
-      storage: memoryStorage(), //almaceno en la memoria
-      limits: { fileSize: 5 * 1024 * 1024 }, // Tamaño limite de 5MB
+      storage: memoryStorage(), // Almaceno en la memoria
+      limits: { fileSize: 5 * 1024 * 1024 }, // Tamaño límite de 5MB
       fileFilter: (req, file, callback) => {
-        if (file.mimetype === 'image.png' || file.mimetype === 'image.jpeg') {
+        const allowedMimeTypes = ['image/png', 'image/jpeg'];
+        if (allowedMimeTypes.includes(file.mimetype)) {
           callback(null, true);
         } else {
-          callback(
-            new BadRequestException(SWAGGER_TRANSLATIONS.MIMETYPE),
-            false,
-          );
+          callback(new BadRequestException(SWAGGER_TRANSLATIONS.MIMETYPE), false);
         }
       },
     }),
   )
   async uploadProfileImage(
-    @UploadedFile() file: Express.Multer.File, //con @UploadedFile obtenemos el archivo que el usuario sube
+    @UploadedFile() file: Express.Multer.File, // Obtengo el archivo
     @Body('userId') userId: string,
   ) {
-    const imageUrl = await this.profileService.uploadImage(file, userId); //Llama al servicio AwsService para manejar la carga de la imagen
-    return { message:  this.i18n.t('success.IMAGE_UPLOADED'), data: imageUrl };
+    const imageUrl = await this.profileService.uploadImage(file, userId);
+    return { message: this.i18n.t('success.IMAGE_UPLOADED'), data: imageUrl };
   }
 
   //Ruta para eliminar la imagen
@@ -139,7 +134,7 @@ export class ProfileController {
   async deleteProfileImage(@Param('userId') userId: string) {
     //Recibe userId como parametro
     const result = await this.profileService.deleteImage(userId); //Llama al servicio para eliminar la imagen
-    return { message:  this.i18n.t('success.IMAGE_DELETED'), data: result };
+    return { message: this.i18n.t('success.IMAGE_DELETED'), data: result };
   }
 
   //Actualizar la info del usuario

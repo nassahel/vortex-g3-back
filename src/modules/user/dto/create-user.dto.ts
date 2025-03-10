@@ -7,6 +7,7 @@ import {
   MaxLength,
   MinLength,
 } from 'class-validator';
+import { i18nValidationMessage } from 'nestjs-i18n';
 
 export enum Rol {
   ADMIN = 'ADMIN',
@@ -14,28 +15,28 @@ export enum Rol {
 }
 
 export class CreateUserDto {
-  @IsString({ message: 'Image must be a string.' })
-  @IsOptional({ message: 'Image is optional.' })
-  @MaxLength(200, { message: 'Image cannot be longer than 200 characters.' })
+  @IsString({ message: i18nValidationMessage('dto.isString') })
+  @IsOptional({ message: i18nValidationMessage('dto.isOptional') })
+  @MaxLength(200, { message: i18nValidationMessage('dto.maxLength') })
   image: string;
 
-  @IsString({ message: 'Name must be a string.' })
-  @MinLength(3, { message: 'Name must be at least 3 characters long.' })
-  @MaxLength(100, { message: 'Name cannot be longer than 100 characters.' })
+  @IsString({ message: i18nValidationMessage('dto.isString') })
+  @MinLength(3, { message: i18nValidationMessage('dto.minLength') })
+  @MaxLength(100, { message: i18nValidationMessage('dto.maxLength') })
   name: string;
 
-  @IsString({ message: 'Email must be a string.' })
-  @MaxLength(50, { message: 'Email cannot be longer than 50 characters.' })
-  @IsEmail({}, { message: 'Email must be a valid email address.' })
+  @IsString({ message: i18nValidationMessage('dto.isString') })
+  @MaxLength(50, { message: i18nValidationMessage('dto.maxLength') })
+  @IsEmail({}, { message: i18nValidationMessage('dto.isEmail') })
   email: string;
 
-  @IsEnum(Rol, { message: 'Role must be either ADMIN or USER.' })
-  @IsOptional({ message: 'Role is optional.' })
+  @IsEnum(Rol, { message: i18nValidationMessage('dto.rolEnum') })
+  @IsOptional({ message: i18nValidationMessage('dto.isOptional') })
   rol: Rol;
 
-  @IsString({ message: 'Password must be a string.' })
-  @IsNotEmpty({ message: 'Password cannot be empty.' })
-  @MinLength(8, { message: 'Password must be at least 8 characters long.' })
-  @MaxLength(100, { message: 'Password cannot be longer than 100 characters.' })
+  @IsString({ message: i18nValidationMessage('dto.isString') })
+  @IsNotEmpty({ message: i18nValidationMessage('dto.isNotEmpty') })
+  @MinLength(8, { message: i18nValidationMessage('dto.minLength') })
+  @MaxLength(100, { message: i18nValidationMessage('dto.maxLength') })
   password: string;
 }

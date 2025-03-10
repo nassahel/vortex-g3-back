@@ -15,6 +15,7 @@
   "isNumber": "{property} debe ser un número válido",
   "isOptional": "{property} es opcional",
   "isPhoneNumber": "El número de teléfono debe ser válido",
-  "isArray": "{property} debe ser un arreglo"
+  "isArray": "{property} debe ser un arreglo",
+  "rolEnum": "El Rol debe ser ADMIN o USER."
 }
 
