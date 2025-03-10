@@ -5,6 +5,7 @@ import { Logger, ValidationPipe } from '@nestjs/common';
 import { setupSwagger } from './swagger/swagger';
 import * as dotenv from 'dotenv';
 import { I18nValidationPipe } from 'nestjs-i18n';
+import { ValidationsExceptionFilter } from './common/middlewares';
 dotenv.config();
 
 async function bootstrap() {
@@ -19,16 +20,16 @@ async function bootstrap() {
     exclude: ['api-docs'],
   });
   app.useGlobalPipes(
-    new ValidationPipe({
+    new I18nValidationPipe({
       transform: true,
       transformOptions: { enableImplicitConversion: true },
       whitelist: true,
       forbidNonWhitelisted: true,
     }),
-    new I18nValidationPipe(),
   );
 
   setupSwagger(app);
+  app.useGlobalFilters(new ValidationsExceptionFilter());
 
   const configService = app.get(ConfigService);
   const PORT = process.env.PORT;

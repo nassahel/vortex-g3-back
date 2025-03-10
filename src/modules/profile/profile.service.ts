@@ -1,9 +1,9 @@
-import { BadRequestException, Inject, Injectable } from '@nestjs/common';
+import { BadRequestException, Inject, Injectable, InternalServerErrorException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
-import { AwsService } from '../../aws/aws.service';
 import { JwtService } from '@nestjs/jwt';
 import { I18nService } from 'nestjs-i18n';
 import { ProfileDto } from './dto/profile.dto';
+import { AwsService } from '../aws/aws.service';
 
 @Injectable()
 export class ProfileService {
@@ -56,16 +56,11 @@ export class ProfileService {
     };
   }
 
+  //Subir imagen de perfil
   async uploadImage(file: Express.Multer.File, userId: string) {
     if (!file) {
-      throw new BadRequestException(this.i18n.t('error.NO_FILE')); //en el caso de q no se suba ningun archivo
+      throw new BadRequestException(this.i18n.t('error.NO_FILE'));
     }
-
-    const allowedMimeTypes = ['image/png', 'image/jpeg'];
-    if (!allowedMimeTypes.includes(file.mimetype)) {
-      throw new BadRequestException(this.i18n.t('error.MIMETYPE'));
-    }
-
     const existingProfile = await this.prisma.profile.findUnique({
       where: { userId },
     });
@@ -78,19 +73,15 @@ export class ProfileService {
       try {
         const imageUrl = existingProfile.profileImage;
         const url = new URL(imageUrl);
-        const key = url.pathname.substring(1); // Remover el primer "/"
+        const key = url.pathname.substring(1);
         await this.awsService.deleteImage(key);
       } catch (error) {
-        console.error(await this.i18n.t('error.ERROR_DELETING_IMAGE', error));
+        console.error('Error deleting previous image:', error);
+        throw new InternalServerErrorException(this.i18n.t('error.ERROR_DELETING_IMAGE'));
       }
     }
 
-    const imageUrl = await this.awsService.uploadImage(file, userId); //se encarga de subir el archivo a s3
-
-    if (!file) {
-      throw new Error(await this.i18n.t('error.ERROR_UPLOADING_IMAGE'));
-    }
-
+    const imageUrl = await this.awsService.uploadImage(file, userId);
     const updatedProfile = await this.prisma.profile.update({
       where: { userId },
       data: { profileImage: imageUrl },
@@ -98,7 +89,7 @@ export class ProfileService {
 
     return {
       message: this.i18n.t('success.PROFILE_IMAGE_UPLOADED'),
-      data: updatedProfile,
+      image: updatedProfile.profileImage,
     };
   }
 
@@ -108,18 +99,16 @@ export class ProfileService {
     });
 
     if (!user || !user.profileImage) {
-      //si no encuentra al usuario o si no tiene foto de perfil
       throw new Error(await this.i18n.t('success.IMAGE_NOT_FOUND'));
     }
 
-    const imageUrl = user.profileImage; //se extrae la imagen de perfil almacenada en user y se le asigna a imageUrl
-    const url = new URL(imageUrl); // crea una nueva instancia de URL utilizando imageUrl
-    const key = url.pathname.substring(1); //toma la ruta (path) del objeto url (ej: /path/to/image.jpg) y usa substring(1) para eliminar el primer caracter
+    const imageUrl = user.profileImage;
+    const url = new URL(imageUrl);
+    const key = url.pathname.substring(1);
 
-    await this.awsService.deleteImage(key); //elimina la imagen de s3
+    await this.awsService.deleteImage(key);
 
     await this.prisma.profile.update({
-      //actualiza y se asigna null en aws a profileImage
       where: { userId },
       data: { profileImage: null },
     });
