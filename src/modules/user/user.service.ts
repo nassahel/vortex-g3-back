@@ -76,6 +76,7 @@ export class UserService {
         this.prisma.user.count({ where: { isDeleted: false } }),
         this.prisma.user.findMany({
           where: { isDeleted: false },
+          include: { profile: true },
           skip: (page - 1) * limit,
           take: limit,
         }),
