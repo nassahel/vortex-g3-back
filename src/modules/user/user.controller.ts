@@ -20,38 +20,39 @@ import { PaginationArgs } from 'src/utils/pagination/pagination.dto';
 import { I18nService } from 'nestjs-i18n';
 import { SWAGGER_TRANSLATIONS } from 'src/i18n/en/i18n.swagger';
 import { ApiOperation, ApiResponse, ApiBody, ApiParam, ApiBearerAuth } from '@nestjs/swagger';
+import { ApiCustomOperation } from 'src/common/decorators/swagger.decorator';
 
 @Controller('users')
 export class UserController {
   constructor(
     private readonly userService: UserService,
     private readonly i18n: I18nService,
-  ) {}
+  ) { }
 
   // crea un usuario, se utiliza para admins.
+  @Post()
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(RoleEnum.ADMIN)
-  @Post()
   @ApiBearerAuth()
-  @ApiOperation({ summary: SWAGGER_TRANSLATIONS.USER_CREATE }) 
-  @ApiBody({ type: CreateUserDto }) 
-  @ApiResponse({
-    status: 201,
-    description: SWAGGER_TRANSLATIONS.USER_CREATE_SUCCESS,
+  @ApiCustomOperation({
+    summary: SWAGGER_TRANSLATIONS.USER_CREATE,
+    bodyType: CreateUserDto,
+    responseStatus: 201,
+    responseDescription: SWAGGER_TRANSLATIONS.USER_CREATE_SUCCESS,
   })
   create(@Body() createUserDto: CreateUserDto) {
     return this.userService.create(createUserDto);
   }
 
   // obtiene todos los usuarios sin borrado logico
-  @ApiBearerAuth()
+  @Get('/admin/all')
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(RoleEnum.ADMIN)
-  @Get('/admin/all')
-  @ApiOperation({ summary: SWAGGER_TRANSLATIONS.USER_GET_ALL })
-  @ApiResponse({
-    status: 201,
-    description: SWAGGER_TRANSLATIONS.USER_GET_ALL_SUCCESS,
+  @ApiBearerAuth()
+  @ApiCustomOperation({
+    summary: SWAGGER_TRANSLATIONS.USER_GET_ALL,
+    responseStatus: 201,
+    responseDescription: SWAGGER_TRANSLATIONS.USER_GET_ALL_SUCCESS,
   })
   findAll(@Query() filters: PaginationArgs) {
     return this.userService.findAll(filters);
@@ -59,10 +60,10 @@ export class UserController {
 
   // obtiene solo los usuarios sin borrado logico y que esten activos
   @Get('get-all-active')
-  @ApiOperation({ summary: SWAGGER_TRANSLATIONS.USER_GET_ALL }) 
-  @ApiResponse({
-    status: 201,
-    description: SWAGGER_TRANSLATIONS.USER_GET_ALL_SUCCESS,
+  @ApiCustomOperation({
+    summary: SWAGGER_TRANSLATIONS.USER_GET_ALL,
+    responseStatus: 201,
+    responseDescription: SWAGGER_TRANSLATIONS.USER_GET_ALL_SUCCESS,
   })
   findAllActive(@Query() filters: PaginationArgs) {
     return this.userService.findAllActive(filters);
@@ -70,20 +71,20 @@ export class UserController {
 
   // Obtiene todos los usuarios con rol USER
   @Get('get-all-users')
-  @ApiOperation({ summary: SWAGGER_TRANSLATIONS.USER_GET_ALL }) 
-  @ApiResponse({
-    status: 201,
-    description: SWAGGER_TRANSLATIONS.USER_GET_ALL_SUCCESS,
+  @ApiCustomOperation({
+    summary: SWAGGER_TRANSLATIONS.USER_GET_ALL,
+    responseStatus: 201,
+    responseDescription: SWAGGER_TRANSLATIONS.USER_GET_ALL_SUCCESS,
   })
   findAllUsers(@Query() filters: PaginationArgs) {
     return this.userService.findAllUsers(filters);
   }
 
   // Obtiene un usuario por id
-  @ApiBearerAuth()
-  @UseGuards(JwtAuthGuard)
   @Get(':id')
-  @ApiOperation({ summary: SWAGGER_TRANSLATIONS.USER_GET_ONE }) 
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: SWAGGER_TRANSLATIONS.USER_GET_ONE })
   @ApiParam({ name: 'id', example: '123', description: 'ID del usuario' })
   @ApiResponse({
     status: 201,
@@ -94,9 +95,9 @@ export class UserController {
   }
 
   // Actualiza un usuario por id
-  @ApiBearerAuth()
-  @UseGuards(JwtAuthGuard)
   @Patch(':id')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
   @ApiParam({ name: 'id', example: '123', description: 'ID del usuario' })
   @ApiBody({ type: UpdateUserDto }) // Define el request body
   @ApiOperation({ summary: SWAGGER_TRANSLATIONS.USER_UPDATE })
@@ -109,10 +110,10 @@ export class UserController {
   }
 
   //Borrado logico de un usuario por id
-  @ApiBearerAuth()
-  @UseGuards(JwtAuthGuard)
   @Patch('delete/:id')
-  @ApiOperation({ summary: SWAGGER_TRANSLATIONS.USER_DELETE }) 
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: SWAGGER_TRANSLATIONS.USER_DELETE })
   @ApiParam({ name: 'id', example: '123', description: 'ID del usuario' })
   @ApiResponse({
     status: 201,
@@ -123,10 +124,10 @@ export class UserController {
   }
 
   //Borra definitivamente un usuario de la base de datos.
-  @ApiBearerAuth()
+  @Delete('delete/:id')
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(RoleEnum.ADMIN)
-  @Delete('delete/:id')
+  @ApiBearerAuth()
   @ApiOperation({ summary: SWAGGER_TRANSLATIONS.USER_DELETE })
   @ApiParam({ name: 'id', example: '123', description: 'ID del usuario' })
   @ApiResponse({
