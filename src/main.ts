@@ -15,7 +15,6 @@ async function bootstrap() {
     origin: '*',
   });
 
-  //Configuracion de las rutas generales. ahora a todas las rutas hay quie ponerle eso de api/v1 antes de lo que corresponda.
   app.setGlobalPrefix('api/v1', {
     exclude: ['api-docs'],
   });

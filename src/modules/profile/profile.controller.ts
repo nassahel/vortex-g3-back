@@ -1,26 +1,5 @@
-import {
-  Controller,
-  Post,
-  Get,
-  Body,
-  Param,
-  Delete,
-  UploadedFile,
-  UseInterceptors,
-  BadRequestException,
-  Put,
-  ValidationPipe,
-  UseGuards,
-} from '@nestjs/common';
-import {
-  ApiOperation,
-  ApiResponse,
-  ApiTags,
-  ApiConsumes,
-  ApiParam,
-  ApiBody,
-  ApiBearerAuth
-} from '@nestjs/swagger';
+import { Controller, Post, Get, Body, Param, Delete, UploadedFile, UseInterceptors, BadRequestException, Put, ValidationPipe, UseGuards, } from '@nestjs/common';
+import { ApiOperation, ApiResponse, ApiTags, ApiConsumes, ApiParam, ApiBody, ApiBearerAuth } from '@nestjs/swagger';
 import { memoryStorage } from 'multer';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { ProfileService } from './profile.service';
@@ -42,18 +21,20 @@ export class ProfileController {
     private readonly i18n: I18nService,
   ) { }
 
+  @Get('/all/profiles')
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(RoleEnum.ADMIN)
-  @Get('/all/profiles')
   @ApiBearerAuth()
   @ApiOperation({ summary: SWAGGER_TRANSLATIONS.PROFILE_GET_ALL })
   @ApiResponse({ status: 200, description: SWAGGER_TRANSLATIONS.PROFILE_GET_ALL_SUCCESS })
   findAll() {
     return this.profileService.getAllProfiles();
   }
+
+
+  @Post('create/:userId')
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(RoleEnum.ADMIN)
-  @Post('create/:userId')
   @ApiOperation({ summary: SWAGGER_TRANSLATIONS.PROFILE_CREATE }) //Para documentacion de Swagger
   @ApiResponse({ status: 201, description: SWAGGER_TRANSLATIONS.PROFILE_CREATE_SUCCESS })
   @ApiConsumes('multipart/form-data')
@@ -92,9 +73,9 @@ export class ProfileController {
   }
 
   // Ruta para subir la imagen
+  @Post('upload-image')
   @ApiBearerAuth()
   @UseGuards(JwtAuthGuard)
-  @Post('upload-image')
   @ApiOperation({ summary: SWAGGER_TRANSLATIONS.PROFILE_UPLOAD }) // Documentación de Swagger
   @ApiResponse({ status: 201, description: SWAGGER_TRANSLATIONS.PROFILE_UPLOAD_SUCCESS }) // Respuesta 201 en caso de éxito
   @ApiConsumes('multipart/form-data') // Indica que la ruta consume archivos
@@ -130,9 +111,9 @@ export class ProfileController {
   }
 
   //Ruta para eliminar la imagen
+  @Delete('delete/:userId')
   @ApiBearerAuth()
   @UseGuards(JwtAuthGuard)
-  @Delete('delete/:userId')
   @ApiOperation({ summary: SWAGGER_TRANSLATIONS.PROFILE_DELETE }) //Para documentacion de Swagger
   @ApiParam({ name: 'userId', example: '123', description: 'ID del usuario' })
   @ApiResponse({ status: 200, description: SWAGGER_TRANSLATIONS.PROFILE_DELETE_SUCCESS }) //Para que responda con un 200 en el caso de que se elimine con exito
@@ -143,9 +124,9 @@ export class ProfileController {
   }
 
   //Actualizar la info del usuario
+  @Put('update/:userId')
   @ApiBearerAuth()
   @UseGuards(JwtAuthGuard)
-  @Put('update/:userId')
   @ApiOperation({ summary: SWAGGER_TRANSLATIONS.PROFILE_UPDATE })
   @ApiResponse({ status: 200, description: SWAGGER_TRANSLATIONS.PROFILE_UPDATE_SUCCESS })
   @ApiParam({ name: 'userId', example: '123', description: 'ID del usuario' })
