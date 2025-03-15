@@ -1,22 +1,23 @@
 import { IsOptional, IsString, IsNumber, Min } from 'class-validator';
+import { i18nValidationMessage } from 'nestjs-i18n';
 
 export class UpdateProductDto {
   @IsOptional()
-  @IsString({ message: 'El nombre debe ser un string.' })
+  @IsString({ message: i18nValidationMessage('dto.isString') })
   name?: string;
 
   @IsOptional()
-  @IsString({ message: 'La descripción debe ser un string.' })
+  @IsString({ message: i18nValidationMessage('dto.isString') })
   description?: string;
 
   @IsOptional()
-  @IsNumber({}, { message: 'El precio debe ser un número.' })
-  @Min(0, { message: 'El precio debe ser mayor o igual a 0.' })
+  @IsNumber({}, { message: i18nValidationMessage('dto.isNumber') })
+  @Min(0, { message: i18nValidationMessage('dto.min') })
   price?: number;
 
   @IsOptional()
-  @IsNumber({}, { message: 'La cantidad debe ser un número.' })
-  @Min(0, { message: 'La cantidad debe ser mayor o igual a 0.' })
+  @IsNumber({}, { message: i18nValidationMessage('dto.isNumber') })
+  @Min(0, { message: i18nValidationMessage('dto.min') })
   stock?: number;
 
   @IsOptional()

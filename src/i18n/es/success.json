@@ -1,9 +1,9 @@
 {
-  "USER_REGISTERED": "LuxShop - ¡Usuario registrado con éxito!",
+  "USER_REGISTERED": "¡Usuario registrado con éxito!",
   "LOGGED_IN": "Usuario autenticado con éxito.",
   "PASSWORD_CHANGED": "Contraseña cambiada con éxito.",
   "RECOVERY_LINK_SENT": "Enlace de recuperación de contraseña generado.",
-  "PASSWORD_RECOVERY": "LuxShop - Recuperación de contraseña",
+  "PASSWORD_RECOVERY": "Recuperación de contraseña",
 
   "ITEM_UPDATED": "Artículo actualizado en el carrito.",
   "ITEM_ADDED": "Artículo agregado al carrito.",

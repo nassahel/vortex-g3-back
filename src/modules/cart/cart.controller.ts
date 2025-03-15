@@ -9,7 +9,7 @@ import {
   NotFoundException,
   UseGuards,
 } from '@nestjs/common';
-import { ApiOperation, ApiResponse, ApiTags, ApiBody, ApiParam } from '@nestjs/swagger';
+import { ApiOperation, ApiResponse, ApiTags, ApiBody, ApiParam, ApiBearerAuth } from '@nestjs/swagger';
 import { CartService } from './cart.service';
 import { UpsertCartItemDto } from './dto/upsert.cart.item.dto';
 import { CheckoutCartDto } from './dto/checkout.cart.dto';
@@ -26,7 +26,7 @@ export class CartController {
   constructor(
     private readonly cartService: CartService,
     private readonly i18n: I18nService,
-  ) {}
+  ) { }
 
   @Get('active/:userId')
   @ApiOperation({ summary: SWAGGER_TRANSLATIONS.CART_GET_OR_CREATE })
@@ -35,13 +35,13 @@ export class CartController {
   async getActiveCart(@Param('userId') userId: string) {
     if (!userId) {
       throw new BadRequestException(
-        await this.i18n.translate('error.USER_ID_REQUIRED'),
+        this.i18n.translate('error.USER_ID_REQUIRED'),
       );
     }
 
     const cart = await this.cartService.getActiveCart(userId);
     return {
-      message: await this.i18n.translate('success.CART_RETRIEVED'),
+      message: this.i18n.translate('success.CART_RETRIEVED'),
       data: cart,
     };
   }
@@ -49,6 +49,7 @@ export class CartController {
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(RoleEnum.ADMIN)
   @Get('/all/carts')
+  @ApiBearerAuth()
   @ApiOperation({ summary: SWAGGER_TRANSLATIONS.CART_GET_ALL })
   @ApiResponse({
     status: 200,
@@ -58,11 +59,11 @@ export class CartController {
     return this.cartService.getAllCarts();
   }
 
-  
+
   @Post('item/:userId')
   @ApiOperation({ summary: SWAGGER_TRANSLATIONS.CART_ADD_OR_UPDATE })
   @ApiParam({ name: 'userId', example: '12345', description: 'ID del usuario' })
-  @ApiBody({ type: UpsertCartItemDto }) // Definimos el request body con el DTO
+  @ApiBody({ type: UpsertCartItemDto })
   @ApiResponse({
     status: 200,
     description: SWAGGER_TRANSLATIONS.CART_ADD_OR_UPDATE_SUCCESS,
@@ -77,7 +78,7 @@ export class CartController {
   ) {
     if (!userId) {
       throw new BadRequestException(
-        await this.i18n.translate('error.USER_ID_REQUIRED'),
+        this.i18n.translate('error.USER_ID_REQUIRED'),
       );
     }
 
@@ -90,11 +91,11 @@ export class CartController {
     } catch (error) {
       if (error instanceof NotFoundException) {
         throw new NotFoundException(
-          await this.i18n.translate('error.PRODUCT_NOT_FOUND'),
+          this.i18n.translate('error.PRODUCT_NOT_FOUND'),
         );
       }
       throw new BadRequestException(
-        await this.i18n.translate('error.UPDATING_CART'),
+        this.i18n.translate('error.UPDATING_CART'),
       );
     }
   }
@@ -111,8 +112,8 @@ export class CartController {
   ) {
     if (!userId || !productId) {
       throw new BadRequestException(
-        (await this.i18n.translate('error.USER_ID_REQUIRED')) &&
-          (await this.i18n.translate('error.PRODUCT_ID_REQUIRED')),
+        (this.i18n.translate('error.USER_ID_REQUIRED')) &&
+        (this.i18n.translate('error.PRODUCT_ID_REQUIRED')),
       );
     }
 
@@ -125,11 +126,11 @@ export class CartController {
     } catch (error) {
       if (error instanceof NotFoundException) {
         throw new NotFoundException(
-          await this.i18n.translate('error.ITEM_NOT_FOUND'),
+          this.i18n.translate('error.ITEM_NOT_FOUND'),
         );
       }
       throw new BadRequestException(
-        await this.i18n.translate('error.ITEM_NOT_REMOVED'),
+        this.i18n.translate('error.ITEM_NOT_REMOVED'),
       );
     }
   }

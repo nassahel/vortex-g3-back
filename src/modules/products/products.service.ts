@@ -8,10 +8,10 @@ import { UpdateProductDto } from './dto/update-product.dto';
 import { PrismaService } from '../prisma/prisma.service';
 import { FilterProductDto } from './dto/filters-product.dto';
 import { ExcelService } from '../excel/excel.service';
-import { AwsService } from 'src/aws/aws.service';
 import { PaginationArgs } from 'src/utils/pagination/pagination.dto';
 import { Paginate } from 'src/utils/pagination/parsing';
 import { I18nService } from 'nestjs-i18n';
+import { AwsService } from '../aws/aws.service';
 
 @Injectable()
 export class ProductsService {
@@ -20,7 +20,7 @@ export class ProductsService {
     private readonly excel: ExcelService,
     private readonly aws: AwsService,
     private readonly i18n: I18nService,
-  ) {}
+  ) { }
 
   async findAll(filters: FilterProductDto & PaginationArgs) {
     try {
@@ -82,7 +82,7 @@ export class ProductsService {
     } catch (error) {
       console.log(error);
       throw new BadRequestException(
-        await this.i18n.t('error.PRODUCT_NOT_FOUND'),
+        this.i18n.t('error.PRODUCT_NOT_FOUND'),
         error,
       );
     }
@@ -115,14 +115,14 @@ export class ProductsService {
 
       if (!product) {
         throw new NotFoundException(
-          await this.i18n.t('error.PRODUCT_ID_NOT_FOUND'),
+          this.i18n.t('error.PRODUCT_ID_NOT_FOUND'),
         );
       }
       return product;
     } catch (error) {
       console.log(error);
       throw new BadRequestException(
-        await this.i18n.t('error.PRODUCT_NOT_FOUND'),
+        this.i18n.t('error.PRODUCT_NOT_FOUND'),
         error.response.message,
       );
     }
@@ -136,16 +136,15 @@ export class ProductsService {
       const newProduct = await this.prisma.$transaction(async (tx) => {
         const { name, description, price, stock, categories } = product;
 
-        // Verificar si el nombre de producto ya existe.
         const productExists = await tx.product.findFirst({
           where: { name: { equals: name, mode: 'insensitive' } },
         });
         if (productExists) {
           throw new BadRequestException(
-            await this.i18n.t('error.PRODUCT_EXISTS'),
+            this.i18n.t('error.PRODUCT_EXISTS'),
           );
         }
-        //verifica que todas las categorías existan, retorna true si todas las categorías existen
+
         const areValidCategories = await this.validateCategories(categories);
         if (!areValidCategories) {
           throw new BadRequestException(
@@ -159,7 +158,7 @@ export class ProductsService {
             description: description || null,
             price,
             stock,
-            // Crear las relaciones con las categorías directamente
+
             categories: {
               create: categories.map((categoryId) => ({
                 categoryId: categoryId,
@@ -171,7 +170,7 @@ export class ProductsService {
           },
         });
 
-        //subir imagenes a s3
+
         if (images && images.length > 0) {
           console.log(images);
           const imagePromises = images.map(async (image) => {
@@ -191,13 +190,13 @@ export class ProductsService {
         return createdProduct;
       });
       return {
-        message: await this.i18n.t('success.CREATED_PRODUCT'),
+        message: this.i18n.t('success.CREATED_PRODUCT'),
         newProduct,
       };
     } catch (error) {
       console.log(error);
       throw new BadRequestException(
-        await this.i18n.t('success.PRODUCT_CREATION_FAILED'),
+        this.i18n.t('success.PRODUCT_CREATION_FAILED'),
         error.response?.message,
       );
     }
@@ -235,7 +234,7 @@ export class ProductsService {
 
       if (!products.length) {
         throw new BadRequestException(
-          await this.i18n.t('error.NO_VALID_PRODUCT'),
+          this.i18n.t('error.NO_VALID_PRODUCT'),
         );
       }
       //se eliminan los productos importados duplicados
@@ -261,7 +260,7 @@ export class ProductsService {
 
         if (existingNames.length > 0) {
           throw new BadRequestException(
-            await this.i18n.t('error.PRODUCT_EXISTS', {
+            this.i18n.t('error.PRODUCT_EXISTS', {
               args: { names: existingNames.map((p) => p.name).join(', ') },
             }),
           );
@@ -339,7 +338,7 @@ export class ProductsService {
     } catch (error) {
       console.log(error);
       throw new BadRequestException(
-        (await this.i18n.t('error.PRODUCTS_IMPORT_FAILED')) + error.message,
+        (this.i18n.t('error.PRODUCTS_IMPORT_FAILED')) + error.message,
       );
     }
   }
@@ -357,7 +356,7 @@ export class ProductsService {
 
         if (!productExists) {
           throw new NotFoundException(
-            await this.i18n.t('error.PRODUCT_ID_NOT_FOUND', { args: { id } }),
+            this.i18n.t('error.PRODUCT_ID_NOT_FOUND', { args: { id } }),
           );
         }
 
@@ -409,7 +408,7 @@ export class ProductsService {
       });
 
       return {
-        message: await this.i18n.t('success.UPDATED_PRODUCT'),
+        message: this.i18n.t('success.UPDATED_PRODUCT'),
         updatedProduct,
       };
     } catch (error) {
@@ -428,7 +427,7 @@ export class ProductsService {
       });
       if (!productExists) {
         throw new NotFoundException(
-          await this.i18n.t('error.PRODUCT_NOT_FOUND'),
+          this.i18n.t('error.PRODUCT_NOT_FOUND'),
         );
       }
       const productDeleted = await this.prisma.product.update({
@@ -436,13 +435,13 @@ export class ProductsService {
         data: { isDeleted: true },
       });
       return {
-        message: await this.i18n.t('error.DELETED_PRODUCT'),
+        message: this.i18n.t('error.DELETED_PRODUCT'),
         productDeleted,
       };
     } catch (error) {
       console.log(error);
       throw new BadRequestException(
-        await this.i18n.t('error.PRODUCT_DELETION_FAILED'),
+        this.i18n.t('error.PRODUCT_DELETION_FAILED'),
         error.response.message,
       );
     }
@@ -455,12 +454,12 @@ export class ProductsService {
       });
       if (!productExists) {
         throw new NotFoundException(
-          await this.i18n.t('error.PRODUCT_NOT_FOUND'),
+          this.i18n.t('error.PRODUCT_NOT_FOUND'),
         );
       }
       if (!productExists.isDeleted) {
         throw new BadRequestException(
-          await this.i18n.t('error.ACTIVE_PRODUCT'),
+          this.i18n.t('error.ACTIVE_PRODUCT'),
         );
       }
       const restoredProduct = await this.prisma.product.update({
@@ -468,13 +467,13 @@ export class ProductsService {
         data: { isDeleted: false },
       });
       return {
-        message: await this.i18n.t('error.PRODUCT_RESTORED'),
+        message: this.i18n.t('error.PRODUCT_RESTORED'),
         restoredProduct,
       };
     } catch (error) {
       console.log(error);
       throw new BadRequestException(
-        await this.i18n.t('error.PRODUCT_RESTORED_FAILED'),
+        this.i18n.t('error.PRODUCT_RESTORED_FAILED'),
         error.response.message,
       );
     }
@@ -514,7 +513,7 @@ export class ProductsService {
     } catch (error) {
       console.log(error);
       throw new BadRequestException(
-        await this.i18n.t('error.CATEGORY_ASSOCIATION_FAILED'),
+        this.i18n.t('error.CATEGORY_ASSOCIATION_FAILED'),
         error.response,
       );
     }

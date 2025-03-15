@@ -35,7 +35,7 @@ export const purchasesPerDayPDF = async (
       color: '#43484C',
     },
     pageSize: 'A4',
-    pageMargins: [40, 50, 40, 60], // Márgenes mejorados
+    pageMargins: [40, 50, 40, 60], 
     header: () => ({
       stack: [
         {

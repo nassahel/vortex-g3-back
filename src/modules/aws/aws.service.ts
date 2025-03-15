@@ -1,11 +1,7 @@
-import {
-  DeleteObjectCommand,
-  PutObjectCommand,
-  S3Client,
-} from '@aws-sdk/client-s3';
+import { DeleteObjectCommand, PutObjectCommand, S3Client, } from '@aws-sdk/client-s3';
 import { Injectable, Logger } from '@nestjs/common';
-import { awsConfig } from '../common/constants/index';
 import * as crypto from 'crypto';
+import { awsConfig } from 'src/common/constants';
 
 @Injectable()
 export class AwsService {

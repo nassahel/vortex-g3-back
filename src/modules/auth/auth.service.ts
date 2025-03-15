@@ -3,7 +3,6 @@ import {
   ConflictException,
   Injectable,
   InternalServerErrorException,
-  NotFoundException,
 } from '@nestjs/common';
 import {
   CreateLoginDto,
@@ -17,6 +16,7 @@ import { messagingConfig } from 'src/common/constants';
 import { recoveryTemplate } from '../messages/templates/recovery-template';
 import { I18nService } from 'nestjs-i18n';
 import * as bcrypt from 'bcrypt';
+import { registrationTmplate } from '../messages/templates/registration-success';
 
 @Injectable()
 export class AuthService {
@@ -25,7 +25,7 @@ export class AuthService {
     private readonly jwt: JwtService,
     private messageService: MessageService,
     private readonly i18n: I18nService,
-  ) {}
+  ) { }
 
   async register(createRegisterDto: CreateRegisterDto) {
     const { email, name, password, repeatPassword } = createRegisterDto;
@@ -66,27 +66,27 @@ export class AuthService {
       await this.prisma.profile.create({
         data: {
           userId: registeredUser.id,
-          profileImage: null,
-          address: null,
-          dni: null,
-          phone: null,
-        },
+          profileImage: '',
+          address: 'Sin asignar',
+          dni: 'Sin asignar',
+          phone: 'Sin asignar',
+        }
       });
 
       //Envia email a gnte cuando alguien se registra.
       //Está comentado para que no le envie emails a gente desconocida mientras lo pruebo
 
-      // const link = `https://luxshop.com/`;
-      // let emailBody = registrationTmplate;
-      // emailBody = emailBody.replace(/{{name}}/g, name);
-      // emailBody = emailBody.replace(/{{link}}/g, link);
+      const link = `https://luxshop.com/`;
+      let emailBody = registrationTmplate;
+      emailBody = emailBody.replace(/{{name}}/g, name);
+      emailBody = emailBody.replace(/{{link}}/g, link);
 
-      // await this.messageService.sendRegisterUserEmail({
-      //   from: messagingConfig.emailSender,
-      //   to: email,
-      //   subject: 'LuxShop - Registro exitoso!',
-      //   emailBody,
-      // });
+      await this.messageService.sendRegisterUserEmail({
+        from: messagingConfig.emailSender,
+        to: email,
+        subject: 'LuxShop - Registro exitoso!',
+        emailBody,
+      });
 
       return {
         message: this.i18n.translate('success.USER_REGISTERED'),
@@ -109,7 +109,6 @@ export class AuthService {
     const { password, email } = createLoginDto;
     const formattedEmail = email.toLowerCase();
     const userExist = await this.prisma.user.findUnique({
-      //Para filtrar a los usuarios inactivos y con borrado logico.
       where: { email: formattedEmail, isActive: true, isDeleted: false },
     });
 
@@ -134,7 +133,6 @@ export class AuthService {
 
     const token = await this.jwt.signAsync(payload, { expiresIn: '24h' });
 
-    //CAMBIAR POR OTRO MENSAJE DESPUES
     if (!token) {
       throw new ConflictException(
         this.i18n.translate('error.INVALID_CREDENTIALS'),
@@ -155,6 +153,7 @@ export class AuthService {
 
   async RequestRecoveryPassword(email: string) {
     const formattedEmail = email.trim().toLowerCase();
+
     const foundUser = await this.prisma.user.findUnique({
       where: { email: formattedEmail },
     });
@@ -164,21 +163,21 @@ export class AuthService {
       );
     }
 
+
     try {
-      const payload = { id: foundUser.id, email: foundUser.email };
+      const payload = { id: foundUser.id, email: foundUser.email, name: foundUser.name };
       const token = this.jwt.sign(payload, { expiresIn: '30m' });
 
-      const link = `https://tu-dominio.com/reset-password?token=${token}`;
+      const link = `http://localhost:3000/user/recovery-password?t=${token}`;
 
-      //Obtengo la plantilla y le reemplazo las variables
       let emailBody = recoveryTemplate;
       emailBody = emailBody.replace(/{{link}}/g, link);
       emailBody = emailBody.replace(/{{name}}/g, foundUser.name);
 
       await this.messageService.sendRegisterUserEmail({
         from: messagingConfig.emailSender,
-        to: email,
-        subject: await this.i18n.translate('success.PASSWORD_RECOVERY'),
+        to: formattedEmail,
+        subject: "LuxShop - Correo de recuperacion de contraseña.",
         emailBody,
       });
 
@@ -199,7 +198,7 @@ export class AuthService {
       const { id } = payload;
       if (!id) {
         throw new BadRequestException(
-          await this.i18n.translate('error.TOKEN_INVALID'),
+          this.i18n.translate('error.TOKEN_INVALID'),
         );
       }
 

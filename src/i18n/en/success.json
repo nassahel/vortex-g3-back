@@ -1,9 +1,9 @@
 {
-  "USER_REGISTERED": "LuxShop - User successfully registered!",
+  "USER_REGISTERED": "User successfully registered!",
   "LOGGED_IN": "User successfully logged in.",
   "PASSWORD_CHANGED": "Password successfully changed.",
   "RECOVERY_LINK_SENT": "Password recovery link generated.",
-  "PASSWORD_RECOVERY": "LuxShop - Password Recovery",
+  "PASSWORD_RECOVERY": "Password Recovery",
 
   "ITEM_UPDATED": "Item updated in cart.",
   "ITEM_ADDED": "Item added to cart.",

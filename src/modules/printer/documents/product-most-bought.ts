@@ -4,7 +4,7 @@ const styles: StyleDictionary = {
   header: {
     fontSize: 18,
     bold: true,
-    color: '#2C3E50', // Azul oscuro elegante
+    color: '#2C3E50',
     alignment: 'center',
   },
   subheader: {
@@ -17,7 +17,7 @@ const styles: StyleDictionary = {
     fontSize: 10,
     bold: true,
     color: '#FFF',
-    fillColor: '#2C3E50', // Fondo oscuro para encabezados de tabla
+    fillColor: '#2C3E50', 
     alignment: 'center',
   },
   text: {
@@ -49,7 +49,7 @@ export const productsMostBoughtPDF = async (
       color: '#43484C',
     },
     pageSize: 'A4',
-    pageMargins: [40, 50, 40, 60], // Márgenes mejorados
+    pageMargins: [40, 50, 40, 60], 
     header: () => {
       return [
         {

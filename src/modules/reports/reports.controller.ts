@@ -6,7 +6,7 @@ import { JwtAuthGuard } from '../auth/guards/jwt.guard';
 import { Roles } from 'src/common/decorators/roles.decorator';
 import { RoleEnum } from 'src/common/constants';
 import { RolesGuard } from '../auth/guards/roles.guard';
-import { ApiBody, ApiConsumes, ApiOperation, ApiParam, ApiResponse } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiBody, ApiConsumes, ApiOperation, ApiParam, ApiResponse } from '@nestjs/swagger';
 
 @Controller('report')
 export class ReportsController {
@@ -36,6 +36,7 @@ export class ReportsController {
     }
   }
 
+  @ApiBearerAuth()
   @UseGuards(JwtAuthGuard)
   @ApiOperation({ summary: 'Generar factura de compra en PDF' })
   @ApiParam({ name: 'id', example: '123', description: 'ID de la compra' })
@@ -63,6 +64,7 @@ export class ReportsController {
 @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(RoleEnum.ADMIN)
   @Post('purchases-per-day')
+  @ApiBearerAuth()
   @ApiOperation({ summary: 'Generar informe de compras por día en PDF' })
   @ApiBody({ type: ChartQueryDto }) // Define el request body
   @ApiResponse({
@@ -76,8 +78,7 @@ export class ReportsController {
       const pdfBuffer = await this.reportsService.purchasesPerDay(body);
       res.set({
         'Content-Type': 'application/pdf',
-        'Content-Disposition': 'attachment; filename="purchases_pr_day.pdf"',
-        // 'Content-Length': pdfBuffer.length.toString(),
+        'Content-Disposition': 'attachment; filename="purchases_pr_day.pdf"',        
       });
 
       res.send(pdfBuffer);
