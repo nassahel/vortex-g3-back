@@ -59,7 +59,6 @@ export class CartService {
     upsertCartItemDto: UpsertCartItemDto,
   ): Promise<{ message: string }> {
     const { productId, quantity } = upsertCartItemDto;
-    
 
     const product = await this.prisma.product.findUnique({
       where: { id: productId },
@@ -129,6 +128,7 @@ export class CartService {
   async checkoutCart(
     userId: string,
     checkoutCartDto: CheckoutCartDto,
+    payMethod: string,
   ): Promise<{ message: string; link: string }> {
     try {
       //Obtener el carrito activo del usuario
@@ -146,34 +146,54 @@ export class CartService {
       if (cart.items.length === 0) {
         throw new NotFoundException(this.i18n.translate('error.CART_EMPTY'));
       }
-      //verificar si el link del pago ya existe
-      const paymentFound = await this.prisma.payment.findFirst({
-        where: { cartId: cart.id },
-      });
-      if (paymentFound) {
-        return { message: 'Payment already exists', link: paymentFound.link };
+      /////////////////////////////////////////////////
+      console.log('payMethod', payMethod);
+      //VERIFICAR METODO DE PAGO ELEGIDO
+      if (payMethod === 'Card') {
+        const payment = await this.prisma.payment.create({
+          data: {
+            cartId: cart.id,
+            amount: Number(cart.price),
+            method: 'Card',
+            link: 'no link',
+            status: 'COMPLETED',
+          },
+        });
+        await this.prisma.cart.update({
+          where: { id: cart.id },
+          data: { status: 'COMPLETED' },
+        });
+        return { message: 'Payment completed', link: 'no link' };
+      } else {
+        //verificar si el link del pago ya existe
+        const paymentFound = await this.prisma.payment.findFirst({
+          where: { cartId: cart.id },
+        });
+        if (paymentFound) {
+          return { message: 'Payment already exists', link: paymentFound.link };
+        }
+        //generar pago en MP con datos del carrito
+        const mpPaymentGenerated = await this.mercadoPagoService.createPayment(
+          cart.id,
+          Number(cart.price),
+        );
+        //crear pago pendiente en la base de datos
+        const payment = await this.prisma.payment.create({
+          data: {
+            cartId: cart.id,
+            amount: Number(cart.price),
+            method: 'MercadoPago',
+            link: mpPaymentGenerated.init_point,
+            status: 'PENDING',
+          },
+        });
+        //incluir el servicio de mail una vez que se implemente
+        //retorno un mensaje de pago generado y el link del pago para redirigir al usuario
+        return {
+          message: 'Payment generated',
+          link: payment.link,
+        };
       }
-      //generar pago en MP con datos del carrito
-      const mpPaymentGenerated = await this.mercadoPagoService.createPayment(
-        cart.id,
-        Number(cart.price),
-      );
-      //crear pago pendiente en la base de datos
-      const payment = await this.prisma.payment.create({
-        data: {
-          cartId: cart.id,
-          amount: Number(cart.price),
-          method: 'MercadoPago',
-          link: mpPaymentGenerated.init_point,
-          status: 'PENDING',
-        },
-      });
-      //incluir el servicio de mail una vez que se implemente
-      //retorno un mensaje de pago generado y el link del pago para redirigir al usuario
-      return {
-        message: 'Payment generated',
-        link: payment.link,
-      };
     } catch (error) {
       console.log(error);
       throw new BadRequestException(
