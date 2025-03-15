@@ -19,7 +19,7 @@ import { UpdateProductDto } from './dto/update-product.dto';
 import { FilterProductDto } from './dto/filters-product.dto';
 import { FileInterceptor, FilesInterceptor } from '@nestjs/platform-express';
 import { memoryStorage } from 'multer';
-import { ApiConsumes, ApiOperation, ApiResponse, ApiParam, ApiBody } from '@nestjs/swagger';
+import { ApiConsumes, ApiOperation, ApiResponse, ApiParam, ApiBody, ApiBearerAuth } from '@nestjs/swagger';
 import { PaginationArgs } from 'src/utils/pagination/pagination.dto';
 import { I18nService } from 'nestjs-i18n';
 import { SWAGGER_TRANSLATIONS } from 'src/i18n/en/i18n.swagger';
@@ -33,11 +33,12 @@ export class ProductsController {
   constructor(
     private readonly productsService: ProductsService,
     private readonly i18n: I18nService,
-  ) {}
+  ) { }
 
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(RoleEnum.ADMIN)
   @Post('/create-product')
+  @ApiBearerAuth()
   @ApiOperation({ summary: SWAGGER_TRANSLATIONS.PRODUCTS_CREATE })
   @ApiBody({ type: CreateProductDto }) // Define el request body
   @ApiResponse({
@@ -67,12 +68,15 @@ export class ProductsController {
       return createdProduct;
     } catch (error) {
       throw new BadRequestException(
-        await this.i18n.t('error.PRODUCT_CREATION_FAILED'),
+        this.i18n.t('error.PRODUCT_CREATION_FAILED'),
       );
     }
   }
 
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(RoleEnum.ADMIN)
   @Post('/upload-products')
+  @ApiBearerAuth()
   @ApiOperation({ summary: SWAGGER_TRANSLATIONS.PRODUCTS_UPLOAD })
   @ApiResponse({
     status: 201,
@@ -112,6 +116,7 @@ export class ProductsController {
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(RoleEnum.ADMIN)
   @Patch('/update/:id')
+  @ApiBearerAuth()
   @ApiOperation({ summary: SWAGGER_TRANSLATIONS.PRODUCTS_UPDATE })
   @ApiParam({ name: 'id', example: '123', description: 'ID del producto' })
   @ApiBody({ type: UpdateProductDto }) // Define el request body
@@ -126,6 +131,7 @@ export class ProductsController {
   //Eliminado logico del producto
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(RoleEnum.ADMIN)
+  @ApiBearerAuth()
   @Delete('/delete/:id')
   @ApiOperation({ summary: SWAGGER_TRANSLATIONS.PRODUCTS_DELETE })
   @ApiParam({ name: 'id', example: '123', description: 'ID del producto' })
@@ -140,6 +146,7 @@ export class ProductsController {
   //Restaurado logico del producto
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(RoleEnum.ADMIN)
+  @ApiBearerAuth()
   @Patch('/restore/:id')
   @ApiOperation({ summary: SWAGGER_TRANSLATIONS.PRODUCTS_RESTORE })
   @ApiParam({ name: 'id', example: '123', description: 'ID del producto' })

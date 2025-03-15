@@ -3,7 +3,6 @@ import {
   ConflictException,
   Injectable,
   InternalServerErrorException,
-  NotFoundException,
 } from '@nestjs/common';
 import {
   CreateLoginDto,
@@ -90,7 +89,7 @@ export class AuthService {
       });
 
       return {
-        message: await this.i18n.translate('success.USER_REGISTERED'),
+        message: this.i18n.translate('success.USER_REGISTERED'),
         newUser: {
           name,
           email: formattedEmail,
@@ -110,7 +109,6 @@ export class AuthService {
     const { password, email } = createLoginDto;
     const formattedEmail = email.toLowerCase();
     const userExist = await this.prisma.user.findUnique({
-      //Para filtrar a los usuarios inactivos y con borrado logico.
       where: { email: formattedEmail, isActive: true, isDeleted: false },
     });
 
@@ -135,7 +133,6 @@ export class AuthService {
 
     const token = await this.jwt.signAsync(payload, { expiresIn: '24h' });
 
-    //CAMBIAR POR OTRO MENSAJE DESPUES
     if (!token) {
       throw new ConflictException(
         this.i18n.translate('error.INVALID_CREDENTIALS'),
@@ -173,7 +170,6 @@ export class AuthService {
 
       const link = `http://localhost:3000/user/recovery-password?t=${token}`;
 
-      //Obtengo la plantilla y le reemplazo las variables
       let emailBody = recoveryTemplate;
       emailBody = emailBody.replace(/{{link}}/g, link);
       emailBody = emailBody.replace(/{{name}}/g, foundUser.name);
@@ -202,7 +198,7 @@ export class AuthService {
       const { id } = payload;
       if (!id) {
         throw new BadRequestException(
-          await this.i18n.translate('error.TOKEN_INVALID'),
+          this.i18n.translate('error.TOKEN_INVALID'),
         );
       }
 
@@ -213,10 +209,10 @@ export class AuthService {
       });
 
       return {
-        message: await this.i18n.translate('error.PASSWORD_CHANGED'),
+        message: this.i18n.translate('error.PASSWORD_CHANGED'),
       };
     } catch (error) {
-      throw new BadRequestException(await this.i18n.translate('error.TOKEN_EXPIRED'));
+      throw new BadRequestException(this.i18n.translate('error.TOKEN_EXPIRED'));
     }
   }
 }

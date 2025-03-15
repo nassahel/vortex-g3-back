@@ -19,7 +19,7 @@ import { RoleEnum } from 'src/common/constants';
 import { PaginationArgs } from 'src/utils/pagination/pagination.dto';
 import { I18nService } from 'nestjs-i18n';
 import { SWAGGER_TRANSLATIONS } from 'src/i18n/en/i18n.swagger';
-import { ApiOperation, ApiResponse, ApiBody, ApiParam } from '@nestjs/swagger';
+import { ApiOperation, ApiResponse, ApiBody, ApiParam, ApiBearerAuth } from '@nestjs/swagger';
 
 @Controller('users')
 export class UserController {
@@ -28,12 +28,13 @@ export class UserController {
     private readonly i18n: I18nService,
   ) {}
 
-  // crea un usuario
+  // crea un usuario, se utiliza para admins.
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(RoleEnum.ADMIN)
   @Post()
+  @ApiBearerAuth()
   @ApiOperation({ summary: SWAGGER_TRANSLATIONS.USER_CREATE }) 
-  @ApiBody({ type: CreateUserDto }) // Define el request body
+  @ApiBody({ type: CreateUserDto }) 
   @ApiResponse({
     status: 201,
     description: SWAGGER_TRANSLATIONS.USER_CREATE_SUCCESS,
@@ -43,6 +44,7 @@ export class UserController {
   }
 
   // obtiene todos los usuarios sin borrado logico
+  @ApiBearerAuth()
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(RoleEnum.ADMIN)
   @Get('/admin/all')
@@ -78,6 +80,7 @@ export class UserController {
   }
 
   // Obtiene un usuario por id
+  @ApiBearerAuth()
   @UseGuards(JwtAuthGuard)
   @Get(':id')
   @ApiOperation({ summary: SWAGGER_TRANSLATIONS.USER_GET_ONE }) 
@@ -91,6 +94,7 @@ export class UserController {
   }
 
   // Actualiza un usuario por id
+  @ApiBearerAuth()
   @UseGuards(JwtAuthGuard)
   @Patch(':id')
   @ApiParam({ name: 'id', example: '123', description: 'ID del usuario' })
@@ -105,6 +109,7 @@ export class UserController {
   }
 
   //Borrado logico de un usuario por id
+  @ApiBearerAuth()
   @UseGuards(JwtAuthGuard)
   @Patch('delete/:id')
   @ApiOperation({ summary: SWAGGER_TRANSLATIONS.USER_DELETE }) 
@@ -118,7 +123,7 @@ export class UserController {
   }
 
   //Borra definitivamente un usuario de la base de datos.
-
+  @ApiBearerAuth()
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(RoleEnum.ADMIN)
   @Delete('delete/:id')
