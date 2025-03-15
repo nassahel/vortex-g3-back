@@ -1,4 +1,5 @@
 import { IsNumber, Min, IsOptional, IsArray, IsString } from 'class-validator';
+import { i18nValidationMessage } from 'nestjs-i18n';
 
 export class UpdatePriceDto {
   @IsOptional()
@@ -7,7 +8,7 @@ export class UpdatePriceDto {
   ids?: string[];
 
   @IsOptional()
-  @IsNumber({}, { message: 'El precio debe ser un número.' })
-  @Min(1, { message: 'El precio debe ser mayor o igual a 1.' })
+  @IsNumber({}, { message: i18nValidationMessage('dto.isNumber') })
+  @Min(1, { message: i18nValidationMessage('dto.min') })
   price?: number;
 }

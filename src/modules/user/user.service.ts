@@ -106,7 +106,7 @@ export class UserService {
       ]);
 
       if (activeUsers.length === 0) {
-        return { message: await this.i18n.t('error.USER_NOT_FOUND') };
+        return { message: this.i18n.t('error.USER_NOT_FOUND') };
       }
 
       return Paginate(activeUsers, total, { page, limit });
@@ -218,7 +218,7 @@ export class UserService {
 
       await this.prisma.user.delete({ where: { id } });
 
-      return { message: await this.i18n.t('success.DELETED_USER_SUCCESS') };
+      return { message: this.i18n.t('success.DELETED_USER_SUCCESS') };
     } catch (error) {
       throw new InternalServerErrorException(this.i18n.t('error.DELETE_USER_FAILED'));
     }

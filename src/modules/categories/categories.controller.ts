@@ -17,7 +17,7 @@ import { CreateCategoryDto } from './dto/create-category.dto';
 import { UpdateCategoryDto } from './dto/update-category.dto';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { PaginationArgs } from 'src/utils/pagination/pagination.dto';
-import { ApiOperation, ApiResponse, ApiBody, ApiParam } from '@nestjs/swagger';
+import { ApiOperation, ApiResponse, ApiBody, ApiParam, ApiBearerAuth } from '@nestjs/swagger';
 import { I18nService } from 'nestjs-i18n';
 import { SWAGGER_TRANSLATIONS } from 'src/i18n/en/i18n.swagger';
 import { JwtAuthGuard } from '../auth/guards/jwt.guard';
@@ -34,6 +34,7 @@ export class CategoriesController {
 
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(RoleEnum.ADMIN)
+  @ApiBearerAuth()
   @Post('/new')
   @ApiOperation({ summary: SWAGGER_TRANSLATIONS.CATEGORIES_CREATE })
   @ApiBody({ type: CreateCategoryDto }) // Define el request body
@@ -48,6 +49,7 @@ export class CategoriesController {
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(RoleEnum.ADMIN)
   @Post('/upload-categories')
+  @ApiBearerAuth()
   @ApiOperation({ summary: SWAGGER_TRANSLATIONS.CATEGORIES_UPLOAD })
   @ApiResponse({
     status: 200,
@@ -72,6 +74,7 @@ export class CategoriesController {
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(RoleEnum.ADMIN)
   @Get('/:id')
+  @ApiBearerAuth()
   @ApiParam({ name: 'id', example: '123', description: 'ID de la categoría' })
   @ApiOperation({ summary: SWAGGER_TRANSLATIONS.CATEGORIES_GET_ONE })
   @ApiResponse({
@@ -85,6 +88,7 @@ export class CategoriesController {
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(RoleEnum.ADMIN)
   @Put('/update/:id')
+  @ApiBearerAuth()
   @ApiOperation({ summary: SWAGGER_TRANSLATIONS.CATEGORIES_UPDATE })
   @ApiParam({ name: 'id', example: '123', description: 'ID de la categoría' })
   @ApiBody({ type: UpdateCategoryDto }) // Define el request body
@@ -102,6 +106,7 @@ export class CategoriesController {
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(RoleEnum.ADMIN)
   @Delete('/delete/:id')
+  @ApiBearerAuth()
   @ApiOperation({ summary: SWAGGER_TRANSLATIONS.CATEGORIES_DELETE })
   @ApiParam({ name: 'id', example: '123', description: 'ID de la categoría' })
   @ApiResponse({
@@ -115,6 +120,7 @@ export class CategoriesController {
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(RoleEnum.ADMIN)
   @Patch('/restore/:id')
+  @ApiBearerAuth()
   @ApiOperation({ summary: SWAGGER_TRANSLATIONS.CATEGORIES_RESTORE })
   @ApiParam({ name: 'id', example: '123', description: 'ID de la categoría' })
   @ApiResponse({

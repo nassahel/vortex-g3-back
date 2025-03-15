@@ -13,7 +13,6 @@ const styles: StyleDictionary = {
 export const invoicePDF = async (purchase): Promise<TDocumentDefinitions> => {
   const prisma = new PrismaService();
 
-  //datos del comprador
   const buyer = await prisma.user.findUnique({
     where: { id: purchase.userId },
     include: { profile: true }

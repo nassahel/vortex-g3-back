@@ -15,33 +15,33 @@ export class ProfileDto {
   @ApiPropertyOptional({ description: 'User name' })
   @IsString({ message: i18nValidationMessage('dto.isString') })
   @IsOptional()
-  @MinLength(1, { message: 'Name must not be empty' })
+  @MinLength(4, { message: i18nValidationMessage('dto.minLength') })
   name: string;
 
   @ApiPropertyOptional({ description: 'User email' })
-  @IsEmail({}, { message: 'Must be a valid email address' })
+  @IsEmail({}, { message: i18nValidationMessage('dto.isEmail') })
   @IsOptional()
   email: string;
 
   @ApiPropertyOptional({ description: 'User address' })
   @IsOptional()
-  @IsString()
-  @MinLength(1, { message: 'Address must not be empty' })
-  @MaxLength(50, { message: 'Address must not exceed 20 characters' })
+  @IsString({ message: i18nValidationMessage('dto.isString') })
+  @MinLength(4, { message: i18nValidationMessage('dto.minLength') })
+  @MaxLength(50, { message: i18nValidationMessage('dto.maxLength') })
   address?: string;
 
   @ApiPropertyOptional({ description: 'User DNI' })
   @IsOptional()
-  @IsString()
-  @MinLength(1, { message: 'DNI must not be empty' })
-  @MaxLength(15, { message: 'DNI must not exceed 15 characters' })
+  @IsString({ message: i18nValidationMessage('dto.isString') })
+  @MinLength(4, { message: i18nValidationMessage('dto.minLength') })
+  @MaxLength(15, { message: i18nValidationMessage('dto.maxLength') })
   dni?: string;
 
   @ApiPropertyOptional({ description: 'User phone number' })
   @IsOptional()
-  @IsString()
-  @MinLength(1, { message: 'Phone must not be empty' })
-  @MaxLength(15, { message: 'Phone must not exceed 15 characters' })
+  @IsString({ message: i18nValidationMessage('dto.isString') })
+  @MinLength(4, { message: i18nValidationMessage('dto.minLength') })
+  @MaxLength(15, { message: i18nValidationMessage('dto.maxLength') })
   phone?: string;
 
   @ApiPropertyOptional({
@@ -61,6 +61,6 @@ export class ProfileDto {
 
   @ApiPropertyOptional({ description: 'User profile image' })
   @IsOptional()
-  @IsString()
+  @IsString({ message: i18nValidationMessage('dto.isString') })
   profileImage?: string;
 }

@@ -14,7 +14,7 @@ export class AuthController {
   constructor(
     private readonly authService: AuthService,
     private readonly i18n: I18nService,
-  ) {}
+  ) { }
 
   @Post('register')
   @ApiOperation({ summary: SWAGGER_TRANSLATIONS.AUTH_REGISTER })
@@ -26,7 +26,7 @@ export class AuthController {
 
   @Post('login')
   @ApiOperation({ summary: SWAGGER_TRANSLATIONS.AUTH_LOGIN })
-  @ApiBody({ type: CreateRegisterDto })
+  @ApiBody({ type: CreateLoginDto })
   @ApiResponse({ status: 200, description: SWAGGER_TRANSLATIONS.AUTH_LOGIN_SUCCESS })
   @ApiResponse({ status: 401, description: SWAGGER_TRANSLATIONS.AUTH_LOGIN_ERROR })
   login(@Body() createLoginDto: CreateLoginDto) {
@@ -35,14 +35,7 @@ export class AuthController {
 
   @Post('request-recovery-password')
   @ApiOperation({ summary: SWAGGER_TRANSLATIONS.AUTH_REQUEST_RECOVERY_PASSWORD })
-  @ApiBody({
-    schema: {
-      type: 'object',
-      properties: {
-        email: { type: 'string', example: 'usuario@example.com', description: 'Correo del usuario' }
-      }
-    }
-  })
+  @ApiBody({ type: RecoveryPasswordDto })
   @ApiResponse({ status: 200, description: SWAGGER_TRANSLATIONS.AUTH_REQUEST_RECOVERY_PASSWORD_SUCCESS })
   @ApiResponse({ status: 401, description: SWAGGER_TRANSLATIONS.AUTH_LOGIN_ERROR })
   RequestRecoveryPassword(@Body() body: { email: string }) {
