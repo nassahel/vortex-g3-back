@@ -8,8 +8,16 @@ import {
   BadRequestException,
   NotFoundException,
   UseGuards,
+  Query,
 } from '@nestjs/common';
-import { ApiOperation, ApiResponse, ApiTags, ApiBody, ApiParam, ApiBearerAuth } from '@nestjs/swagger';
+import {
+  ApiOperation,
+  ApiResponse,
+  ApiTags,
+  ApiBody,
+  ApiParam,
+  ApiBearerAuth,
+} from '@nestjs/swagger';
 import { CartService } from './cart.service';
 import { UpsertCartItemDto } from './dto/upsert.cart.item.dto';
 import { CheckoutCartDto } from './dto/checkout.cart.dto';
@@ -26,12 +34,15 @@ export class CartController {
   constructor(
     private readonly cartService: CartService,
     private readonly i18n: I18nService,
-  ) { }
+  ) {}
 
   @Get('active/:userId')
   @ApiOperation({ summary: SWAGGER_TRANSLATIONS.CART_GET_OR_CREATE })
   @ApiParam({ name: 'userId', example: '12345', description: 'ID del usuario' })
-  @ApiResponse({ status: 200, description: SWAGGER_TRANSLATIONS.CART_RETRIEVED })
+  @ApiResponse({
+    status: 200,
+    description: SWAGGER_TRANSLATIONS.CART_RETRIEVED,
+  })
   async getActiveCart(@Param('userId') userId: string) {
     if (!userId) {
       throw new BadRequestException(
@@ -58,7 +69,6 @@ export class CartController {
   findAll() {
     return this.cartService.getAllCarts();
   }
-
 
   @Post('item/:userId')
   @ApiOperation({ summary: SWAGGER_TRANSLATIONS.CART_ADD_OR_UPDATE })
@@ -94,26 +104,34 @@ export class CartController {
           this.i18n.translate('error.PRODUCT_NOT_FOUND'),
         );
       }
-      throw new BadRequestException(
-        this.i18n.translate('error.UPDATING_CART'),
-      );
+      throw new BadRequestException(this.i18n.translate('error.UPDATING_CART'));
     }
   }
 
   @Delete('item/:userId/:productId')
   @ApiOperation({ summary: SWAGGER_TRANSLATIONS.CART_REMOVE_ITEM })
   @ApiParam({ name: 'userId', example: '12345', description: 'ID del usuario' })
-  @ApiParam({ name: 'productId', example: '98765', description: 'ID del producto' })
-  @ApiResponse({ status: 200, description: SWAGGER_TRANSLATIONS.CART_REMOVE_ITEM_SUCCESS })
-  @ApiResponse({ status: 404, description: SWAGGER_TRANSLATIONS.CART_ITEM_NOT_FOUND })
+  @ApiParam({
+    name: 'productId',
+    example: '98765',
+    description: 'ID del producto',
+  })
+  @ApiResponse({
+    status: 200,
+    description: SWAGGER_TRANSLATIONS.CART_REMOVE_ITEM_SUCCESS,
+  })
+  @ApiResponse({
+    status: 404,
+    description: SWAGGER_TRANSLATIONS.CART_ITEM_NOT_FOUND,
+  })
   async removeItemFromCart(
     @Param('userId') userId: string,
     @Param('productId') productId: string,
   ) {
     if (!userId || !productId) {
       throw new BadRequestException(
-        (this.i18n.translate('error.USER_ID_REQUIRED')) &&
-        (this.i18n.translate('error.PRODUCT_ID_REQUIRED')),
+        this.i18n.translate('error.USER_ID_REQUIRED') &&
+          this.i18n.translate('error.PRODUCT_ID_REQUIRED'),
       );
     }
 
@@ -145,14 +163,18 @@ export class CartController {
   async checkoutCart(
     @Param('userId') userId: string,
     @Body() checkoutCartDto: CheckoutCartDto,
+    @Query('payMethod') payMethod: string,
   ) {
-    return this.cartService.checkoutCart(userId, checkoutCartDto);
+    return this.cartService.checkoutCart(userId, checkoutCartDto, payMethod);
   }
 
   @Post('cancel/:userId') // Cancelar el carrito
   @ApiOperation({ summary: SWAGGER_TRANSLATIONS.CART_CHECKOUT_CANCEL })
   @ApiParam({ name: 'userId', example: '12345', description: 'ID del usuario' })
-  @ApiResponse({ status: 200, description: SWAGGER_TRANSLATIONS.CART_CHECKOUT_CANCEL_SUCCESS })
+  @ApiResponse({
+    status: 200,
+    description: SWAGGER_TRANSLATIONS.CART_CHECKOUT_CANCEL_SUCCESS,
+  })
   async cancelCart(@Param('userId') userId: string) {
     return this.cartService.cancelCart(userId);
   }
