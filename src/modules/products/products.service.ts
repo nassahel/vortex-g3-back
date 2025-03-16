@@ -93,16 +93,10 @@ export class ProductsService {
       const product = await this.prisma.product.findFirst({
         where: { id, isDeleted: false },
         include: {
-          images: {
-            select: {
-              id: true,
-              url: true,
-              altText: true,
-            },
-          },
+          images: true,
           categories: {
             select: {
-              category: {
+              category: {  // Asumiendo que la relación en la tabla intermedia está nombrada como "category"
                 select: {
                   id: true,
                   name: true,
@@ -118,7 +112,14 @@ export class ProductsService {
           this.i18n.t('error.PRODUCT_ID_NOT_FOUND'),
         );
       }
-      return product;
+
+      const categories = product.categories.map(cat => cat.category);
+
+      return {
+        ...product,
+        categories: categories
+      };
+
     } catch (error) {
       console.log(error);
       throw new BadRequestException(
@@ -127,6 +128,7 @@ export class ProductsService {
       );
     }
   }
+
 
   async createProduct(
     product: CreateProductDto,
@@ -172,7 +174,6 @@ export class ProductsService {
 
 
         if (images && images.length > 0) {
-          console.log(images);
           const imagePromises = images.map(async (image) => {
             const imageUrl = await this.aws.uploadImage(
               image,
