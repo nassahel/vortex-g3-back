@@ -10,7 +10,7 @@
   },
   "scripts": {
     "prisma:generate": "prisma generate",
-    "build": "npm run prisma:generate && nest build",
+    "build": "npm run prisma:generate && npx nest build",
     "prebuild": "prisma generate",
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
     "start": "nest start",
