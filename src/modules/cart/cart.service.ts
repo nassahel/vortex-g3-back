@@ -147,7 +147,13 @@ export class CartService {
         throw new NotFoundException(this.i18n.translate('error.CART_EMPTY'));
       }
       /////////////////////////////////////////////////
-      console.log('payMethod', payMethod);
+      //verificar si el link del pago ya existe
+      const paymentFound = await this.prisma.payment.findFirst({
+        where: { cartId: cart.id },
+      });
+      if (paymentFound) {
+        return { message: 'Payment already exists', link: paymentFound.link };
+      }
       //VERIFICAR METODO DE PAGO ELEGIDO
       if (payMethod === 'Card') {
         const payment = await this.prisma.payment.create({
@@ -165,13 +171,6 @@ export class CartService {
         });
         return { message: 'Payment completed', link: 'no link' };
       } else {
-        //verificar si el link del pago ya existe
-        const paymentFound = await this.prisma.payment.findFirst({
-          where: { cartId: cart.id },
-        });
-        if (paymentFound) {
-          return { message: 'Payment already exists', link: paymentFound.link };
-        }
         //generar pago en MP con datos del carrito
         const mpPaymentGenerated = await this.mercadoPagoService.createPayment(
           cart.id,

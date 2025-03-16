@@ -8,6 +8,7 @@ import {
   BadRequestException,
   NotFoundException,
   UseGuards,
+  Query,
 } from '@nestjs/common';
 import {
   ApiOperation,
@@ -165,8 +166,9 @@ export class CartController {
   async checkoutCart(
     @Param('userId') userId: string,
     @Body() checkoutCartDto: CheckoutCartDto,
-    @Body() payMethod: string,
+    @Query('payMethod') payMethod: string,
   ) {
+    console.log('payMethod', payMethod);
     return this.cartService.checkoutCart(userId, checkoutCartDto, payMethod);
   }
 
