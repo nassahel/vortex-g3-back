@@ -26,8 +26,7 @@ export class ReportsController {
       const pdfBuffer = await this.reportsService.generateMostBoughtProductsGraph(body);
       res.set({
         'Content-Type': 'application/pdf',
-        'Content-Disposition': 'attachment; filename="most_bought_products.pdf"',
-        // 'Content-Length': pdfBuffer.length.toString(),
+        'Content-Disposition': 'attachment; filename="most_bought_products.pdf"',        
       });
 
       res.send(pdfBuffer);
@@ -36,6 +35,7 @@ export class ReportsController {
     }
   }
 
+  @Get('generate-invoice/:id')
   @ApiBearerAuth()
   @UseGuards(JwtAuthGuard)
   @ApiOperation({ summary: 'Generar factura de compra en PDF' })
@@ -45,7 +45,6 @@ export class ReportsController {
     description: 'Archivo PDF con la factura de compra',
     content: { 'application/pdf': {} },
   })
-  @Get('generate-invoice/:id')
   async generateInvoice(@Param('id') id: string, @Res() res: Response) {
     try {
       const pdfBuffer = await this.reportsService.generateInvoice(id);
@@ -60,13 +59,13 @@ export class ReportsController {
       res.status(500).json({ error: error.message });
     }
   }
-
-@UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(RoleEnum.ADMIN)
+  
   @Post('purchases-per-day')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(RoleEnum.ADMIN)
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Generar informe de compras por día en PDF' })
-  @ApiBody({ type: ChartQueryDto }) // Define el request body
+  @ApiBody({ type: ChartQueryDto })
   @ApiResponse({
     status: 200,
     description: 'Archivo PDF con el informe de compras por día',
@@ -78,7 +77,7 @@ export class ReportsController {
       const pdfBuffer = await this.reportsService.purchasesPerDay(body);
       res.set({
         'Content-Type': 'application/pdf',
-        'Content-Disposition': 'attachment; filename="purchases_pr_day.pdf"',        
+        'Content-Disposition': 'attachment; filename="purchases_pr_day.pdf"',
       });
 
       res.send(pdfBuffer);
@@ -86,8 +85,4 @@ export class ReportsController {
       res.status(500).json({ error: error.message });
     }
   }
-
-
-
-
 }

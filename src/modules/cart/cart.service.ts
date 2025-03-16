@@ -16,19 +16,16 @@ export class CartService {
     private readonly prisma: PrismaService,
     private readonly i18n: I18nService,
     private readonly mercadoPagoService: MercadoPagoService,
-    //mail service una vez que se implemente
   ) {}
 
   async getActiveCart(userId: string): Promise<{ id: string; items: any[] }> {
     let cart = await this.prisma.cart.findFirst({
-      // Aqui lo busca y lo incluye
       where: { userId, status: 'PENDING' },
       include: { items: true },
     });
 
     if (!cart) {
       cart = await this.prisma.cart.create({
-        //Aqui lo crea
         data: {
           userId,
           status: 'PENDING',
@@ -48,7 +45,7 @@ export class CartService {
       return allCarts;
     } catch (error) {
       throw new BadRequestException(
-        await this.i18n.translate('error.CART_NOT_FOUND'),
+         this.i18n.translate('error.CART_NOT_FOUND'),
         error,
       );
     }
@@ -66,25 +63,23 @@ export class CartService {
 
     if (!product) {
       throw new NotFoundException(
-        await this.i18n.translate('error.PRODUCT_NOT_FOUND'),
+         this.i18n.translate('error.PRODUCT_NOT_FOUND'),
       );
     }
 
     const cart = await this.getActiveCart(userId);
 
     const existingItem = await this.prisma.cartItem.findFirst({
-      //Busca el item en el carrito
       where: { cartId: cart.id, productId },
     });
 
     if (existingItem) {
       if (quantity === 0) {
-        await this.prisma.cartItem.delete({ where: { id: existingItem.id } }); //Elimina el item del carrito
+        await this.prisma.cartItem.delete({ where: { id: existingItem.id } });
         return { message: await this.i18n.translate('error.ITEM_REMOVED') };
       }
 
       await this.prisma.cartItem.update({
-        //Actualiza la cantidad del item
         where: { id: existingItem.id },
         data: { quantity },
       });
@@ -93,7 +88,6 @@ export class CartService {
       return { message: await this.i18n.translate('success.ITEM_UPDATED') };
     } else {
       await this.prisma.cartItem.create({
-        //Crea un nuevo item en el carrito
         data: {
           cartId: cart.id,
           productId,
@@ -109,17 +103,15 @@ export class CartService {
 
   private async recalculateCartTotal(cartId: string) {
     const items = await this.prisma.cartItem.findMany({
-      //busca los productos
       where: { cartId },
     });
 
     const total = items.reduce(
-      (acc, { price, quantity }) => acc.add(price.mul(quantity)), //Itera sobre el arreglo 'items' y suma el costo de cada item multiplicado por la cantidad
+      (acc, { price, quantity }) => acc.add(price.mul(quantity)), 
       new Decimal(0),
     );
 
     await this.prisma.cart.update({
-      //actualiza el carrito
       where: { id: cartId },
       data: { price: total },
     });
@@ -131,7 +123,6 @@ export class CartService {
     payMethod: string,
   ): Promise<{ message: string; link: string }> {
     try {
-      //Obtener el carrito activo del usuario
       const cart = await this.prisma.cart.findFirst({
         where: { userId, status: { in: ['PENDING', 'INPROCESS'] } }, // Permite checkout desde ambos estados
         include: { items: true },
@@ -203,7 +194,7 @@ export class CartService {
   }
 
   async cancelCart(userId: string): Promise<{ message: string }> {
-    const cart = await this.getActiveCart(userId); //Obtiene el carrito activo
+    const cart = await this.getActiveCart(userId);
     if (!cart) {
       throw new NotFoundException(
         await this.i18n.translate('success.CART_CHECKOUT'),
@@ -211,7 +202,6 @@ export class CartService {
     }
 
     const cancelCart = await this.prisma.cart.update({
-      //Actualiza el carrito a 'CANCELED'
       where: { id: cart.id },
       data: { status: 'CANCELED' },
     });
@@ -226,19 +216,18 @@ export class CartService {
     const cart = await this.getActiveCart(userId);
 
     const item = await this.prisma.cartItem.findFirst({
-      //Busca el item en el carrito
       where: { cartId: cart.id, productId },
     });
 
     if (!item) {
       throw new NotFoundException(
-        await this.i18n.translate('error.ITEM_NOT_FOUND'),
+        this.i18n.translate('error.ITEM_NOT_FOUND'),
       );
     }
 
-    await this.prisma.cartItem.delete({ where: { id: item.id } }); //Elimina el item del carrito
+    await this.prisma.cartItem.delete({ where: { id: item.id } });
 
-    await this.recalculateCartTotal(cart.id); //Recalcula el total del carrito
+    await this.recalculateCartTotal(cart.id);
     return { message: await this.i18n.translate('error.ITEM_REMOVED') };
   }
 
@@ -246,7 +235,6 @@ export class CartService {
     cartId: string,
   ): Promise<{ success: boolean; message: string }> {
     try {
-      //obtener el carrito por id
       const cart = await this.prisma.cart.findUnique({
         where: { id: cartId, status: 'COMPLETED' },
         include: { items: true },
@@ -256,7 +244,6 @@ export class CartService {
           this.i18n.translate('error.CART_NOT_FOUND'),
         );
       }
-      //actualizar el stock de los items del carrito
       for (const item of cart.items) {
         await this.prisma.product.update({
           where: { id: item.productId },

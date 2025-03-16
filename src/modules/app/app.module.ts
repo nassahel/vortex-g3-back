@@ -13,6 +13,7 @@ import { CartModule } from '../cart/cart.module';
 import I18nModuleConfig from 'src/config/i18n.config';
 import { ReportsModule } from '../reports/reports.module';
 import { PaymentModule } from '../payments/payments.module';
+import { ChatbotModule } from '../chatbot/chatbot.module';
 
 @Module({
   imports: [
@@ -32,6 +33,7 @@ import { PaymentModule } from '../payments/payments.module';
     CartModule,
     ReportsModule,
     PaymentModule,
+    ChatbotModule
   ],
   controllers: [AppController],
 })

@@ -57,9 +57,9 @@ export class CartController {
     };
   }
 
+  @Get('/all/carts')
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(RoleEnum.ADMIN)
-  @Get('/all/carts')
   @ApiBearerAuth()
   @ApiOperation({ summary: SWAGGER_TRANSLATIONS.CART_GET_ALL })
   @ApiResponse({
@@ -158,17 +158,13 @@ export class CartController {
     summary: SWAGGER_TRANSLATIONS.CART_CHECKOUT,
   })
   @ApiParam({ name: 'userId', example: '12345', description: 'ID del usuario' })
-  @ApiBody({ type: CheckoutCartDto }) // Definir el request body con DTO
-  @ApiResponse({
-    status: 200,
-    description: SWAGGER_TRANSLATIONS.CART_CHECKOUT_SUCCESS,
-  })
+  @ApiBody({ type: CheckoutCartDto })
+  @ApiResponse({ status: 200, description: SWAGGER_TRANSLATIONS.CART_CHECKOUT_SUCCESS })
   async checkoutCart(
     @Param('userId') userId: string,
     @Body() checkoutCartDto: CheckoutCartDto,
     @Query('payMethod') payMethod: string,
   ) {
-    console.log('payMethod', payMethod);
     return this.cartService.checkoutCart(userId, checkoutCartDto, payMethod);
   }
 

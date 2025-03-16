@@ -39,9 +39,8 @@ export class ImagesController {
   @ApiResponse({ status: 200, description: SWAGGER_TRANSLATIONS.IMAGES_UPLOAD_IMAGE_SUCCESS })
   @UseInterceptors(
     FileInterceptor('image', {
-      //Configuro como manejar la carga de archivos
-      storage: memoryStorage(), //almaceno en la memoria
-      limits: { fileSize: 5 * 1024 * 1024 }, // Tamaño limite de 5MB
+      storage: memoryStorage(),
+      limits: { fileSize: 5 * 1024 * 1024 },
       fileFilter: (req, file, callback) => {
         if (file.mimetype === 'image/png' || file.mimetype === 'image/jpeg') {
           callback(null, true);

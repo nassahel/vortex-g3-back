@@ -1,18 +1,4 @@
-import {
-  Controller,
-  Get,
-  Post,
-  Body,
-  Param,
-  Query,
-  UploadedFile,
-  UseInterceptors,
-  BadRequestException,
-  Patch,
-  UploadedFiles,
-  Delete,
-  UseGuards,
-} from '@nestjs/common';
+import { Controller, Get, Post, Body, Param, Query, UploadedFile, UseInterceptors, BadRequestException, Patch, UploadedFiles, Delete, UseGuards, } from '@nestjs/common';
 import { ProductsService } from './products.service';
 import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
@@ -35,9 +21,9 @@ export class ProductsController {
     private readonly i18n: I18nService,
   ) { }
 
+  @Post('/create-product')
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(RoleEnum.ADMIN)
-  @Post('/create-product')
   @ApiBearerAuth()
   @ApiOperation({ summary: SWAGGER_TRANSLATIONS.PRODUCTS_CREATE })
   @ApiBody({ type: CreateProductDto }) // Define el request body
@@ -73,9 +59,9 @@ export class ProductsController {
     }
   }
 
+  @Post('/upload-products')
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(RoleEnum.ADMIN)
-  @Post('/upload-products')
   @ApiBearerAuth()
   @ApiOperation({ summary: SWAGGER_TRANSLATIONS.PRODUCTS_UPLOAD })
   @ApiResponse({
@@ -113,9 +99,9 @@ export class ProductsController {
     return this.productsService.findOne(id);
   }
 
+  @Patch('/update/:id')
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(RoleEnum.ADMIN)
-  @Patch('/update/:id')
   @ApiBearerAuth()
   @ApiOperation({ summary: SWAGGER_TRANSLATIONS.PRODUCTS_UPDATE })
   @ApiParam({ name: 'id', example: '123', description: 'ID del producto' })
@@ -129,10 +115,10 @@ export class ProductsController {
   }
 
   //Eliminado logico del producto
+  @Delete('/delete/:id')
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(RoleEnum.ADMIN)
   @ApiBearerAuth()
-  @Delete('/delete/:id')
   @ApiOperation({ summary: SWAGGER_TRANSLATIONS.PRODUCTS_DELETE })
   @ApiParam({ name: 'id', example: '123', description: 'ID del producto' })
   @ApiResponse({
@@ -144,10 +130,10 @@ export class ProductsController {
   }
 
   //Restaurado logico del producto
+  @Patch('/restore/:id')
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(RoleEnum.ADMIN)
   @ApiBearerAuth()
-  @Patch('/restore/:id')
   @ApiOperation({ summary: SWAGGER_TRANSLATIONS.PRODUCTS_RESTORE })
   @ApiParam({ name: 'id', example: '123', description: 'ID del producto' })
   @ApiResponse({
